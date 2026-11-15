@@ -512,10 +512,10 @@
                 <div class="field">
                   <label for="claudeKeyInput">API key</label>
                   <div class="secret-row">
-                    <input id="claudeKeyInput" type="password" placeholder="sk-ant-api03-…" autocomplete="off" autocapitalize="off" spellcheck="false" />
+                    <input id="claudeKeyInput" type="password" placeholder="sk-ant-… or coa_…" autocomplete="off" autocapitalize="off" spellcheck="false" />
                     <button class="btn" type="button" id="toggleKeyVisibility" aria-label="Show or hide the API key">Show</button>
                   </div>
-                  <div class="hint">Get one from the Anthropic Console → API Keys. A Claude key starts with <strong>sk-ant-</strong></div>
+                  <div class="hint">Use a Claude key (<strong>sk-ant-…</strong>) from the Anthropic Console, or a Coarena key (<strong>coa_…</strong>) from coarena.ai → Model API → Keys.</div>
                 </div>
                 <div class="field">
                   <label for="claudeModelSelect">Default Claude model</label>
@@ -529,7 +529,7 @@
 
               <div class="security-note">
                 <strong>Where the key actually lives</strong>
-                In the live version the key is saved on the server as a secret environment variable (<strong>ANTHROPIC_API_KEY</strong>) — never in the website code, never sent to a visitor's browser, and never shown in full again after saving. Only the last 4 characters stay visible here so you can tell which key is active.
+                The key is saved on the server as the secret environment variable <strong>ANTHROPIC_AUTH_TOKEN</strong> (Supabase → Edge Functions → Manage secrets) — never in the website code, never sent to a visitor's browser, and never shown in full again after saving. Only the last 4 characters stay visible here so you can tell which key is active.
               </div>
 
               <div style="margin-top:18px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
@@ -748,39 +748,64 @@
         }
         function checkKeyFormat() {
           var v = keyInput.value.trim();
-          if (!v) { showKeyMsg("Paste your Claude API key first.", false); keyInput.focus(); return null; }
-          if (v.indexOf("sk-ant-") !== 0 || v.length < 20) {
-            showKeyMsg("That doesn't look like a Claude key — it should start with sk-ant-", false);
+          if (!v) { showKeyMsg("Paste your API key first.", false); keyInput.focus(); return null; }
+          if ((v.indexOf("sk-ant-") !== 0 && v.indexOf("coa_") !== 0) || v.length < 20) {
+            showKeyMsg("That doesn't look right — a Claude key starts with sk-ant-, a Coarena key starts with coa_", false);
             return null;
           }
           return v;
+        }
+        function setKeyPill(connected, last4) {
+          var pill = document.getElementById("keyPill");
+          if (connected) {
+            pill.textContent = "Connected · ••••" + last4;
+            pill.className = "pill pro";
+            var status = document.getElementById("keyStatus");
+            status.classList.add("connected");
+            status.querySelector("span:last-child").textContent =
+              "Key ending ••••" + last4 + " is live on the server as ANTHROPIC_AUTH_TOKEN.";
+          } else {
+            pill.textContent = "Not connected";
+            pill.className = "pill flag";
+          }
         }
         document.getElementById("toggleKeyVisibility").addEventListener("click", function () {
           var show = keyInput.type === "password";
           keyInput.type = show ? "text" : "password";
           this.textContent = show ? "Hide" : "Show";
         });
-        document.getElementById("testKeyBtn").addEventListener("click", function () {
-          if (!checkKeyFormat()) return;
-          showKeyMsg("Format looks right. In the live version, Test pings Anthropic to verify the key before saving.", true);
+        document.getElementById("testKeyBtn").addEventListener("click", async function () {
+          var v = checkKeyFormat();
+          if (!v) return;
+          var btn = this;
+          btn.disabled = true;
+          showKeyMsg("Checking the server secret…", true);
+          try {
+            var sb = window.supabase.createClient("https://elbddcclcmmpqdxsdahg.supabase.co", "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI");
+            var res = await sb.functions.invoke("ai-status");
+            if (res.error) {
+              showKeyMsg("ai-status function is not deployed yet — deploy it in Supabase → Edge Functions, then test again.", false);
+            } else if (res.data && res.data.configured && res.data.key_valid) {
+              setKeyPill(true, v.slice(-4));
+              showKeyMsg("Connected — the server secret is set and the key works. Real audits can run now.", true);
+            } else if (res.data && res.data.configured) {
+              showKeyMsg("Secret is set, but the key check failed (invalid key or daily limit reached). Check the key in Supabase secrets.", false);
+            } else {
+              showKeyMsg("Server secret is not set yet. Add ANTHROPIC_AUTH_TOKEN in Supabase → Edge Functions → Manage secrets, then test again.", false);
+            }
+          } catch (_e) {
+            showKeyMsg("Could not reach the server — check your connection and try again.", false);
+          }
+          btn.disabled = false;
         });
         document.getElementById("apiKeyForm").addEventListener("submit", function (e) {
           e.preventDefault();
           var v = checkKeyFormat();
           if (!v) return;
-          var last4 = v.slice(-4);
-          var pill = document.getElementById("keyPill");
-          pill.textContent = "Connected · ••••" + last4;
-          pill.className = "pill pro";
-          var status = document.getElementById("keyStatus");
-          status.classList.add("connected");
-          status.querySelector("span:last-child").textContent =
-            "Key ending ••••" + last4 + " is active in this preview. In the live version it would now be stored server-side as ANTHROPIC_API_KEY.";
-          keyInput.value = "";
-          keyInput.type = "password";
-          document.getElementById("toggleKeyVisibility").textContent = "Show";
-          keyInput.placeholder = "••••••••••••" + last4 + " — paste a new key to replace it";
-          showKeyMsg("Saved for this preview — nothing was sent or stored by this page.", true);
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(v).catch(function () {});
+          }
+          showKeyMsg("Key copied. This page never stores it — paste it as the ANTHROPIC_AUTH_TOKEN secret in Supabase → Edge Functions → Manage secrets, then click Test connection.", true);
         });
 
         /* Settings save (in-memory preview only) */
