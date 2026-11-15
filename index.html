@@ -240,7 +240,8 @@
           <a href="#/pricing" data-page-link="pricing">Pricing</a>
           <a href="#/faq" data-page-link="faq">FAQ</a>
           <a href="#/contact" data-page-link="contact">Contact</a>
-          <a href="auth.html">Log in</a>
+          <a href="auth.html" id="navLogin">Log in</a>
+          <a href="auth.html" id="navAccount" style="display:none">My account</a>
           <a class="btn btn-lime btn-small" href="#/pricing" data-page-link="pricing">Try Pro free</a>
         </nav>
       </div>
@@ -643,7 +644,6 @@
         var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         var btn = document.getElementById("trialBtn");
         var msg = document.getElementById("trialMsg");
-        var loginLink = document.querySelector('a[href="auth.html"]');
         function fmtDate(iso) {
           var d = new Date(iso);
           return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -657,7 +657,6 @@
           if (!btn) return;
           var s = await sb.auth.getSession();
           var user = s.data && s.data.session && s.data.session.user;
-          if (loginLink && user) loginLink.textContent = "My account";
           if (!user) {
             btn.textContent = "Start 3 free days of Pro";
             btn.removeAttribute("aria-disabled");
@@ -707,5 +706,6 @@
         refreshState();
       })();
     </script>
+    <script src="nav-auth.js"></script>
   </body>
 </html>

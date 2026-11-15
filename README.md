@@ -27,3 +27,7 @@ These are the final demo pages. They run on sample data only — no live API key
 - `auth.html` — Log in / Sign up page, wired to the xraykit Supabase project.
 - `supabase/migrations/001_init.sql` — profiles, audits, subscriptions tables + RLS. Run in the Supabase SQL Editor.
 - `supabase/make-admin.sql` — run after the first signup to make gmmostafijur001@gmail.com the admin.
+
+## Admin dashboard (live)
+- `admin.html` — owner-only. Redirects to auth.html when logged out and to the site when the user is not an admin. Live stats (users, MRR, trials, audits, API cost), latest signups, all users, recent audits, abuse (empty until a flag system exists) — all read from Supabase under admin RLS. Settings form is still preview-only; real settings saving arrives with payments.
+- `nav-auth.js` — shared header auth state: hides "Log in" and shows "My account" when a session exists (index, audit, report, auth pages).

@@ -250,6 +250,12 @@
     </style>
   </head>
   <body>
+    <div id="gateOverlay" style="position:fixed;inset:0;background:#06090a;color:#e9f2ec;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:Archivo,system-ui,sans-serif;">
+      <div style="text-align:center;padding:20px;">
+        <div style="font-size:22px;font-weight:800;">XRayKit Admin</div>
+        <div id="gateMsg" style="margin-top:10px;color:#9db3a4;">Checking admin access…</div>
+      </div>
+    </div>
     <div class="layout">
       <!-- ============ SIDEBAR ============ -->
       <aside class="sidebar">
@@ -303,7 +309,7 @@
           </div>
           <div class="topbar-actions">
             <a class="btn" href="index.html">← XRayKit site</a>
-            <span class="demo-chip">Demo data — product not live yet</span>
+            <span class="demo-chip" id="dataChip">Connecting to live data…</span>
           </div>
         </div>
 
@@ -312,28 +318,28 @@
           <div class="kpis">
             <div class="kpi">
               <div class="label">Total users</div>
-              <div class="value">128</div>
-              <div class="delta"><span class="up">▲ 14</span> new this week</div>
+              <div class="value" id="kpiUsers">—</div>
+              <div class="delta" id="kpiUsersD">Loading…</div>
             </div>
             <div class="kpi">
               <div class="label">Monthly revenue (MRR)</div>
-              <div class="value">$294</div>
-              <div class="delta"><span class="up">▲ $42</span> vs last month</div>
+              <div class="value" id="kpiMrr">—</div>
+              <div class="delta" id="kpiMrrD">Loading…</div>
             </div>
             <div class="kpi">
               <div class="label">Active Pro trials</div>
-              <div class="value">19</div>
-              <div class="delta">3-day free trial · <span class="up">6 convert</span> on avg.</div>
+              <div class="value" id="kpiTrials">—</div>
+              <div class="delta" id="kpiTrialsD">Loading…</div>
             </div>
             <div class="kpi">
               <div class="label">Audits run</div>
-              <div class="value">342</div>
-              <div class="delta"><span class="up">▲ 58</span> this month</div>
+              <div class="value" id="kpiAudits">—</div>
+              <div class="delta" id="kpiAuditsD">Loading…</div>
             </div>
             <div class="kpi">
               <div class="label">API cost this month</div>
-              <div class="value">$18.40</div>
-              <div class="delta">Claude + X API · <span class="up">6.3%</span> of MRR</div>
+              <div class="value" id="kpiApi">—</div>
+              <div class="delta" id="kpiApiD">Loading…</div>
             </div>
           </div>
 
@@ -436,10 +442,10 @@
         <!-- ===== AUDITS ===== -->
         <section class="view" id="view-audits">
           <div class="kpis">
-            <div class="kpi"><div class="label">Audits total</div><div class="value">342</div><div class="delta">All time</div></div>
-            <div class="kpi"><div class="label">This month</div><div class="value">58</div><div class="delta"><span class="up">▲ 21%</span> vs October</div></div>
-            <div class="kpi"><div class="label">Average score</div><div class="value">61<span style="font-size:17px; color:var(--ink-3)"> / 100</span></div><div class="delta">Across all profiles scanned</div></div>
-            <div class="kpi"><div class="label">Free-limit hits</div><div class="value">23</div><div class="delta">Free users who used their 1 audit</div></div>
+            <div class="kpi"><div class="label">Audits total</div><div class="value" id="kpiAuditsTotal">—</div><div class="delta" id="kpiAuditsTotalD">Loading…</div></div>
+            <div class="kpi"><div class="label">This month</div><div class="value" id="kpiAuditsMonth">—</div><div class="delta" id="kpiAuditsMonthD">Loading…</div></div>
+            <div class="kpi"><div class="label">Average score</div><div class="value" id="kpiAvgScore">—</div><div class="delta" id="kpiAvgScoreD">Loading…</div></div>
+            <div class="kpi"><div class="label">Free-limit hits</div><div class="value" id="kpiFreeHits">—</div><div class="delta" id="kpiFreeHitsD">Loading…</div></div>
           </div>
           <div class="card">
             <h2>Recent audits</h2>
@@ -451,27 +457,27 @@
         <!-- ===== API COSTS ===== -->
         <section class="view" id="view-costs">
           <div class="kpis">
-            <div class="kpi"><div class="label">Total this month</div><div class="value">$18.40</div><div class="delta">Against $294 MRR — <span class="up">healthy margin</span></div></div>
-            <div class="kpi"><div class="label">Cost per audit</div><div class="value">$0.21</div><div class="delta">Claude tokens per full scan</div></div>
-            <div class="kpi"><div class="label">Cost per AI draft</div><div class="value">$0.04</div><div class="delta">Thread / post generation</div></div>
+            <div class="kpi"><div class="label">Total this month</div><div class="value" id="kpiCostTotal">—</div><div class="delta" id="kpiCostTotalD">Loading…</div></div>
+            <div class="kpi"><div class="label">Cost per audit</div><div class="value" id="kpiCostPerAudit">—</div><div class="delta" id="kpiCostPerAuditD">Loading…</div></div>
+            <div class="kpi"><div class="label">Cost per AI draft</div><div class="value" id="kpiCostPerDraft">—</div><div class="delta" id="kpiCostPerDraftD">Loading…</div></div>
           </div>
           <div class="card">
             <h2>Where the money goes — November</h2>
             <div class="card-sub">Pay-per-use only. No fixed monthly API fees.</div>
             <div class="cost-row">
-              <div class="top"><span>Claude API — audits &amp; reports</span><span class="amt">$12.18</span></div>
-              <div class="cost-bar"><i style="width:66%"></i></div>
-              <div class="cost-note">58 audits × ~$0.21</div>
+              <div class="top"><span>Claude API — audits &amp; reports</span><span class="amt" id="costAmtAudits">$0.00</span></div>
+              <div class="cost-bar"><i id="costBarAudits" style="width:0%"></i></div>
+              <div class="cost-note" id="costNoteAudits">No audits billed yet</div>
             </div>
             <div class="cost-row">
-              <div class="top"><span>Claude API — AI Create drafts</span><span class="amt">$4.62</span></div>
-              <div class="cost-bar"><i style="width:25%"></i></div>
-              <div class="cost-note">~115 drafts generated</div>
+              <div class="top"><span>Claude API — AI Create drafts</span><span class="amt" id="costAmtDrafts">$0.00</span></div>
+              <div class="cost-bar"><i id="costBarDrafts" style="width:0%"></i></div>
+              <div class="cost-note" id="costNoteDrafts">No drafts billed yet</div>
             </div>
             <div class="cost-row">
-              <div class="top"><span>X API — profile &amp; hashtag reads</span><span class="amt">$1.60</span></div>
-              <div class="cost-bar"><i style="width:9%"></i></div>
-              <div class="cost-note">$0.005 per read · posting stays manual at launch, so post credits are $0</div>
+              <div class="top"><span>X API — profile &amp; hashtag reads</span><span class="amt" id="costAmtX">$0.00</span></div>
+              <div class="cost-bar"><i id="costBarX" style="width:0%"></i></div>
+              <div class="cost-note" id="costNoteX">$0.005 per read · posting stays manual at launch, so post credits are $0</div>
             </div>
             <p class="cost-note" style="margin-top:6px">Watch the link-post trap when auto-posting launches: a post with a link costs $0.20 on the X API — 13× a plain post ($0.015).</p>
           </div>
@@ -784,6 +790,127 @@
           note.classList.add("show");
           window.setTimeout(function () { note.classList.remove("show"); }, 4000);
         });
+      })();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      (function () {
+        "use strict";
+        var sb = window.supabase.createClient("https://elbddcclcmmpqdxsdahg.supabase.co", "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI");
+        function $(id) { return document.getElementById(id); }
+        function esc(v) { return String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+        function fmtDate(iso) { var d = new Date(iso); return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
+        function setText(id, text) { var el = $(id); if (el) el.textContent = text; }
+        function setHtml(id, html) { var el = $(id); if (el) el.innerHTML = html; }
+        function deny(text) { var m = $("gateMsg"); if (m) m.textContent = text; }
+        function initials(email) { var local = String(email || "?").split("@")[0].replace(/[^a-zA-Z0-9]/g, ""); return (local.slice(0, 2) || "??").toUpperCase(); }
+        function planPill(plan) { var p = String(plan || "free"); return '<span class="pill ' + (p === "pro" ? "pro" : "free") + '">' + esc(p) + "</span>"; }
+        function userRow(u, withAction) {
+          return "<tr>" +
+            '<td class="user-td"><div class="user-cell"><span class="avatar">' + esc(initials(u.email)) + "</span>" +
+            '<span><span class="handle">' + esc(u.email) + '</span><br><span class="email">' + esc(u.email) + "</span></span></div></td>" +
+            '<td data-label="Plan">' + planPill(u.plan) + "</td>" +
+            (withAction
+              ? '<td data-label="Audits used" class="num">' + Number(u.audits_used || 0) + "</td>"
+              : '<td data-label="Goal">\u2014</td>') +
+            '<td data-label="Joined" class="num">' + esc(fmtDate(u.created_at)) + "</td>" +
+            '<td data-label="Status"><span class="pill active">Active</span></td>' +
+            (withAction ? '<td data-label="Action"><button class="btn small" type="button" disabled title="Suspend controls coming soon">Suspend</button></td>' : "") +
+            "</tr>";
+        }
+        async function main() {
+          var sess = await sb.auth.getSession();
+          var user = sess.data && sess.data.session && sess.data.session.user;
+          if (!user) {
+            deny("Not logged in \u2014 taking you to the login page\u2026");
+            setTimeout(function () { window.location.replace("auth.html"); }, 1200);
+            return;
+          }
+          var prof = await sb.from("profiles").select("is_admin").eq("id", user.id).single();
+          if (prof.error || !prof.data || !prof.data.is_admin) {
+            deny("Admin access only \u2014 taking you back to the site\u2026");
+            setTimeout(function () { window.location.replace("index.html"); }, 1500);
+            return;
+          }
+          var res = await Promise.all([
+            sb.from("profiles").select("id,email,plan,trial_ends_at,audits_used,is_admin,created_at").order("created_at", { ascending: false }).limit(200),
+            sb.from("subscriptions").select("user_id,status"),
+            sb.from("audits").select("id,user_id,handle,score,created_at").order("created_at", { ascending: false }).limit(100)
+          ]);
+          var profiles = res[0].data || [];
+          var subs = res[1].data || [];
+          var audits = res[2].data || [];
+          if (res[0].error || res[1].error || res[2].error) {
+            deny("Could not load live data \u2014 please reload the page.");
+            return;
+          }
+          var proCount = profiles.filter(function (p) { return p.plan === "pro"; }).length;
+          var freeCount = profiles.length - proCount;
+          var trialing = subs.filter(function (x) { return x.status === "trialing"; }).length;
+          var paying = subs.filter(function (x) { return x.status === "active"; }).length;
+          var mrr = paying * 7;
+          var now = new Date();
+          var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          var auditsMonth = audits.filter(function (a) { return new Date(a.created_at) >= monthStart; }).length;
+          var scored = audits.filter(function (a) { return typeof a.score === "number"; });
+          var avg = scored.length ? Math.round(scored.reduce(function (t, a) { return t + a.score; }, 0) / scored.length) : null;
+          var freeHits = profiles.filter(function (p) { return p.plan === "free" && Number(p.audits_used || 0) >= 1; }).length;
+
+          setText("kpiUsers", String(profiles.length));
+          setText("kpiUsersD", proCount + " Pro \u00b7 " + freeCount + " Free");
+          setText("kpiMrr", "$" + mrr);
+          setText("kpiMrrD", paying ? paying + " paying subscriber" + (paying === 1 ? "" : "s") : "No paying subscribers yet");
+          setText("kpiTrials", String(trialing));
+          setText("kpiTrialsD", "3-day free trial");
+          setText("kpiAudits", String(audits.length));
+          setText("kpiAuditsD", auditsMonth + " this month");
+          setText("kpiApi", "$0.00");
+          setText("kpiApiD", "No paid API calls yet");
+          setText("kpiAuditsTotal", String(audits.length));
+          setText("kpiAuditsTotalD", "All time");
+          setText("kpiAuditsMonth", String(auditsMonth));
+          setText("kpiAuditsMonthD", "This month");
+          var avgEl = $("kpiAvgScore");
+          if (avgEl) avgEl.innerHTML = (avg === null ? "\u2014" : String(avg)) + '<span style="font-size:17px; color:var(--ink-3)"> / 100</span>';
+          setText("kpiAvgScoreD", scored.length ? "Across " + scored.length + " scored audit" + (scored.length === 1 ? "" : "s") : "No scored audits yet");
+          setText("kpiFreeHits", String(freeHits));
+          setText("kpiFreeHitsD", "Free users who used their 1 audit");
+          setText("kpiCostTotal", "$0.00");
+          setText("kpiCostTotalD", "Against $" + mrr + " MRR");
+          setText("kpiCostPerAudit", "\u2014");
+          setText("kpiCostPerAuditD", "No audits billed yet");
+          setText("kpiCostPerDraft", "\u2014");
+          setText("kpiCostPerDraftD", "No drafts billed yet");
+          setText("costAmtAudits", "$0.00");
+          setText("costAmtDrafts", "$0.00");
+          setText("costAmtX", "$0.00");
+          setText("costNoteAudits", audits.length + " audits run \u00b7 $0 billed so far");
+          setText("costNoteDrafts", "No drafts billed yet");
+          setText("costNoteX", "$0.005 per read \u00b7 posting stays manual at launch, so post credits are $0");
+          ["costBarAudits", "costBarDrafts", "costBarX"].forEach(function (id) { var b = $(id); if (b) b.style.width = "0%"; });
+
+          var chip = $("dataChip");
+          if (chip) chip.textContent = "Live data";
+
+          var latest = profiles.slice(0, 5);
+          setHtml("latestBody", latest.length ? latest.map(function (u) { return userRow(u, false); }).join("") : '<tr><td colspan="5">No users yet.</td></tr>');
+          setHtml("usersBody", profiles.length ? profiles.map(function (u) { return userRow(u, true); }).join("") : '<tr><td colspan="6">No users yet.</td></tr>');
+          setText("userCount", profiles.length + " account" + (profiles.length === 1 ? "" : "s"));
+          setHtml("auditList", audits.length ? audits.map(function (a) {
+            var cls = (typeof a.score === "number" && a.score >= 70) ? "" : ((typeof a.score === "number" && a.score >= 50) ? "mid" : "low");
+            return '<div class="audit-row">' +
+              '<span class="score-ring ' + cls + '">' + (typeof a.score === "number" ? a.score : "\u2014") + "</span>" +
+              '<span><span class="who">' + esc(a.handle || "\u2014") + '</span><br><span class="meta">' + esc(fmtDate(a.created_at)) + "</span></span>" +
+              '<span class="goal"><span class="pill free">Saved audit</span></span></div>';
+          }).join("") : '<p class="empty-note">No audits yet \u2014 the first real audit will show here.</p>');
+          setHtml("abuseList", "");
+          var ae = $("abuseEmpty"); if (ae) ae.style.display = "block";
+          var badge = $("abuseBadge"); if (badge) badge.style.display = "none";
+
+          var ov = $("gateOverlay"); if (ov) ov.remove();
+        }
+        main();
       })();
     </script>
   </body>
