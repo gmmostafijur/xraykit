@@ -581,7 +581,7 @@
                       <tr><th scope="row">Material read</th><td id="bMaterial">—</td></tr>
                       <tr><th scope="row">Goal</th><td id="bGoal">—</td></tr>
                       <tr><th scope="row">Report goes to</th><td id="bEmail">—</td></tr>
-                      <tr><th scope="row">Plan</th><td>Free — audit 1 of 1 this month</td></tr>
+                      <tr><th scope="row">Plan</th><td id="bPlan">Free — audit 1 of 1 this month</td></tr>
                     </tbody>
                   </table>
                   <div class="brief-next">
@@ -1379,6 +1379,41 @@
           inHandle.focus();
         });
 
+        /* ---------- real AI audit (Supabase Edge Function) ---------- */
+        var sb = window.supabase.createClient("https://elbddcclcmmpqdxsdahg.supabase.co", "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI");
+        var scanResult = null, scanError = null, scanDone = false;
+        function runRealScan(payload) {
+          return sb.auth.getSession().then(function (sess) {
+            var user = sess.data && sess.data.session && sess.data.session.user;
+            if (!user) {
+              var e0 = new Error("not_logged_in");
+              e0.code = "not_logged_in";
+              throw e0;
+            }
+            return sb.functions.invoke("ai-audit", { body: payload });
+          }).then(function (res) {
+            if (res.error) {
+              var ctx = res.error.context;
+              var status = ctx && ctx.status;
+              var e = new Error("Audit failed");
+              if (status === 402) { e.code = "limit_reached"; e.message = "limit_reached"; }
+              else if (status === 401) { e.code = "not_logged_in"; e.message = "not_logged_in"; }
+              else if (status) { e.message = "Audit failed (HTTP " + status + ")"; }
+              throw e;
+            }
+            var data = res.data || {};
+            if (data.error === "limit_reached") {
+              var e2 = new Error("limit_reached");
+              e2.code = "limit_reached";
+              e2.plan = data.plan; e2.limit = data.limit;
+              throw e2;
+            }
+            if (data.error) { var e3 = new Error(String(data.error)); e3.code = "api_error"; throw e3; }
+            if (!data.audit_id) { var e4 = new Error("No audit was returned"); e4.code = "api_error"; throw e4; }
+            return data;
+          });
+        }
+
         /* ---------- validation + submit ---------- */
         function markInvalid(id, bad) {
           var f = $(id);
@@ -1436,15 +1471,44 @@
           var steps = brief.querySelectorAll("[data-step]");
           for (var i = 0; i < steps.length; i++) steps[i].className = "";
           timers.forEach(clearTimeout); timers = [];
+          scanResult = null; scanError = null; scanDone = false;
+          runRealScan({
+            handle: handle,
+            project: inProject.value.trim(),
+            category: inCategory.value,
+            goal: radioVal("goal"),
+            bio: inBio.value.trim(),
+            pinned: pin,
+            posts: posts
+          }).then(function (r) { scanResult = r; scanDone = true; }).catch(function (e) { scanError = e; scanDone = true; });
           var per = reduced ? 60 : 650;
           steps.forEach(function (li, idx) {
             timers.push(setTimeout(function () { li.classList.add("doing"); }, idx * per));
             timers.push(setTimeout(function () { li.classList.remove("doing"); li.classList.add("done"); li.querySelector(".dot").textContent = "✓"; }, idx * per + per * 0.8));
           });
           timers.push(setTimeout(function () {
-            $("briefTitle").textContent = "Scan brief received — @" + handle;
-            $("briefLede").textContent = "Your material is locked in and the diagnosis is being built from it. The full report — score first, problems ranked by impact — goes to " + inEmail.value.trim() + ".";
-            $("briefDone").hidden = false;
+            (function finish() {
+              if (!scanDone) { setTimeout(finish, 400); return; }
+              if (scanError) {
+                var msg = "Something went wrong — please try again.";
+                if (scanError.code === "not_logged_in") msg = "Please log in first — audits need an account. Use the Log in link in the menu, then run the scan again.";
+                else if (scanError.code === "limit_reached") msg = "You've used your free audit for this month. Start the 3-day Pro trial for 30 audits a month.";
+                else if (scanError.message) msg = scanError.message;
+                $("briefTitle").textContent = "Audit didn't run";
+                $("briefLede").textContent = msg;
+                $("briefDone").hidden = false;
+                return;
+              }
+              $("briefTitle").textContent = "Report ready — @" + handle;
+              $("briefLede").textContent = "Your audit is done. Opening your report…";
+              var planCell = $("bPlan");
+              if (planCell && scanResult) {
+                planCell.textContent = (scanResult.plan === "pro" ? "Pro" : "Free") + " — audit " + scanResult.audits_used + " of " + scanResult.limit + " this month";
+              }
+              $("bEmail").textContent = "Your report page (opening…)";
+              $("briefDone").hidden = false;
+              setTimeout(function () { window.location.href = "report.html?id=" + encodeURIComponent(scanResult.audit_id); }, 1400);
+            })();
           }, steps.length * per + 200));
         }
 

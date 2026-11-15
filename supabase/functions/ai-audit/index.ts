@@ -56,7 +56,8 @@ function buildPrompt(input) {
     "{",
     '  "score": 59,',
     '  "dimensions": {"profile": 62, "content": 55, "engagement": 48, "positioning": 70},',
-    '  "problems": [{"title": "short title", "problem": "what is wrong, with evidence from their posts", "fix": "the concrete fix", "impact": "high"}, ... 5 items],',
+    '  "problems": [{"title": "short title, e.g. Bio & positioning", "score": 38, "saw": "quote their own words back, e.g. the bio text", "why": "why this costs them reach, trust or followers", "fix": "the concrete fix, written out", "impact": "high"}, ... exactly 5 items, worst first],',
+    '  "strengths": [{"title": "short asset name, e.g. A live testnet", "text": "why this is a real asset and how to use it"}, ... exactly 3 items],',
     '  "threads": [{"hook": "first line of the thread", "angle": "what the thread teaches or proves"}, ... 5 items],',
     '  "fullThread": ["post 1 (hook)", "post 2", "... 7 to 10 posts, each under 280 characters"],',
     '  "bioOptions": ["bio option 1", "bio option 2", "bio option 3"],',
@@ -81,8 +82,15 @@ function validReport(r) {
   if (!r || typeof r !== "object") return false;
   if (typeof r.score !== "number") return false;
   if (!Array.isArray(r.problems) || r.problems.length < 1) return false;
+  for (const p of r.problems) {
+    if (!p || typeof p.title !== "string" || typeof p.saw !== "string" ||
+        typeof p.why !== "string" || typeof p.fix !== "string") return false;
+    if (typeof p.score !== "number") p.score = 50;
+  }
   if (!Array.isArray(r.threads) || r.threads.length < 1) return false;
   if (!Array.isArray(r.fullThread) || r.fullThread.length < 1) return false;
+  if (!Array.isArray(r.plan7day) || r.plan7day.length < 1) return false;
+  if (!Array.isArray(r.strengths)) r.strengths = [];
   return true;
 }
 
@@ -206,6 +214,16 @@ Deno.serve(async (req) => {
       return json({ error: "AI returned an unusable report" }, 502);
     }
     report.score = Math.max(0, Math.min(100, Math.round(report.score)));
+    report.problems.forEach(function (p) {
+      p.score = Math.max(0, Math.min(100, Math.round(Number(p.score) || 50)));
+      if (!["high", "medium", "low"].includes(p.impact)) p.impact = "medium";
+    });
+    report.meta = {
+      handle: handle,
+      project: payload.project,
+      category: payload.category,
+      goal: payload.goal,
+    };
     if (report.dimensions) {
       Object.keys(report.dimensions).forEach(function (k) {
         const v = Number(report.dimensions[k]);
