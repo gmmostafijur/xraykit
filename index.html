@@ -162,6 +162,7 @@
       .plan li.off { opacity: 0.45; } .plan li.off::before { content: "—"; color: inherit; }
       .plan .btn { margin-top: auto; width: 100%; }
       .pricing-note { margin-top: 22px; font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink-faint); max-width: 880px; }
+      .trial-msg { min-height: 20px; margin: 12px 0 0; font-weight: 700; font-size: 14px; }
 
       /* faq + contact */
       .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 40px; max-width: 1000px; }
@@ -376,7 +377,8 @@
                 <div class="price"><span class="amt">$7</span><span class="per">/ month</span></div>
                 <p class="pdesc">Free for your first 3 days — no card up front. Keep it afterwards for $7/month.</p>
                 <ul><li>30 audits per month</li><li>Every problem with its written fix</li><li>Thread generator — full drafts, not outlines</li><li>Thread ideas matched to your launch stage</li><li>7-day posting plan</li><li>Re-scan after fixes to watch the score move</li></ul>
-                <a class="btn btn-lime" href="#/pricing" data-page-link="pricing">Start 3 free days of Pro</a>
+                <a class="btn btn-lime trial-btn" id="trialBtn" href="#/pricing" data-page-link="pricing">Start 3 free days of Pro</a>
+                <p class="trial-msg" id="trialMsg" aria-live="polite"></p>
               </article>
             </div>
             <p class="pricing-note">TRIAL TERMS — 3 days of full Pro, no card up front and nothing to cancel. When the trial ends, Pro simply pauses; add a card only if you want to keep it at $7/month.</p>
@@ -629,6 +631,80 @@
         }
         window.addEventListener("hashchange", route);
         route();
+      })();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      (function () {
+        "use strict";
+        var SUPABASE_URL = "https://elbddcclcmmpqdxsdahg.supabase.co";
+        var SUPABASE_ANON_KEY = "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI";
+        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var btn = document.getElementById("trialBtn");
+        var msg = document.getElementById("trialMsg");
+        var loginLink = document.querySelector('a[href="auth.html"]');
+        function fmtDate(iso) {
+          var d = new Date(iso);
+          return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        }
+        function setMsg(text, ok) {
+          if (!msg) return;
+          msg.textContent = text;
+          msg.style.color = ok ? "var(--chip-ok)" : "var(--chip-bad)";
+        }
+        async function refreshState() {
+          if (!btn) return;
+          var s = await sb.auth.getSession();
+          var user = s.data && s.data.session && s.data.session.user;
+          if (loginLink && user) loginLink.textContent = "My account";
+          if (!user) {
+            btn.textContent = "Start 3 free days of Pro";
+            btn.removeAttribute("aria-disabled");
+            return;
+          }
+          var r = await sb.rpc("my_plan");
+          if (r.error || !r.data) return;
+          if (r.data.plan === "pro" && r.data.trial_ends_at) {
+            btn.textContent = "Pro trial active \u2014 ends " + fmtDate(r.data.trial_ends_at);
+            btn.setAttribute("aria-disabled", "true");
+          } else if (r.data.plan === "pro") {
+            btn.textContent = "Pro active";
+            btn.setAttribute("aria-disabled", "true");
+          } else {
+            btn.textContent = "Start 3 free days of Pro";
+            btn.removeAttribute("aria-disabled");
+          }
+        }
+        if (btn) btn.addEventListener("click", async function (e) {
+          e.preventDefault();
+          var s = await sb.auth.getSession();
+          var user = s.data && s.data.session && s.data.session.user;
+          if (!user) { window.location.href = "auth.html"; return; }
+          if (btn.getAttribute("aria-disabled") === "true") return;
+          btn.textContent = "Starting your trial\u2026";
+          btn.setAttribute("aria-disabled", "true");
+          var r = await sb.rpc("start_free_trial");
+          if (r.error) {
+            setMsg("Something went wrong \u2014 please try again.", false);
+            refreshState();
+            return;
+          }
+          if (r.data && r.data.ok) {
+            setMsg("Your 3-day Pro trial is on \u2014 it ends " + fmtDate(r.data.trial_ends_at) + ". No card needed.", true);
+            btn.textContent = "Pro trial active \u2014 ends " + fmtDate(r.data.trial_ends_at);
+          } else if (r.data && r.data.reason === "already_pro") {
+            setMsg("You already have Pro.", true);
+            refreshState();
+          } else if (r.data && r.data.reason === "trial_used") {
+            setMsg("Your free trial was already used on this account.", false);
+            refreshState();
+          } else {
+            setMsg("Something went wrong \u2014 please try again.", false);
+            refreshState();
+          }
+        });
+        refreshState();
       })();
     </script>
   </body>
