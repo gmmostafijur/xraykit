@@ -60,7 +60,14 @@ Deno.serve(async (req) => {
         messages: [{ role: "user", content: "hi" }],
       }),
     });
-    return json({ configured: true, key_valid: r.ok, status: r.status });
+    let coarena_error = null;
+    if (!r.ok) {
+      try {
+        const e = await r.json();
+        if (e && e.error && e.error.message) coarena_error = String(e.error.message).slice(0, 160);
+      } catch (_e) {}
+    }
+    return json({ configured: true, key_valid: r.ok, status: r.status, coarena_error });
   } catch (e) {
     return json(
       { configured: false, key_valid: false, error: String(e).slice(0, 200) },

@@ -789,7 +789,12 @@
               setKeyPill(true, v.slice(-4));
               showKeyMsg("Connected — the server secret is set and the key works. Real audits can run now.", true);
             } else if (res.data && res.data.configured) {
-              showKeyMsg("Secret is set, but the key check failed (invalid key or daily limit reached). Check the key in Supabase secrets.", false);
+              var st = res.data.status;
+              var extra = res.data.coarena_error ? " — " + res.data.coarena_error : "";
+              if (st === 401) showKeyMsg("Secret is set, but Coarena says the key is not valid (401). The secret probably still holds the old key — re-save the NEW key in Supabase secrets." + extra, false);
+              else if (st === 429) showKeyMsg("Secret is set, but Coarena says the daily limit is reached (429). Try again later." + extra, false);
+              else if (st === 404 || st === 400) showKeyMsg("Secret is set, but Coarena rejected the request (HTTP " + st + "). This looks like a model problem, not the key — tell Muse." + extra, false);
+              else showKeyMsg("Secret is set, but the key check failed (HTTP " + (st || "?") + ")." + extra, false);
             } else {
               showKeyMsg("Server secret is not set yet. Add ANTHROPIC_AUTH_TOKEN in Supabase → Edge Functions → Manage secrets, then test again.", false);
             }
