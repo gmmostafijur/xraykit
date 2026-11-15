@@ -1380,17 +1380,27 @@
         });
 
         /* ---------- real AI audit (Supabase Edge Function) ---------- */
-        var sb = window.supabase.createClient("https://elbddcclcmmpqdxsdahg.supabase.co", "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI");
+        var sb = null;
+        function getSb() {
+          if (sb) return sb;
+          if (!window.supabase || !window.supabase.createClient) {
+            throw new Error("Supabase failed to load — check your connection and reload the page.");
+          }
+          sb = window.supabase.createClient("https://elbddcclcmmpqdxsdahg.supabase.co", "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI");
+          return sb;
+        }
         var scanResult = null, scanError = null, scanDone = false;
         function runRealScan(payload) {
-          return sb.auth.getSession().then(function (sess) {
+          var client;
+          try { client = getSb(); } catch (e) { return Promise.reject(e); }
+          return client.auth.getSession().then(function (sess) {
             var user = sess.data && sess.data.session && sess.data.session.user;
             if (!user) {
               var e0 = new Error("not_logged_in");
               e0.code = "not_logged_in";
               throw e0;
             }
-            return sb.functions.invoke("ai-audit", { body: payload });
+            return client.functions.invoke("ai-audit", { body: payload });
           }).then(function (res) {
             if (res.error) {
               var ctx = res.error.context;
@@ -1476,7 +1486,7 @@
             handle: handle,
             project: inProject.value.trim(),
             category: inCategory.value,
-            goal: radioVal("goal"),
+            goal: (function (g) { return (g === "Raise funds" || g === "Nail the launch") ? "fundraise" : "community"; })(radioVal("goal")),
             bio: inBio.value.trim(),
             pinned: pin,
             posts: posts
@@ -2446,6 +2456,27 @@
             "Mainnet is close. Here is exactly what launches on day one — and what does not. No vague promises.";
           researchForm.requestSubmit ? researchForm.requestSubmit() : researchForm.dispatchEvent(new Event("submit", { cancelable: true }));
         });
+
+        /* ---------- pre-fill from URL (e.g. after a reload with ?handle=...) ---------- */
+        (function prefillFromUrl() {
+          var q = new URLSearchParams(window.location.search);
+          if (!q.get("handle") && !q.get("project")) return;
+          function setVal(id, v) { var el = $(id); if (el && v != null) el.value = v; }
+          setVal("inHandle", q.get("handle"));
+          setVal("inProject", q.get("project"));
+          setVal("inCategory", q.get("category"));
+          setVal("inBio", q.get("bio"));
+          setVal("inPinned", q.get("pinned"));
+          setVal("inPosts", q.get("posts"));
+          setVal("inEmail", q.get("email"));
+          function checkRadio(name, v) {
+            if (!v) return;
+            var r = document.querySelector('input[name="' + name + '"][value="' + v.replace(/"/g, "") + '"]');
+            if (r) r.checked = true;
+          }
+          checkRadio("stage", q.get("stage"));
+          checkRadio("goal", q.get("goal"));
+        })();
 
         refresh();
         show(currentPage());
