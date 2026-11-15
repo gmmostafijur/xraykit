@@ -2596,7 +2596,10 @@
             var u0 = s0.data && s0.data.session && s0.data.session.user;
             if (!u0) return;
             var r0 = await sb0.rpc("my_plan");
-            if (r0.data && r0.data.plan === "pro") buyBtn.style.display = "none";
+            // Hide only for paid Pro. A trial user (trial_ends_at in the future)
+            // keeps the button so they can add a card and keep Pro after the trial.
+            var trialing = r0.data && r0.data.trial_ends_at && new Date(r0.data.trial_ends_at).getTime() > Date.now();
+            if (r0.data && r0.data.plan === "pro" && !trialing) buyBtn.style.display = "none";
           } catch (err) { /* leave the button visible */ }
         }
         refreshBuyState();
