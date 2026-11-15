@@ -441,7 +441,7 @@
           <a href="#/faq" data-page-link="faq">FAQ</a>
           <a href="#/contact" data-page-link="contact">Contact</a>
           <a href="auth.html" id="navLogin">Log in</a>
-          <a href="auth.html" id="navAccount" style="display:none">My account</a>
+          <a href="account.html" id="navAccount" style="display:none">My account</a>
           <a class="btn btn-lime btn-small" href="#/pricing" data-page-link="pricing">Try Pro free</a>
         </nav>
       </div>
@@ -1138,7 +1138,10 @@
                 <div class="price"><span class="amt">$7</span><span class="per">/ month</span></div>
                 <p class="pdesc">Free for your first 3 days — no card up front. Keep it afterwards for $7/month.</p>
                 <ul><li>30 audits per month</li><li>Every problem with its written fix</li><li>Thread generator — full drafts, not outlines</li><li>Content import — paste past posts, add your website or a PDF; AI Create writes in your voice</li><li>Thread ideas matched to your launch stage</li><li>Scheduler — 7-day plan with drafts, times &amp; AI image ideas (you post via X's free scheduler)</li><li>Hashtag research — daily posts, comments, volume &amp; competition</li><li>Re-scan after fixes to watch the score move</li></ul>
-                <a class="btn btn-lime" href="#/audit" data-page-link="audit">Start 3 free days of Pro</a>
+                <a class="btn btn-lime trial-btn" id="trialBtn" href="#/pricing" data-page-link="pricing">Start 3 free days of Pro</a>
+                <p class="trial-msg" id="trialMsg" aria-live="polite"></p>
+                <a class="btn" id="buyProBtn" href="#/pricing" data-page-link="pricing">Add a card — keep Pro at $7/mo</a>
+                <p class="trial-msg" id="buyProMsg" aria-live="polite"></p>
               </article>
             </div>
             <p class="pricing-note">TRIAL TERMS — 3 days of full Pro, no card up front and nothing to cancel. When the trial ends, Pro simply pauses; add a card only if you want to keep it at $7/month.</p>
@@ -2494,5 +2497,142 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="nav-auth.js"></script>
+<style>.trial-msg { min-height: 20px; margin: 12px 0 0; font-weight: 700; font-size: 14px; }</style>
+    <script>
+      (function () {
+        "use strict";
+        var SUPABASE_URL = "https://elbddcclcmmpqdxsdahg.supabase.co";
+        var SUPABASE_ANON_KEY = "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI";
+        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        var btn = document.getElementById("trialBtn");
+        var msg = document.getElementById("trialMsg");
+        function fmtDate(iso) {
+          var d = new Date(iso);
+          return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        }
+        function setMsg(text, ok) {
+          if (!msg) return;
+          msg.textContent = text;
+          msg.style.color = ok ? "var(--chip-ok)" : "var(--chip-bad)";
+        }
+        async function refreshState() {
+          if (!btn) return;
+          var s = await sb.auth.getSession();
+          var user = s.data && s.data.session && s.data.session.user;
+          if (!user) {
+            btn.textContent = "Start 3 free days of Pro";
+            btn.removeAttribute("aria-disabled");
+            return;
+          }
+          var r = await sb.rpc("my_plan");
+          if (r.error || !r.data) return;
+          if (r.data.plan === "pro" && r.data.trial_ends_at) {
+            btn.textContent = "Pro trial active \u2014 ends " + fmtDate(r.data.trial_ends_at);
+            btn.setAttribute("aria-disabled", "true");
+          } else if (r.data.plan === "pro") {
+            btn.textContent = "Pro active";
+            btn.setAttribute("aria-disabled", "true");
+          } else {
+            btn.textContent = "Start 3 free days of Pro";
+            btn.removeAttribute("aria-disabled");
+          }
+        }
+        if (btn) btn.addEventListener("click", async function (e) {
+          e.preventDefault();
+          var s = await sb.auth.getSession();
+          var user = s.data && s.data.session && s.data.session.user;
+          if (!user) { window.location.href = "auth.html"; return; }
+          if (btn.getAttribute("aria-disabled") === "true") return;
+          btn.textContent = "Starting your trial\u2026";
+          btn.setAttribute("aria-disabled", "true");
+          var r = await sb.rpc("start_free_trial");
+          if (r.error) {
+            setMsg("Something went wrong \u2014 please try again.", false);
+            refreshState();
+            return;
+          }
+          if (r.data && r.data.ok) {
+            setMsg("Your 3-day Pro trial is on \u2014 it ends " + fmtDate(r.data.trial_ends_at) + ". No card needed.", true);
+            btn.textContent = "Pro trial active \u2014 ends " + fmtDate(r.data.trial_ends_at);
+          } else if (r.data && r.data.reason === "already_pro") {
+            setMsg("You already have Pro.", true);
+            refreshState();
+          } else if (r.data && r.data.reason === "trial_used") {
+            setMsg("Your free trial was already used on this account.", false);
+            refreshState();
+          } else {
+            setMsg("Something went wrong \u2014 please try again.", false);
+            refreshState();
+          }
+        });
+        refreshState();
+      })();
+    </script>
+    <script>
+      // XRayKit — Paddle checkout (Pro $7/mo). Fill in the config below from
+      // the Paddle dashboard. The client token + price ID are publishable
+      // (safe in frontend code); the webhook secret is server-side only
+      // (Supabase Edge Function secret PADDLE_WEBHOOK_SECRET).
+      // Client token: Paddle -> Developer tools -> Authentication -> Client-side tokens
+      // Price ID: Paddle -> Catalog -> Products -> XRayKit Pro -> Price (pri_...)
+      (function () {
+        "use strict";
+        var PADDLE_CONFIG = {
+          environment: "sandbox", // "sandbox" while testing, "production" when live
+          clientToken: "test_d1ac3a2a08f6ec57f91e912c835",
+          priceId: "pri_01m7fzz4bfm186zjcr00240n1e"
+        };
+        var SUPABASE_URL = "https://elbddcclcmmpqdxsdahg.supabase.co";
+        var SUPABASE_ANON_KEY = "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI";
+        var buyBtn = document.getElementById("buyProBtn");
+        var buyMsg = document.getElementById("buyProMsg");
+        if (!buyBtn) return;
+        function say(text) { if (buyMsg) buyMsg.textContent = text; }
+        async function refreshBuyState() {
+          // Hide the buy button when the user already has Pro.
+          try {
+            var sb0 = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            var s0 = await sb0.auth.getSession();
+            var u0 = s0.data && s0.data.session && s0.data.session.user;
+            if (!u0) return;
+            var r0 = await sb0.rpc("my_plan");
+            if (r0.data && r0.data.plan === "pro") buyBtn.style.display = "none";
+          } catch (err) { /* leave the button visible */ }
+        }
+        refreshBuyState();
+        buyBtn.addEventListener("click", async function (e) {
+          e.preventDefault();
+          if (!window.Paddle) { say("Checkout is still loading — try again in a second."); return; }
+          if (!PADDLE_CONFIG.clientToken || PADDLE_CONFIG.clientToken.indexOf("PASTE_") === 0 ||
+              !PADDLE_CONFIG.priceId || PADDLE_CONFIG.priceId.indexOf("PASTE_") === 0) {
+            say("Card payments are being connected — the owner is finishing the Paddle setup.");
+            return;
+          }
+          var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          var s = await sb.auth.getSession();
+          var user = s.data && s.data.session && s.data.session.user;
+          if (!user) { window.location.href = "auth.html"; return; }
+          say("Opening secure checkout…");
+          try {
+            window.Paddle.Initialize({
+              token: PADDLE_CONFIG.clientToken,
+              environment: PADDLE_CONFIG.environment,
+              eventCallback: function (ev) {
+                if (ev && ev.name === "checkout.completed") {
+                  say("Payment received — Pro unlocks in a few seconds. Refresh the page to see it.");
+                }
+              }
+            });
+            window.Paddle.Checkout.open({
+              items: [{ priceId: PADDLE_CONFIG.priceId, quantity: 1 }],
+              customer: { email: user.email },
+              customData: { userId: user.id }
+            });
+          } catch (err) {
+            say("Checkout could not open — please try again.");
+          }
+        });
+      })();
+    </script>
   </body>
 </html>
