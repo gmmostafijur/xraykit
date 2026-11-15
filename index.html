@@ -380,6 +380,8 @@
                 <ul><li>30 audits per month</li><li>Every problem with its written fix</li><li>Thread generator — full drafts, not outlines</li><li>Thread ideas matched to your launch stage</li><li>7-day posting plan</li><li>Re-scan after fixes to watch the score move</li></ul>
                 <a class="btn btn-lime trial-btn" id="trialBtn" href="#/pricing" data-page-link="pricing">Start 3 free days of Pro</a>
                 <p class="trial-msg" id="trialMsg" aria-live="polite"></p>
+                <a class="btn" id="buyProBtn" href="#/pricing" data-page-link="pricing">Add a card — keep Pro at $7/mo</a>
+                <p class="trial-msg" id="buyProMsg" aria-live="polite"></p>
               </article>
             </div>
             <p class="pricing-note">TRIAL TERMS — 3 days of full Pro, no card up front and nothing to cancel. When the trial ends, Pro simply pauses; add a card only if you want to keep it at $7/month.</p>
@@ -704,6 +706,73 @@
           }
         });
         refreshState();
+      })();
+    </script>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+    <script>
+      // XRayKit — Paddle checkout (Pro $7/mo). Fill in the config below from
+      // the Paddle dashboard. The client token + price ID are publishable
+      // (safe in frontend code); the webhook secret is server-side only
+      // (Supabase Edge Function secret PADDLE_WEBHOOK_SECRET).
+      // Client token: Paddle -> Developer tools -> Authentication -> Client-side tokens
+      // Price ID: Paddle -> Catalog -> Products -> XRayKit Pro -> Price (pri_...)
+      (function () {
+        "use strict";
+        var PADDLE_CONFIG = {
+          environment: "sandbox", // "sandbox" while testing, "production" when live
+          clientToken: "PASTE_YOUR_PADDLE_CLIENT_TOKEN",
+          priceId: "PASTE_YOUR_PADDLE_PRICE_ID"
+        };
+        var SUPABASE_URL = "https://elbddcclcmmpqdxsdahg.supabase.co";
+        var SUPABASE_ANON_KEY = "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI";
+        var buyBtn = document.getElementById("buyProBtn");
+        var buyMsg = document.getElementById("buyProMsg");
+        if (!buyBtn) return;
+        function say(text) { if (buyMsg) buyMsg.textContent = text; }
+        async function refreshBuyState() {
+          // Hide the buy button when the user already has Pro.
+          try {
+            var sb0 = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            var s0 = await sb0.auth.getSession();
+            var u0 = s0.data && s0.data.session && s0.data.session.user;
+            if (!u0) return;
+            var r0 = await sb0.rpc("my_plan");
+            if (r0.data && r0.data.plan === "pro") buyBtn.style.display = "none";
+          } catch (err) { /* leave the button visible */ }
+        }
+        refreshBuyState();
+        buyBtn.addEventListener("click", async function (e) {
+          e.preventDefault();
+          if (!window.Paddle) { say("Checkout is still loading — try again in a second."); return; }
+          if (!PADDLE_CONFIG.clientToken || PADDLE_CONFIG.clientToken.indexOf("PASTE_") === 0 ||
+              !PADDLE_CONFIG.priceId || PADDLE_CONFIG.priceId.indexOf("PASTE_") === 0) {
+            say("Card payments are being connected — the owner is finishing the Paddle setup.");
+            return;
+          }
+          var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          var s = await sb.auth.getSession();
+          var user = s.data && s.data.session && s.data.session.user;
+          if (!user) { window.location.href = "auth.html"; return; }
+          say("Opening secure checkout…");
+          try {
+            window.Paddle.Initialize({
+              token: PADDLE_CONFIG.clientToken,
+              environment: PADDLE_CONFIG.environment,
+              eventCallback: function (ev) {
+                if (ev && ev.name === "checkout.completed") {
+                  say("Payment received — Pro unlocks in a few seconds. Refresh the page to see it.");
+                }
+              }
+            });
+            window.Paddle.Checkout.open({
+              items: [{ priceId: PADDLE_CONFIG.priceId, quantity: 1 }],
+              customer: { email: user.email },
+              customData: { userId: user.id }
+            });
+          } catch (err) {
+            say("Checkout could not open — please try again.");
+          }
+        });
       })();
     </script>
     <script src="nav-auth.js"></script>
