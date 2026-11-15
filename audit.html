@@ -1409,6 +1409,16 @@
               if (status === 402) { e.code = "limit_reached"; e.message = "limit_reached"; }
               else if (status === 401) { e.code = "not_logged_in"; e.message = "not_logged_in"; }
               else if (status) { e.message = "Audit failed (HTTP " + status + ")"; }
+              // Surface the function's own error message when it sent one.
+              if (ctx && typeof ctx.text === "function" && !ctx.bodyUsed) {
+                return ctx.text().then(function (t) {
+                  try {
+                    var b = JSON.parse(t);
+                    if (b && b.error) e.message = b.error + (b.detail ? " — " + b.detail : "");
+                  } catch (_x) { /* keep the HTTP message */ }
+                  throw e;
+                }, function () { throw e; });
+              }
               throw e;
             }
             var data = res.data || {};

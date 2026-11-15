@@ -66,6 +66,23 @@ function buildPrompt(input) {
   ].join("\n");
 }
 
+function extractAiText(d) {
+  if (!d) return "";
+  if (typeof d === "string") return d;
+  if (Array.isArray(d.content)) {
+    for (const b of d.content) {
+      if (b && typeof b.text === "string" && b.text) return b.text;
+    }
+  }
+  if (typeof d.content === "string") return d.content;
+  if (Array.isArray(d.choices) && d.choices[0] && d.choices[0].message &&
+      typeof d.choices[0].message.content === "string") {
+    return d.choices[0].message.content;
+  }
+  if (typeof d.output_text === "string") return d.output_text;
+  return "";
+}
+
 function extractJson(text) {
   if (!text) return null;
   const start = text.indexOf("{");
@@ -204,13 +221,17 @@ Deno.serve(async (req) => {
         502
       );
     }
-    const aiData = await aiRes.json();
-    const text =
-      aiData && aiData.content && aiData.content[0] && aiData.content[0].text
-        ? aiData.content[0].text
-        : "";
+    const aiRaw = await aiRes.text();
+    let aiData = null;
+    try {
+      aiData = JSON.parse(aiRaw);
+    } catch (_e) {
+      return json({ error: "AI provider error", detail: aiRaw.slice(0, 300) }, 502);
+    }
+    const text = extractAiText(aiData);
     const report = extractJson(text);
     if (!validReport(report)) {
+      console.error("ai-audit: unusable AI report", text.slice(0, 500));
       return json({ error: "AI returned an unusable report" }, 502);
     }
     report.score = Math.max(0, Math.min(100, Math.round(report.score)));
@@ -224,7 +245,7 @@ Deno.serve(async (req) => {
       category: payload.category,
       goal: payload.goal,
     };
-    if (report.dimensions) {
+    if (report.dimensions && typeof report.dimensions === "object") {
       Object.keys(report.dimensions).forEach(function (k) {
         const v = Number(report.dimensions[k]);
         report.dimensions[k] = isNaN(v) ? 0 : Math.max(0, Math.min(100, Math.round(v)));
@@ -242,7 +263,8 @@ Deno.serve(async (req) => {
       .select("id")
       .single();
     if (ins.error || !ins.data) {
-      return json({ error: "Could not save audit" }, 500);
+      console.error("ai-audit: insert failed", ins.error);
+      return json({ error: "Could not save audit", detail: (ins.error && ins.error.message) || "" }, 500);
     }
     await admin
       .from("profiles")
@@ -257,6 +279,7 @@ Deno.serve(async (req) => {
       audits_used: auditsUsed + 1,
     });
   } catch (e) {
-    return json({ error: "Audit failed", detail: String(e).slice(0, 200) }, 500);
+    console.error("ai-audit failed", e);
+    return json({ error: "Audit failed", detail: String((e && e.message) || e).slice(0, 200) }, 500);
   }
 });
