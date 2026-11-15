@@ -7,9 +7,14 @@ Paste an X handle, bio, pinned post and recent posts — get an Audit Score (0�
 - **Free:** 1 audit (score + 2 problems)
 - **Pro:** $7/month, 30 audits/month — first 3 days free
 
-## This repo (demo)
+## Pages (final Step 1–4)
 
-`index.html` is the client-side demo (landing page, audit form, sample report, admin dashboard preview). It runs on sample data only — no live API key, no backend, nothing is saved.
+- `index.html` — Step 1: Landing page
+- `audit.html` — Step 2: Audit form
+- `report.html` — Step 3: Sample report
+- `admin.html` — Step 4: Admin dashboard preview
+
+These are the final demo pages. They run on sample data only — no live API key, no backend, nothing is saved.
 
 ## Live version (planned)
 
