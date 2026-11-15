@@ -22,3 +22,8 @@ These are the final demo pages. They run on sample data only — no live API key
 - Audit engine: Claude API, server-side only (key never in frontend code)
 - Payments: Lemon Squeezy / Paddle ($7/mo Pro, 3-day free trial)
 - Hosting: GitHub Pages + Cloudflare (custom domain, SSL)
+
+## Login (live, Supabase)
+- `auth.html` — Log in / Sign up page, wired to the xraykit Supabase project.
+- `supabase/migrations/001_init.sql` — profiles, audits, subscriptions tables + RLS. Run in the Supabase SQL Editor.
+- `supabase/make-admin.sql` — run after the first signup to make gmmostafijur001@gmail.com the admin.
