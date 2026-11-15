@@ -518,12 +518,12 @@
                   <div class="hint">Use a Claude key (<strong>sk-ant-…</strong>) from the Anthropic Console, or a Coarena key (<strong>coa_…</strong>) from coarena.ai → Model API → Keys.</div>
                 </div>
                 <div class="field">
-                  <label for="claudeModelSelect">Default Claude model</label>
+                  <label for="claudeModelSelect">Default AI model</label>
                   <select id="claudeModelSelect">
-                    <option value="sonnet">Claude Sonnet — audits &amp; reports (recommended)</option>
-                    <option value="haiku">Claude Haiku — faster, cheaper drafts</option>
+                    <option value="gemini-flash">Gemini 3.8 Flash — audits &amp; reports (in use)</option>
+                    <option value="deepseek-flash">DeepSeek V4.1 Flash — faster, cheaper drafts</option>
                   </select>
-                  <div class="hint">Sonnet for quality on full audits; Haiku if draft volume grows and cost matters more.</div>
+                  <div class="hint">Gemini Flash for quality on full audits; DeepSeek Flash if draft volume grows and cost matters more. (Claude models are currently off on Coarena.)</div>
                 </div>
               </div>
 

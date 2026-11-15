@@ -18,7 +18,7 @@ const corsHeaders = {
 };
 
 const COARENA_BASE = "https://coarena.ai/api";
-const MODEL = "claude-sonnet-5-5";
+const MODEL = "gemini-3-8-flash";
 const FREE_LIMIT = 1;
 const PRO_LIMIT = 30;
 const MAX_TOKENS = 4000;
