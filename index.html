@@ -744,9 +744,38 @@
           } catch (err) { /* leave the button visible */ }
         }
         refreshBuyState();
+        // Initialise Paddle.js once at page load (not on every click —
+        // re-initialising per click can throw before the checkout opens).
+        // Failures are logged to the console so a failed open can be diagnosed.
+        var paddleReady = false;
+        function initPaddle() {
+          if (paddleReady || !window.Paddle) return;
+          if (!PADDLE_CONFIG.clientToken || PADDLE_CONFIG.clientToken.indexOf("PASTE_") === 0) return;
+          try {
+            window.Paddle.Initialize({
+              token: PADDLE_CONFIG.clientToken,
+              environment: PADDLE_CONFIG.environment,
+              eventCallback: function (ev) {
+                if (ev && ev.name === "checkout.completed") {
+                  say("Payment received — Pro unlocks in a few seconds. Refresh the page to see it.");
+                }
+              }
+            });
+            paddleReady = true;
+          } catch (err) {
+            console.error("XRayKit Paddle init failed:", err);
+          }
+        }
+        initPaddle();
+        var initTries = 0;
+        var initTimer = setInterval(function () {
+          initTries++;
+          initPaddle();
+          if (paddleReady || initTries >= 20) clearInterval(initTimer);
+        }, 250);
         buyBtn.addEventListener("click", async function (e) {
           e.preventDefault();
-          if (!window.Paddle) { say("Checkout is still loading — try again in a second."); return; }
+          if (!window.Paddle || !paddleReady) { say("Checkout is still loading — try again in a second."); return; }
           if (!PADDLE_CONFIG.clientToken || PADDLE_CONFIG.clientToken.indexOf("PASTE_") === 0 ||
               !PADDLE_CONFIG.priceId || PADDLE_CONFIG.priceId.indexOf("PASTE_") === 0) {
             say("Card payments are being connected — the owner is finishing the Paddle setup.");
@@ -758,21 +787,13 @@
           if (!user) { window.location.href = "auth.html"; return; }
           say("Opening secure checkout…");
           try {
-            window.Paddle.Initialize({
-              token: PADDLE_CONFIG.clientToken,
-              environment: PADDLE_CONFIG.environment,
-              eventCallback: function (ev) {
-                if (ev && ev.name === "checkout.completed") {
-                  say("Payment received — Pro unlocks in a few seconds. Refresh the page to see it.");
-                }
-              }
-            });
             window.Paddle.Checkout.open({
               items: [{ priceId: PADDLE_CONFIG.priceId, quantity: 1 }],
               customer: { email: user.email },
               customData: { userId: user.id }
             });
           } catch (err) {
+            console.error("XRayKit Paddle checkout failed:", err);
             say("Checkout could not open — please try again.");
           }
         });
