@@ -125,10 +125,11 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-    // New secret key first (custom secret SUPABASE_SERVICE_KEY, sb_secret_...):
+    // New secret key first (custom secret SERVICE_ROLE_KEY, sb_secret_...):
     // the auto-provided SUPABASE_SERVICE_ROLE_KEY is DEPRECATED and no longer
     // carries service-role privileges (2026-11-16: 42501 on DB writes).
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_KEY") ||
+    // NOTE: custom secrets may not start with the SUPABASE_ prefix.
+    const serviceKey = Deno.env.get("SERVICE_ROLE_KEY") ||
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const aiKey = Deno.env.get("ANTHROPIC_AUTH_TOKEN");
     if (!supabaseUrl || !anonKey || !serviceKey) {
