@@ -2632,9 +2632,13 @@
           if (paddleReady || !window.Paddle) return;
           if (!PADDLE_CONFIG.clientToken || PADDLE_CONFIG.clientToken.indexOf("PASTE_") === 0) return;
           try {
+            // Paddle.js v2: 'environment' is NOT an Initialize option — it throws
+            // "Unknown option parameter 'environment'". Set it separately first.
+            if (PADDLE_CONFIG.environment === "sandbox" && window.Paddle.Environment) {
+              window.Paddle.Environment.set("sandbox");
+            }
             window.Paddle.Initialize({
               token: PADDLE_CONFIG.clientToken,
-              environment: PADDLE_CONFIG.environment,
               eventCallback: function (ev) {
                 if (ev && ev.name === "checkout.completed") {
                   say("Payment received — Pro unlocks in a few seconds. Refresh the page to see it.");
