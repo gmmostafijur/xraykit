@@ -466,7 +466,7 @@
               <span class="step-tag">Step 2 — Run the scan</span>
               <h1>Tell XRayKit what to <span class="hl">scan.</span></h1>
               <p>Paste in your handle, bio, pinned post and recent posts — exactly as a first-time visitor sees them. XRayKit reads all five frames and builds your diagnosis from what's actually there.</p>
-              <span class="plan-note">FREE PLAN — <b>1 audit this month</b> · NO X PASSWORD, EVER · TAKES ABOUT A MINUTE</span>
+              <span class="plan-note" id="planNote">FREE PLAN — <b>1 audit this month</b> · NO X PASSWORD, EVER · TAKES ABOUT A MINUTE</span>
             </div>
 
             <div class="audit-grid">
@@ -1392,6 +1392,27 @@
           sb = window.supabase.createClient("https://elbddcclcmmpqdxsdahg.supabase.co", "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI");
           return sb;
         }
+        /* ---------- show the real plan (not the Free default) ---------- */
+        function refreshPlanNote() {
+          var client;
+          try { client = getSb(); } catch (e) { return; }
+          client.auth.getSession().then(function (sess) {
+            var user = sess.data && sess.data.session && sess.data.session.user;
+            if (!user) return null;
+            return client.rpc("my_plan");
+          }).then(function (r) {
+            if (!r || !r.data) return;
+            var isPro = r.data.plan === "pro";
+            var limit = isPro ? 30 : 1;
+            var used = Number(r.data.audits_used || 0);
+            var label = isPro ? "Pro" : "Free";
+            var planCell = document.getElementById("bPlan");
+            if (planCell) planCell.textContent = label + " — audit " + used + " of " + limit + " this month";
+            var note = document.getElementById("planNote");
+            if (note) note.innerHTML = (isPro ? "PRO PLAN" : "FREE PLAN") + " — <b>" + used + " of " + limit + " audits used this month</b> · NO X PASSWORD, EVER · TAKES ABOUT A MINUTE";
+          }).catch(function () {});
+        }
+        window.addEventListener("load", refreshPlanNote);
         var scanResult = null, scanError = null, scanDone = false;
         function runRealScan(payload) {
           var client;

@@ -149,28 +149,16 @@ Deno.serve(async (req) => {
     const plan = planRow.plan === "pro" ? "pro" : "free";
     const limit = plan === "pro" ? PRO_LIMIT : FREE_LIMIT;
 
-    const profRes = await admin
-      .from("profiles")
-      .select("audits_used, audits_reset_at")
-      .eq("id", user.id)
-      .single();
-    const profile = profRes.data || {};
+    // Usage is counted from the audits table itself (own rows, RLS-allowed),
+    // so the limit check needs no server key at all.
     const now = new Date();
-    let auditsUsed = Number(profile.audits_used || 0);
-    const resetAt = profile.audits_reset_at
-      ? new Date(profile.audits_reset_at)
-      : null;
-    if (!resetAt || now >= resetAt) {
-      auditsUsed = 0;
-      const nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      await admin
-        .from("profiles")
-        .update({
-          audits_used: 0,
-          audits_reset_at: nextReset.toISOString(),
-        })
-        .eq("id", user.id);
-    }
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const countRes = await userClient
+      .from("audits")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", monthStart);
+    let auditsUsed = countRes.count || 0;
     if (auditsUsed >= limit) {
       return json(
         {
@@ -252,7 +240,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const ins = await admin
+    // Save with the signed-in user's own session: RLS explicitly allows a
+    // user to insert their own audit rows, so no server key is needed here.
+    const ins = await userClient
       .from("audits")
       .insert({
         user_id: user.id,
