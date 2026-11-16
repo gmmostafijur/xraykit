@@ -242,12 +242,12 @@
           <a href="#/contact" data-page-link="contact">Contact</a>
           <a href="auth.html" id="navLogin">Log in</a>
           <a href="account.html" id="navAccount" style="display:none">My account</a>
-          <a class="btn btn-lime btn-small" href="#/pricing" data-page-link="pricing">Try Pro free</a>
+          <a class="btn btn-lime btn-small" href="#/pricing" data-page-link="pricing" data-logged-out-only>Try Pro free</a>
         </nav>
       </div>
     </header>
 
-    <div class="trial-strip" role="note">
+    <div class="trial-strip" role="note" data-logged-out-only>
       <div class="wrap trial-strip-in">
         <span class="mono">Launch offer</span>
         <span>Pro is <strong>free for your first 3 days</strong> — full audits, thread drafts, the lot. No card needed.</span>
@@ -306,7 +306,7 @@
             <div class="steps">
               <article class="step"><span class="num">01</span><h3>Run the scan</h3><p>Drop in your handle, bio, pinned post, and recent posts. XRayKit reads them like a first-time visitor would.</p><a class="btn step-btn" href="audit.html">Step 1 — Run my free scan →</a></article>
               <article class="step"><span class="num">02</span><h3>Get the diagnosis</h3><p>A 0–100 score with the problems ranked by impact — each one paired with the exact fix, not vague advice.</p><a class="btn step-btn" href="report.html">Step 2 — What the diagnosis includes →</a></article>
-              <article class="step"><span class="num">03</span><h3>Post the fix</h3><p>Pro turns the diagnosis into a ready-to-post thread draft and a 7-day plan built around your next milestone.</p><a class="btn btn-lime step-btn" href="#/pricing" data-page-link="pricing">Step 3 — Start 3 free days of Pro →</a></article>
+              <article class="step"><span class="num">03</span><h3>Post the fix</h3><p>Pro turns the diagnosis into a ready-to-post thread draft and a 7-day plan built around your next milestone.</p><a class="btn btn-lime step-btn" href="#/pricing" data-page-link="pricing" data-logged-out-only>Step 3 — Start 3 free days of Pro →</a></article>
             </div>
           </div>
         </section>
@@ -323,7 +323,7 @@
           </div>
         </section>
 
-        <section class="final"><div class="wrap final-in"><h2>Find out what your profile is costing you.</h2><p>Your first scan is free — and for launch, Pro is free for 3 days too. See the problems, post the fix, watch the score move.</p><a class="btn btn-lime" href="#/pricing" data-page-link="pricing">Start with 3 free days of Pro</a></div></section>
+        <section class="final"><div class="wrap final-in"><h2>Find out what your profile is costing you.</h2><p>Your first scan is free — and for launch, Pro is free for 3 days too. See the problems, post the fix, watch the score move.</p><a class="btn btn-lime" href="#/pricing" data-page-link="pricing" data-logged-out-only>Start with 3 free days of Pro</a></div></section>
       </div>
 
       <!-- ================= PAGE: ABOUT US ================= -->
@@ -378,7 +378,7 @@
                 <div class="price"><span class="amt">$7</span><span class="per">/ month</span></div>
                 <p class="pdesc">Free for your first 3 days — no card up front. Keep it afterwards for $7/month.</p>
                 <ul><li>30 audits per month</li><li>Every problem with its written fix</li><li>Thread generator — full drafts, not outlines</li><li>Thread ideas matched to your launch stage</li><li>7-day posting plan</li><li>Re-scan after fixes to watch the score move</li></ul>
-                <a class="btn btn-lime trial-btn" id="trialBtn" href="#/pricing" data-page-link="pricing">Start 3 free days of Pro</a>
+                <a class="btn btn-lime trial-btn" id="trialBtn" href="#/pricing" data-page-link="pricing" data-logged-out-only>Start 3 free days of Pro</a>
                 <p class="trial-msg" id="trialMsg" aria-live="polite"></p>
                 <a class="btn" id="buyProBtn" href="#/pricing" data-page-link="pricing">Add a card — keep Pro at $7/mo</a>
                 <p class="trial-msg" id="buyProMsg" aria-live="polite"></p>

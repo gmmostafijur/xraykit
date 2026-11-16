@@ -14,6 +14,10 @@
       var acct = document.getElementById("navAccount");
       if (login) login.style.display = user ? "none" : "";
       if (acct) acct.style.display = user ? "" : "none";
+      // Trial / launch offer ("Try Pro free") is for logged-out visitors
+      // only — a logged-in user never sees it, even if they never took the trial.
+      var offers = document.querySelectorAll("[data-logged-out-only]");
+      for (var i = 0; i < offers.length; i++) offers[i].style.display = user ? "none" : "";
     });
   }
   if (document.readyState === "loading") {

@@ -442,12 +442,12 @@
           <a href="#/contact" data-page-link="contact">Contact</a>
           <a href="auth.html" id="navLogin">Log in</a>
           <a href="account.html" id="navAccount" style="display:none">My account</a>
-          <a class="btn btn-lime btn-small" href="#/pricing" data-page-link="pricing">Try Pro free</a>
+          <a class="btn btn-lime btn-small" href="#/pricing" data-page-link="pricing" data-logged-out-only>Try Pro free</a>
         </nav>
       </div>
     </header>
 
-    <div class="trial-strip" role="note">
+    <div class="trial-strip" role="note" data-logged-out-only>
       <div class="wrap trial-strip-in">
         <span class="mono">Launch offer</span>
         <span>Pro is <strong>free for your first 3 days</strong> — full audits, thread drafts, the lot. No card needed.</span>
@@ -1138,7 +1138,7 @@
                 <div class="price"><span class="amt">$7</span><span class="per">/ month</span></div>
                 <p class="pdesc">Free for your first 3 days — no card up front. Keep it afterwards for $7/month.</p>
                 <ul><li>30 audits per month</li><li>Every problem with its written fix</li><li>Thread generator — full drafts, not outlines</li><li>Content import — paste past posts, add your website or a PDF; AI Create writes in your voice</li><li>Thread ideas matched to your launch stage</li><li>Scheduler — 7-day plan with drafts, times &amp; AI image ideas (you post via X's free scheduler)</li><li>Hashtag research — daily posts, comments, volume &amp; competition</li><li>Re-scan after fixes to watch the score move</li></ul>
-                <a class="btn btn-lime trial-btn" id="trialBtn" href="#/pricing" data-page-link="pricing">Start 3 free days of Pro</a>
+                <a class="btn btn-lime trial-btn" id="trialBtn" href="#/pricing" data-page-link="pricing" data-logged-out-only>Start 3 free days of Pro</a>
                 <p class="trial-msg" id="trialMsg" aria-live="polite"></p>
                 <a class="btn" id="buyProBtn" href="#/pricing" data-page-link="pricing">Add a card — keep Pro at $7/mo</a>
                 <p class="trial-msg" id="buyProMsg" aria-live="polite"></p>
