@@ -1011,7 +1011,7 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
           var project = meta.project || handle;
           var category = meta.category || "";
           var goal = meta.goal || "community";
-          var goalLabel = { fundraise: "Raise funds", community: "Grow the community", sales: "Drive sales" }[goal] || goal;
+          var goalLabel = { fundraise: "Raise funds", community: "Grow the community", sales: "Drive sales", launch: "Nail the launch" }[goal] || goal;
           var dateStr = fmtDate(audit.created_at);
           var ref = "XR-" + String(audit.id).replace(/-/g, "").slice(0, 4).toUpperCase();
           var problems = r.problems.slice(0, 5);
@@ -1036,6 +1036,21 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
           if (stamp) stamp.innerHTML = '<span class="sample">Your report</span><br />Scan ref <b>' + esc(ref) + '</b> · ' + esc(dateStr) + '<br />Material: bio · pinned post · recent posts';
 
           if (window.XRayKitSetScore) window.XRayKitSetScore(clamp(r.score));
+
+          var ring = q(".ring-wrap"); if (ring) ring.setAttribute("aria-label", "Overall profile score: " + clamp(r.score) + " out of 100");
+
+          var projCards = qa(".proj-card");
+          if (projCards[0]) {
+            var pScore = projCards[0].querySelector(".score"); if (pScore) pScore.innerHTML = clamp(r.score) + ' <span>/ 100</span>';
+            var pBar = projCards[0].querySelector(".bar i"); if (pBar) pBar.style.width = clamp(r.score) + "%";
+            var pTxt = projCards[0].querySelector("p"); if (pTxt) pTxt.textContent = "Your score today, from this scan.";
+          }
+          if (projCards[1]) {
+            var eK = projCards[1].querySelector(".k"); if (eK) eK.textContent = "After the 7-day plan";
+            var eScore = projCards[1].querySelector(".score"); if (eScore) eScore.textContent = "\u2014";
+            var eBar = projCards[1].querySelector(".bar i"); if (eBar) eBar.style.width = "0%";
+            var eTxt = projCards[1].querySelector("p"); if (eTxt) eTxt.textContent = "Re-scan after the 7-day plan to see the new score.";
+          }
 
           var weakest = problems.slice().sort(function (a, b) { return (a.score || 50) - (b.score || 50); })[0];
           var band = r.score >= 70 ? "ready to scale — fix the last few leaks" : r.score >= 50 ? "strong product, invisible account" : r.score >= 30 ? "good material, weak presentation" : "invisible account — fix the basics first";
@@ -1094,9 +1109,10 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
             var d = plan[i];
             if (!d) { el.style.display = "none"; return; }
             var no = el.querySelector(".d-no"); if (no) no.textContent = "DAY " + (i + 1);
-            var chip = el.querySelector(".chip"); if (chip) chip.textContent = "Fixes FR.0" + (i + 1);
+            var chip = el.querySelector(".chip"); if (chip) chip.textContent = i < problems.length ? "Fixes FR.0" + (i + 1) : "Keep the momentum";
             var h3 = el.querySelector("h3"); if (h3) h3.textContent = String(d.post || "").slice(0, 90);
             var para = el.querySelector("p"); if (para) para.textContent = d.why || "";
+            var dr = el.querySelector(".draft"); if (dr && d.draft) dr.textContent = d.draft;
           });
           var planLede = q("#plan .lede");
           if (planLede) planLede.textContent = "One move a day, in impact order. Every draft below is written for " + project + "'s voice and goal — copy it, post it, done.";

@@ -44,7 +44,7 @@ function buildPrompt(input) {
     "Handle: @" + input.handle,
     "Project: " + input.project,
     "Category: " + input.category,
-    "Goal: " + input.goal + " (fundraise / community / sales)",
+    "Goal: " + input.goal + " (fundraise / community / sales / launch)",
     "Bio: " + clean(input.bio, 500),
     "Pinned post: " + clean(input.pinned, 1000),
     "Recent posts:",
@@ -61,7 +61,7 @@ function buildPrompt(input) {
     '  "threads": [{"hook": "first line of the thread", "angle": "what the thread teaches or proves"}, ... 5 items],',
     '  "fullThread": ["post 1 (hook)", "post 2", "... 7 to 10 posts, each under 280 characters"],',
     '  "bioOptions": ["bio option 1", "bio option 2", "bio option 3"],',
-    '  "plan7day": [{"day": "Day 1", "post": "what to post", "why": "why it works"}, ... 7 items]',
+    '  "plan7day": [{"day": "Day 1", "post": "what to post", "why": "why it works", "draft": "the copy-ready post text for that day, under 280 characters"}, ... 7 items]',
     "}",
   ].join("\n");
 }
@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
     const input = await req.json();
     const handle = clean(input.handle, 50).replace(/^@/, "");
     if (!handle) return json({ error: "X handle is required" }, 400);
-    const goal = ["fundraise", "community", "sales"].includes(input.goal)
+    const goal = ["fundraise", "community", "sales", "launch"].includes(input.goal)
       ? input.goal
       : "community";
     const payload = {

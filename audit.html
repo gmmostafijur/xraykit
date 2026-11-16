@@ -1520,7 +1520,7 @@
             handle: handle,
             project: inProject.value.trim(),
             category: inCategory.value,
-            goal: (function (g) { return (g === "Raise funds" || g === "Nail the launch") ? "fundraise" : "community"; })(radioVal("goal")),
+            goal: (function (g) { return g === "Raise funds" ? "fundraise" : g === "Nail the launch" ? "launch" : "community"; })(radioVal("goal")),
             bio: inBio.value.trim(),
             pinned: pin,
             posts: posts
