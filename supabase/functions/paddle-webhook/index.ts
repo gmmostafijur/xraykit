@@ -17,10 +17,16 @@
 //
 // Secrets (Supabase → Edge Functions → Secrets):
 //   PADDLE_WEBHOOK_SECRET — the notification destination secret (pdl_ntfset_...)
+//   SUPABASE_SERVICE_KEY — the new secret API key (sb_secret_...) copied
+//     from Settings → API → Secret keys, set as a custom secret. Preferred:
+//     the auto-provided SUPABASE_SERVICE_ROLE_KEY is DEPRECATED and no
+//     longer carries service-role privileges (2026-11-16: webhook upserts
+//     failed with Postgres 42501 insufficient_privilege because of it).
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY — auto-provided by Supabase
 //
 // Paddle dashboard → Developer tools → Notifications → Add destination:
-//   URL: https://elbddcclcmmpqdxsdahg.supabase.co/functions/v1/paddle-webhook
+//   URL: https://elbddcclcmmpqdxsdahg.supabase.co/functions/v1/smooth-api
+//   (deployed slug is "smooth-api", not "paddle-webhook")
 //   Events: subscription.created, subscription.activated, subscription.updated,
 //           subscription.canceled, subscription.past_due, subscription.paused,
 //           subscription.resumed
@@ -29,7 +35,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const WEBHOOK_SECRET = Deno.env.get("PADDLE_WEBHOOK_SECRET") || "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const SERVICE_KEY =
+  Deno.env.get("SUPABASE_SERVICE_KEY") ||
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 const SIGNATURE_MAX_AGE_SECONDS = 300; // 5 minutes — replay protection
 
