@@ -243,6 +243,11 @@
       .img-idea { margin-top: 12px; border: 1.5px dashed var(--scan); border-radius: 10px; padding: 11px 14px; font-size: 13.5px; color: var(--ink-soft); background: var(--scan-soft); }
       .img-idea .mono { display: block; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--scan); font-weight: 600; margin-bottom: 4px; }
       .img-off { margin-top: 12px; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-faint); letter-spacing: 0.04em; }
+      .img-gen { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+      .img-gen .btn { min-height: 38px; padding: 8px 14px; font-size: 13.5px; }
+      .img-preview { margin-top: 12px; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--line); }
+      .img-preview img { display: block; width: 100%; height: auto; }
+      .img-status { font-size: 13px; color: var(--ink-soft); }
       .slot-tags { margin-top: 10px; font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--scan); overflow-wrap: anywhere; }
       .slot-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
       .slot-actions .btn { flex: 1; min-width: 130px; }
@@ -900,7 +905,7 @@
 
                 <p class="form-sec">03 · Media &amp; tags</p>
                 <div class="toggle-row">
-                  <div class="t-copy"><b>AI image for each post</b><span>On: every draft gets an image idea matched to its topic, ready to generate. Off: text-only posts.</span></div>
+                  <div class="t-copy"><b>AI image for each post</b><span>On: every draft gets a real AI image, generated from an idea matched to its topic. Off: text-only posts.</span></div>
                   <label class="switch"><input type="checkbox" id="sImages" checked /><span class="track" aria-hidden="true"></span><span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Toggle AI image ideas</span></label>
                 </div>
                 <div class="toggle-row">
@@ -1843,6 +1848,67 @@
           "Behind-the-scenes style graphic: a tidy workspace / dashboard collage with the {project} colours, captioned with the week's theme.",
           "Comparison graphic: “before / after” two-panel layout showing what changes for users after this update."
         ];
+        /* ---------- AI image generation ---------- */
+        var IMG_STYLE = "clean modern social media graphic, dark ink background, lime green accent, bold and uncluttered";
+        var IMG_W = 1200, IMG_H = 675;
+        function imagePrompt(idea) { return idea + ". " + IMG_STYLE + "."; }
+        function imageUrl(prompt, seed) {
+          return "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) +
+            "?width=" + IMG_W + "&height=" + IMG_H + "&model=flux&nologo=true&seed=" + seed;
+        }
+        function attachImageGen(btn, idea, host) {
+          var status = document.createElement("span");
+          status.className = "img-status";
+          var wrap = document.createElement("div");
+          wrap.className = "img-gen";
+          wrap.appendChild(btn); wrap.appendChild(status);
+          host.appendChild(wrap);
+          var actionsShown = false;
+          var preview = null;
+          function showActions(imgEl) {
+            var dl = document.createElement("button");
+            dl.type = "button"; dl.className = "btn btn-small"; dl.textContent = "Download PNG";
+            dl.addEventListener("click", function () {
+              dl.disabled = true; dl.textContent = "Saving\u2026";
+              fetch(imgEl.src).then(function (r) { return r.blob(); }).then(function (b) {
+                var a = document.createElement("a");
+                a.href = URL.createObjectURL(b); a.download = "xraykit-thread-image.png";
+                document.body.appendChild(a); a.click(); a.remove();
+                dl.disabled = false; dl.textContent = "Download PNG";
+              }).catch(function () { window.open(imgEl.src, "_blank"); dl.disabled = false; dl.textContent = "Download PNG"; });
+            });
+            var again = document.createElement("button");
+            again.type = "button"; again.className = "btn btn-small"; again.textContent = "New variation";
+            again.addEventListener("click", function () { generate(); });
+            wrap.appendChild(dl); wrap.appendChild(again);
+          }
+          function generate() {
+            var seed = Math.floor(Math.random() * 1000000);
+            var url = imageUrl(imagePrompt(idea), seed);
+            btn.disabled = true; btn.textContent = "Generating\u2026";
+            status.textContent = "Generating your image \u2014 a few seconds\u2026";
+            if (preview) { preview.remove(); preview = null; }
+            var box = document.createElement("div");
+            box.className = "img-preview";
+            var img = document.createElement("img");
+            img.alt = "AI-generated image for this post";
+            img.addEventListener("load", function () {
+              btn.disabled = false; btn.textContent = "Regenerate image";
+              status.textContent = "Done \u2014 download it and attach it in the X composer.";
+              if (!actionsShown) { actionsShown = true; showActions(img); }
+            });
+            img.addEventListener("error", function () {
+              btn.disabled = false; btn.textContent = "Try again";
+              status.textContent = "Couldn't generate that one \u2014 try again.";
+            });
+            img.src = url;
+            box.appendChild(img);
+            host.appendChild(box);
+            preview = box;
+          }
+          btn.addEventListener("click", generate);
+        }
+        /* ---------- end AI image generation ---------- */
         function schedCtx() {
           var project = sProject.value.trim() || "your project";
           var handle = "@" + (sHandle.value.replace(/^@+/, "").trim() || "yourhandle");
@@ -1901,7 +1967,7 @@
 
           var sum = document.createElement("div"); sum.className = "plan-summary";
           var sm = document.createElement("span"); sm.className = "mono"; sm.textContent = "Plan ready · Manual posting mode";
-          var sh = document.createElement("h3"); sh.textContent = dates.length + " days · " + total + " posts · " + (sImages.checked ? "AI image idea on every post" : "Text-only posts");
+          var sh = document.createElement("h3"); sh.textContent = dates.length + " days · " + total + " posts · " + (sImages.checked ? "AI image on every post" : "Text-only posts");
           var st = document.createElement("div"); st.className = "plan-stats";
           st.innerHTML = "";
           [["Days", dates.length], ["Posts", total], ["Images", sImages.checked ? "On" : "Off"], ["Hashtags", sTags.checked ? "On" : "Off"], ["X credits used", "0"]].forEach(function (kv) {
@@ -1941,10 +2007,15 @@
               var body = document.createElement("div"); body.className = "slot-text"; body.textContent = text;
               slot.appendChild(meta); slot.appendChild(body);
               if (sImages.checked) {
+                var idea = fillTpl(pick(IMG_IDEAS, idx), ctx);
                 var im = document.createElement("div"); im.className = "img-idea";
                 var imt = document.createElement("span"); imt.className = "mono"; imt.textContent = "AI image idea — matched to this post";
-                var imb = document.createElement("span"); imb.textContent = fillTpl(pick(IMG_IDEAS, idx), ctx);
-                im.appendChild(imt); im.appendChild(imb); slot.appendChild(im);
+                var imb = document.createElement("span"); imb.textContent = idea;
+                im.appendChild(imt); im.appendChild(imb);
+                var genBtn = document.createElement("button");
+                genBtn.type = "button"; genBtn.className = "btn btn-small btn-lime"; genBtn.textContent = "Generate image";
+                attachImageGen(genBtn, idea, im);
+                slot.appendChild(im);
               } else {
                 var off = document.createElement("p"); off.className = "img-off"; off.textContent = "IMAGE: OFF — TEXT-ONLY POST"; slot.appendChild(off);
               }
