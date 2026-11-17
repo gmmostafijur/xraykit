@@ -63,7 +63,7 @@
 
       /* trial strip */
       .trial-strip { background: var(--lime); color: var(--lime-ink); border-bottom: 2px solid var(--lime-ink); }
-      .trial-strip-in { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; padding: 10px 0; text-align: center; font-size: 14px; font-weight: 600; overflow-wrap: break-word; }
+      .trial-strip-in { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; padding: 10px 20px; text-align: center; font-size: 14px; font-weight: 600; overflow-wrap: break-word; }
       .trial-strip-in > span { min-width: 0; }
       .trial-strip .mono { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border: 1.5px solid var(--lime-ink); padding: 2px 8px; border-radius: 999px; }
       .trial-strip a { font-weight: 800; text-underline-offset: 3px; padding: 6px 2px; }
@@ -71,7 +71,7 @@
       /* hero */
       .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); background: var(--bg-raise); }
       .hero-x { position: absolute; right: -4%; top: 50%; transform: translateY(-50%) rotate(-6deg); font-weight: 900; font-size: clamp(340px,44vw,620px); line-height: 0.8; color: transparent; -webkit-text-stroke: 2px var(--scan); opacity: 0.16; pointer-events: none; user-select: none; }
-      .hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; padding: 64px 0 72px; align-items: center; }
+      .hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; padding: 64px 20px 72px; align-items: center; }
       .hero-tag { display: inline-flex; align-items: center; gap: 8px; font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--scan); border: 1.5px solid var(--scan); border-radius: 999px; padding: 6px 14px; margin-bottom: 22px; background: var(--scan-soft); }
       .hero-tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--scan); }
       h1 { margin: 0 0 20px; font-size: clamp(34px,5.4vw,62px); line-height: 1.04; font-weight: 900; letter-spacing: -0.015em; overflow-wrap: break-word; }
@@ -102,7 +102,7 @@
       .film-band { background: var(--film); color: var(--film-ink); }
       .film-holes { height: 22px; background-image: radial-gradient(circle, var(--bg) 3.2px, transparent 3.8px); background-size: 30px 22px; background-position: center; opacity: 0.9; }
       @media (prefers-color-scheme: dark) { .film-holes { background-image: radial-gradient(circle, #06090a 3.2px, transparent 3.8px); } }
-      .film-in { padding: 34px 0 40px; }
+      .film-in { padding: 34px 20px 40px; }
       .film-title { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--film-soft); margin: 0 0 20px; }
       .frames { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; }
       .frame { border: 1.5px solid color-mix(in srgb, var(--film-ink) 32%, transparent); border-radius: 8px; padding: 16px 14px; min-height: 118px; display: flex; flex-direction: column; gap: 8px; }
@@ -193,7 +193,7 @@
 
       /* final */
       .final { background: var(--film); color: var(--film-ink); text-align: center; }
-      .final-in { padding: 68px 0 60px; }
+      .final-in { padding: 68px 20px 60px; }
       .final h2 { margin: 0 auto 14px; font-size: clamp(28px,4vw,44px); font-weight: 900; line-height: 1.08; max-width: 18em; }
       .final p { margin: 0 auto 28px; color: var(--film-soft); max-width: 36em; font-size: 16.5px; }
 
@@ -211,7 +211,7 @@
       footer .mono { font-size: 12px; letter-spacing: 0.06em; }
 
       @media (max-width: 900px) {
-        .hero-grid { grid-template-columns: 1fr; gap: 40px; padding: 48px 0 56px; }
+        .hero-grid { grid-template-columns: 1fr; gap: 40px; padding: 48px 20px 56px; }
         .hero-x { right: auto; left: 46%; top: -30px; transform: rotate(-6deg); font-size: 300px; }
         .scan-card { transform: rotate(0.6deg); max-width: 520px; }
         .frames { grid-template-columns: repeat(2,1fr); } .frame:last-child { grid-column: span 2; }
