@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scheduler — your 7-day plan, dated · XRayKit</title>
+    <meta name="description" content="Turn your XRayKit 7-day plan into a dated week: pick your days and time, copy each draft, download a calendar file. Posting stays manual." />
+    <link rel="icon" href="logo.png" />
+    <style>
+      :root {
+        --bg: #e9ede8; --bg-raise: #f4f6f2; --panel: #fbfcf9;
+        --ink: #0c1210; --ink-soft: #3c4741; --ink-faint: #6c7871;
+        --line: #d6ddd4; --line-strong: #0c1210;
+        --lime: #9be315; --lime-ink: #131a05;
+        --scan: #0a7a5c; --scan-soft: #dcebe4;
+        --chip-ok: #0a7a5c; --chip-warn: #9a6700; --chip-bad: #b3261e;
+        --radius: 14px; --shadow: 0 18px 40px rgba(11,16,14,0.14);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #06090a; --bg-raise: #0a0f11; --panel: #0d1416;
+          --ink: #e9ede8; --ink-soft: #aab5ae; --ink-faint: #7d8881;
+          --line: #22302b; --line-strong: #e9ede8;
+          --lime: #a6f22e; --lime-ink: #131a05;
+          --scan: #4ade80; --scan-soft: #122b20;
+          --chip-ok: #4ade80; --chip-warn: #fbbf24; --chip-bad: #f87171;
+          --shadow: 0 18px 40px rgba(0,0,0,0.5);
+        }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+      .topbar { border-bottom: 1px solid var(--line); background: var(--bg-raise); }
+      .topbar-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 20px; }
+      .wordmark { display: inline-flex; align-items: center; gap: 10px; font-weight: 900; letter-spacing: 0.04em; text-decoration: none; color: var(--ink); font-size: 18px; }
+      .wordmark img { width: 34px; height: 34px; border-radius: 8px; }
+      .topnav { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+      .topnav a { color: var(--ink-soft); text-decoration: none; font-size: 14.5px; font-weight: 600; }
+      .topnav a:hover { color: var(--ink); }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 10px; border: 1.5px solid var(--line-strong); background: var(--panel); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px; text-decoration: none; cursor: pointer; }
+      .btn:hover { transform: translateY(-1px); }
+      .btn-lime { background: var(--lime); border-color: var(--lime-ink); color: var(--lime-ink); }
+      .btn-small { min-height: 36px; padding: 7px 12px; font-size: 13.5px; }
+      .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+      .hero { padding: 56px 0 8px; }
+      .hero .mono { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--scan); font-weight: 600; }
+      .hero h1 { margin: 10px 0 12px; font-size: clamp(30px,4vw,44px); font-weight: 900; line-height: 1.08; letter-spacing: -0.01em; }
+      .hero p { margin: 0 0 14px; color: var(--ink-soft); font-size: 16.5px; max-width: 44em; }
+      .hero .sample-note { font-size: 14px; }
+      .section { padding: 28px 0 64px; }
+      .card { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+      .card h2 { margin: 0 0 6px; font-size: 19px; }
+      .card .hint { margin: 0 0 16px; color: var(--ink-soft); font-size: 14.5px; }
+      .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field label { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+      .field input { background: var(--bg-raise); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; }
+      .day-pick { display: grid; gap: 10px; margin-top: 18px; }
+      .day-pick label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; cursor: pointer; }
+      .day-pick label.off { opacity: 0.5; }
+      .day-pick input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--scan); flex: none; }
+      .day-pick .t { font-weight: 800; font-size: 15px; }
+      .day-pick .w { color: var(--ink-soft); font-size: 13.5px; }
+      .week-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+      .sched-day { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 14px; }
+      .sched-day .d-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+      .sched-day .d-date { font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 700; color: var(--scan); }
+      .sched-day .d-no { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+      .sched-day h3 { margin: 0 0 6px; font-size: 18px; }
+      .sched-day .why { margin: 0 0 12px; color: var(--ink-soft); font-size: 14.5px; }
+      .sched-day .draft { background: var(--bg-raise); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 14.5px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 12px; }
+      .empty { color: var(--ink-soft); font-size: 15px; }
+      .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .foot { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--ink-faint); font-size: 13.5px; }
+      @media (max-width: 640px) { .topnav { gap: 12px; } .hero { padding-top: 36px; } }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <a class="wordmark" href="index.html"><img src="logo.png" alt="" />XRayKit</a>
+        <nav class="topnav" aria-label="Main menu">
+          <a href="index.html">Home</a>
+          <a href="audit.html">Run a scan</a>
+          <a href="report.html">Sample report</a>
+          <a href="auth.html">Log in</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <span class="mono">Scheduler</span>
+        <h1>Your 7-day plan, <span style="color:var(--scan)">dated</span>.</h1>
+        <p id="heroSub">Pick a start date and time, tick the days you will actually post, and get a dated week of ready drafts. Posting is manual at launch — copy a draft, post it on X, or use X&rsquo;s own free scheduler. No X connection, no auto-post.</p>
+        <p class="sample-note" id="planNote"></p>
+      </section>
+
+      <section class="section">
+        <div class="card">
+          <h2>When do you post?</h2>
+          <p class="hint">Untick a day to skip it — the dates compress so your week stays in order. Times are in your local time.</p>
+          <div class="controls">
+            <div class="field"><label for="startDate">Start date</label><input type="date" id="startDate" /></div>
+            <div class="field"><label for="postTime">Post time</label><input type="time" id="postTime" value="18:00" /></div>
+          </div>
+          <div class="day-pick" id="dayPick"></div>
+          <div class="week-actions">
+            <button class="btn btn-lime" type="button" id="icsBtn">Download calendar (.ics)</button>
+            <button class="btn" type="button" id="copyWeekBtn">Copy whole week</button>
+            <a class="btn" href="report.html" id="backReport">Back to the report &rarr;</a>
+          </div>
+        </div>
+
+        <div id="weekList"></div>
+      </section>
+    </main>
+
+    <footer class="foot"><div class="wrap">XRayKit — X audit &amp; thread generator for crypto founders. Posting is manual at launch; auto-posting arrives later as a higher tier.</div></footer>
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      (function () {
+        "use strict";
+        var SAMPLE_PLAN = [{"day": "DAY 1", "chip": "Fixes FR.01", "post": "Ship the new bio", "why": "Two minutes in profile settings. Leads with the live testnet instead of “coming soon”.", "draft": "The DEX for first-time swappers: one click, no bridging, no gas juggling. Testnet is LIVE — try it free today. Token launch next month 👇"}, {"day": "DAY 2", "chip": "Fixes FR.02", "post": "Replace the pinned post", "why": "Unpin the announcement. Pin the seed-round story thread — problem, product, invitation.", "draft": "1/ We raised our seed round to build the DEX we kept wishing existed.\n\nHere's the problem we're fixing, what the testnet already does, and how to try it today 🧵\n\n2/ Swapping today means 4 tabs, 2 bridges and a prayer. NovaSwap does it in one click.\n\nThe testnet is live and free — link below. Feedback goes straight to the team, and the best of it ships before launch."}, {"day": "DAY 3", "chip": "Fixes FR.04", "post": "Show the product, don't describe it", "why": "A short screen recording of one full swap. Proof beats adjectives — this is the post that gets bookmarked.", "draft": "Watch a complete swap on NovaSwap testnet: 11 seconds, start to finish.\n\nNo bridge. No second tab. No gas maths.\n\nThat's the whole product. Try it yourself — link in bio, free while it's on testnet."}, {"day": "DAY 4", "chip": "Fixes FR.04", "post": "Teach one thing", "why": "The first education post in the feed's history. Simple, specific, saveable.", "draft": "Why does one swap touch 3 different contracts — and what does that cost you?\n\nA 60-second explainer, no jargon 🧵\n\n(Short version: every extra hop is extra gas, extra slippage, and one more place things break. We built NovaSwap to cut it to one.)"}, {"day": "DAY 5", "chip": "Fixes FR.04", "post": "Ask the community a real question", "why": "Not “gm”. A question testnet users can actually answer — with a payoff for answering.", "draft": "Testnet swappers: what's the ONE thing that still feels slower than it should?\n\nBest answer gets fixed this week — and quoted in the launch thread.\n\nWe read every reply."}, {"day": "DAY 6", "chip": "Fixes FR.03", "post": "Deliver the teased partnership", "why": "The announcement that was “coming this week” — shipped as the announcement itself, with what it means for users.", "draft": "Announced properly this time: NovaSwap is partnering with [partner] — so testnet swaps settle against deeper liquidity from day one.\n\nWhat it means for you: tighter spreads on every pair at launch.\n\nNo “details soon”. The integration is live on testnet now — try a swap and feel it."}, {"day": "DAY 7", "chip": "Fixes FR.05", "post": "Start the launch runway", "why": "A date, a promise with specifics, and a reason for testnet users to care. The countdown begins.", "draft": "Token launch date drops Monday.\n\nHere's what testnet users get on day one:\n· Early access window before public trading\n· Launch-week fee rebates\n· Your feedback, shipped — check the changelog\n\nTry the testnet this weekend. It counts."}];
+        var SUPABASE_URL = "https://elbddcclcmmpqdxsdahg.supabase.co";
+        var SUPABASE_ANON_KEY = "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI";
+        var params = new URLSearchParams(window.location.search);
+        var reportId = params.get("id") || "";
+        var plan = SAMPLE_PLAN.slice();
+        var handle = "novaswap";
+        var isSample = true;
+        var storeKey = "xraykit_sched_" + (reportId || "sample");
+
+        var startInput = document.getElementById("startDate");
+        var timeInput = document.getElementById("postTime");
+        var dayPick = document.getElementById("dayPick");
+        var weekList = document.getElementById("weekList");
+        var planNote = document.getElementById("planNote");
+        var heroSub = document.getElementById("heroSub");
+        var toast = document.getElementById("toast"), toastTimer = null;
+        var icsBtn = document.getElementById("icsBtn");
+        var copyWeekBtn = document.getElementById("copyWeekBtn");
+        var backReport = document.getElementById("backReport");
+        if (reportId) backReport.href = "report.html?id=" + encodeURIComponent(reportId);
+
+        function showToast(msg) {
+          toast.textContent = msg;
+          toast.classList.add("show");
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2400);
+        }
+        function tomorrowISO() {
+          var d = new Date(); d.setDate(d.getDate() + 1);
+          return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+        }
+        function loadState() {
+          var def = { start: tomorrowISO(), time: "18:00", on: [true, true, true, true, true, true, true] };
+          try {
+            var raw = localStorage.getItem(storeKey);
+            if (!raw) return def;
+            var s = JSON.parse(raw);
+            if (typeof s.start === "string" && s.start) def.start = s.start;
+            if (typeof s.time === "string" && s.time) def.time = s.time;
+            if (Array.isArray(s.on) && s.on.length === 7) def.on = s.on.map(Boolean);
+            return def;
+          } catch (e) { return def; }
+        }
+        var state = loadState();
+        startInput.value = state.start;
+        startInput.min = new Date().toISOString().slice(0, 10);
+        timeInput.value = state.time;
+        function saveState() {
+          try { localStorage.setItem(storeKey, JSON.stringify(state)); } catch (e) { /* private mode */ }
+        }
+        function fmtDate(d) {
+          return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+        }
+        function fmtTime(hhmm) {
+          var p = String(hhmm || "18:00").split(":");
+          var h = parseInt(p[0], 10) || 0, m = parseInt(p[1], 10) || 0;
+          var ap = h >= 12 ? "PM" : "AM";
+          var h12 = h % 12; if (h12 === 0) h12 = 12;
+          return h12 + ":" + String(m).padStart(2, "0") + " " + ap;
+        }
+        function parseStart() {
+          var v = startInput.value || tomorrowISO();
+          var p = v.split("-");
+          var d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+          if (isNaN(d.getTime())) { d = new Date(); d.setDate(d.getDate() + 1); }
+          return d;
+        }
+        function datedDays() {
+          var out = [];
+          var cursor = parseStart();
+          for (var i = 0; i < plan.length; i++) {
+            if (!state.on[i]) continue;
+            var d = new Date(cursor);
+            var tp = String(timeInput.value || "18:00").split(":");
+            d.setHours(parseInt(tp[0], 10) || 0, parseInt(tp[1], 10) || 0, 0, 0);
+            out.push({ idx: i, date: d, item: plan[i] });
+            cursor.setDate(cursor.getDate() + 1);
+          }
+          return out;
+        }
+        function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+        function renderPick() {
+          dayPick.innerHTML = "";
+          plan.forEach(function (item, i) {
+            var lab = document.createElement("label");
+            if (!state.on[i]) lab.className = "off";
+            var cb = document.createElement("input");
+            cb.type = "checkbox"; cb.checked = !!state.on[i];
+            cb.addEventListener("change", function () {
+              state.on[i] = cb.checked; lab.className = cb.checked ? "" : "off";
+              saveState(); renderWeek();
+            });
+            var tx = document.createElement("span");
+            tx.innerHTML = '<span class="t">' + esc(item.day) + " — " + esc(item.post) + '</span><br /><span class="w">' + esc(item.why) + "</span>";
+            lab.appendChild(cb); lab.appendChild(tx);
+            dayPick.appendChild(lab);
+          });
+        }
+        function renderWeek() {
+          var days = datedDays();
+          icsBtn.disabled = days.length === 0;
+          copyWeekBtn.disabled = days.length === 0;
+          if (!days.length) {
+            weekList.innerHTML = '<p class="empty">Pick at least one day above — your dated week will appear here.</p>';
+            return;
+          }
+          var html = "";
+          days.forEach(function (dd) {
+            html += '<article class="sched-day"><div class="d-head"><span class="d-date">' + esc(fmtDate(dd.date)) + " · " + esc(fmtTime(timeInput.value)) + '</span><span class="d-no">' + esc(dd.item.day) + " · " + esc(dd.item.chip || "") + '</span></div>'
+              + "<h3>" + esc(dd.item.post) + "</h3>"
+              + '<p class="why">' + esc(dd.item.why) + "</p>"
+              + '<p class="draft">' + esc(dd.item.draft) + "</p>"
+              + '<button class="btn btn-small" type="button" data-copy-idx="' + dd.idx + '">Copy draft</button></article>';
+          });
+          weekList.innerHTML = html;
+        }
+        weekList.addEventListener("click", function (e) {
+          var btn = e.target.closest("[data-copy-idx]");
+          if (!btn) return;
+          var item = plan[parseInt(btn.getAttribute("data-copy-idx"), 10)];
+          if (!item) return;
+          copyText(item.draft, btn);
+        });
+        function copyText(text, btn) {
+          function done() {
+            if (btn) {
+              var old = btn.textContent;
+              btn.textContent = "Copied ✓";
+              setTimeout(function () { btn.textContent = old; }, 2000);
+            }
+            showToast("Copied — ready to paste into X.");
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, function () { fallback(); });
+          } else fallback();
+          function fallback() {
+            var ta = document.createElement("textarea");
+            ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand("copy"); done(); }
+            catch (e2) { showToast("Copy failed — long-press the text to copy it manually."); }
+            document.body.removeChild(ta);
+          }
+        }
+        function icsEscape(s) {
+          return String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+        }
+        function pad2(n) { return String(n).padStart(2, "0"); }
+        function icsDate(d) {
+          return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + "T" + pad2(d.getHours()) + pad2(d.getMinutes()) + "00";
+        }
+        function downloadICS() {
+          var days = datedDays();
+          if (!days.length) return;
+          var stamp = icsDate(new Date());
+          var lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//XRayKit//Scheduler//EN", "CALSCALE:GREGORIAN"];
+          days.forEach(function (dd, k) {
+            var end = new Date(dd.date.getTime() + 30 * 60000);
+            lines.push("BEGIN:VEVENT");
+            lines.push("UID:xraykit-" + (reportId || "sample") + "-" + (dd.idx + 1) + "@xraykit");
+            lines.push("DTSTAMP:" + stamp);
+            lines.push("DTSTART:" + icsDate(dd.date));
+            lines.push("DTEND:" + icsDate(end));
+            lines.push("SUMMARY:" + icsEscape("X post: " + dd.item.post));
+            lines.push("DESCRIPTION:" + icsEscape(dd.item.draft + "\n\nWhy: " + dd.item.why));
+            lines.push("END:VEVENT");
+          });
+          lines.push("END:VCALENDAR");
+          var blob = new Blob([lines.join("\r\n")], { type: "text/calendar" });
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "xraykit-week-@" + handle + ".ics";
+          document.body.appendChild(a); a.click();
+          setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+          showToast("Calendar file downloaded — import it into Google Calendar.");
+        }
+        function copyWeek() {
+          var days = datedDays();
+          if (!days.length) return;
+          var parts = days.map(function (dd) {
+            return fmtDate(dd.date) + " · " + fmtTime(timeInput.value) + " — " + dd.item.day + ": " + dd.item.post + "\n" + dd.item.draft;
+          });
+          copyText(parts.join("\n\n"), copyWeekBtn);
+        }
+        icsBtn.addEventListener("click", downloadICS);
+        copyWeekBtn.addEventListener("click", copyWeek);
+        startInput.addEventListener("change", function () { state.start = startInput.value; saveState(); renderWeek(); });
+        timeInput.addEventListener("change", function () { state.time = timeInput.value; saveState(); renderWeek(); });
+
+        function renderAll() {
+          planNote.textContent = isSample
+            ? "Sample plan — NovaSwap. Run your own scan and this page dates YOUR plan instead."
+            : "Your plan for @" + handle + " — from your latest report.";
+          heroSub.textContent = isSample
+            ? "Pick a start date and time, tick the days you will actually post, and get a dated week of ready drafts. Posting is manual at launch — copy a draft, post it on X, or use X's own free scheduler. No X connection, no auto-post."
+            : "Your 7-day plan for @" + handle + ", dated. Posting is manual at launch — copy a draft, post it on X, or use X's own free scheduler. No X connection, no auto-post.";
+          renderPick();
+          renderWeek();
+        }
+        renderAll();
+        if (reportId && window.supabase) {
+          try {
+            var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            sb.from("audits").select("handle,report").eq("id", reportId).single().then(function (res) {
+              if (res.error || !res.data || !res.data.report) return; // keep the sample
+              var r = res.data.report;
+              if (!Array.isArray(r.plan7day) || r.plan7day.length < 1) return;
+              plan = r.plan7day.slice(0, 7).map(function (d, i) {
+                return { day: "DAY " + (i + 1), chip: "", post: d.post || ("Day " + (i + 1)), why: d.why || "", draft: d.draft || "" };
+              });
+              handle = res.data.handle || handle;
+              isSample = false;
+              state = loadState();
+              renderAll();
+            });
+          } catch (e) { /* keep the sample */ }
+        }
+      })();
+    </script>
+  </body>
+</html>
