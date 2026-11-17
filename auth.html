@@ -227,6 +227,15 @@
     </style>
         <style>
       [hidden] { display: none !important; }
+      .modal-overlay { position: fixed; inset: 0; background: rgba(3, 6, 5, 0.72); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50; }
+      .modal-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; width: 100%; max-width: 420px; box-shadow: var(--shadow); animation: pop 0.22s ease; }
+      .modal-card h3 { font-size: 22px; line-height: 1.25; margin: 0 0 6px; }
+      @keyframes pop { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+      .otp-input { text-align: center; font-size: 22px !important; letter-spacing: 8px; font-weight: 700; height: 56px !important; }
+      .btn.loading { opacity: 0.85; cursor: wait; }
+      .btn.loading::after { content: ""; display: inline-block; width: 14px; height: 14px; margin-left: 8px; vertical-align: -2px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.7s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .check-dot { width: 56px; height: 56px; border-radius: 50%; background: var(--lime); color: var(--lime-ink); display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; margin-bottom: 12px; }
       :root {
         --bg: #06090a; --bg-raise: #0a0f11; --panel: #0d1310;
         --ink: #e9f2ec; --ink-soft: #b7c6bb; --ink-faint: #7d8f83;
@@ -329,14 +338,6 @@
               <button class="btn btn-lime" type="submit" id="authSubmit">Log in &rarr;</button>
             </form>
             <p id="forgotWrap" style="margin:10px 0 0"><a class="auth-back" href="#" id="forgotLink">Forgot password?</a></p>
-            <form id="otpForm" hidden novalidate>
-              <label class="field"><span>Verification code</span>
-                <input class="input" id="otpCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="12345678" maxlength="8" />
-              </label>
-              <p class="auth-hint" id="otpHint">We emailed a verification code to <strong id="otpEmail"></strong>. It expires in 60 minutes &mdash; check spam too.</p>
-              <button class="btn btn-lime" type="submit" id="otpVerifyBtn">Verify code &rarr;</button>
-              <p class="auth-hint"><a class="auth-back" href="#" id="otpResendLink">Resend code</a> &nbsp;&middot;&nbsp; <a class="auth-back" href="#" id="otpBackLink">&larr; Back to log in</a></p>
-            </form>
             <form id="newPwForm" hidden novalidate>
               <label class="field"><span>New password</span>
                 <input class="input" id="newPassword" type="password" required autocomplete="new-password" placeholder="At least 6 characters" minlength="6" />
@@ -397,6 +398,27 @@
         </div>
       </div>
     </footer>
+      <div class="modal-overlay" id="otpModal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="otpModalTitle">
+          <div id="otpStepCode">
+            <h3 id="otpModalTitle">Check your email</h3>
+            <p class="auth-sub">We sent a verification code to <strong id="otpEmail"></strong>. It expires in 60 minutes &mdash; check spam too.</p>
+            <form id="otpForm" novalidate>
+              <label class="field"><span>Verification code</span>
+                <input class="input otp-input" id="otpCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="••••••••" maxlength="8" />
+              </label>
+              <button class="btn btn-lime" type="submit" id="otpVerifyBtn" style="width:100%">Verify code &rarr;</button>
+              <p class="auth-hint" style="text-align:center"><a class="auth-back" href="#" id="otpResendLink">Resend code</a> &nbsp;&middot;&nbsp; <a class="auth-back" href="#" id="otpBackLink">&larr; Back to log in</a></p>
+            </form>
+            <p class="auth-msg" id="otpMsg" aria-live="polite"></p>
+          </div>
+          <div id="otpStepDone" hidden style="text-align:center">
+            <div class="check-dot">✓</div>
+            <h3>Email verified</h3>
+            <p class="auth-sub">Taking you to your audit&hellip;</p>
+          </div>
+        </div>
+      </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       (function () {
@@ -411,19 +433,35 @@
         function showOnly(which) {
           $("authForm").hidden = which !== "form";
           $("forgotWrap").hidden = which !== "form" || mode !== "login";
-          $("otpForm").hidden = which !== "otp";
           $("newPwForm").hidden = which !== "newpw";
         }
+        function setLoading(btn, on, text) {
+          if (on) {
+            if (!btn.classList.contains("loading")) { btn.dataset.label = btn.textContent; btn.dataset.loadingText = text; }
+            btn.textContent = text;
+            btn.classList.add("loading");
+            btn.disabled = true;
+          } else {
+            var label = btn.dataset.label, lt = btn.dataset.loadingText;
+            btn.classList.remove("loading");
+            btn.disabled = false;
+            delete btn.dataset.label; delete btn.dataset.loadingText;
+            if (label && lt && btn.textContent === lt) btn.textContent = label;
+          }
+        }
+        function showOtpMsg(text, ok) { var m = $("otpMsg"); m.textContent = text; m.className = "auth-msg " + (ok ? "ok" : "err"); }
         function showOtp(email, purpose) {
           flow = purpose; pendingEmail = email;
+          try { sessionStorage.setItem("xraykit_otp", JSON.stringify({ email: email, flow: purpose })); } catch (e) {}
           $("otpEmail").textContent = email;
           $("otpCode").value = "";
-          showOnly("otp");
-          showMsg(purpose === "recovery" ? "Reset code sent \u2014 enter the code from your email." : "Account created \u2014 enter the code from your email.", true);
+          showOtpMsg("", true);
+          $("otpStepCode").hidden = false;
+          $("otpStepDone").hidden = true;
+          $("otpModal").hidden = false;
+          setTimeout(function () { $("otpCode").focus(); }, 60);
         }
-        function $(id) { return document.getElementById(id); }
-        var msg = $("authMsg");
-        function showMsg(text, ok) { msg.textContent = text; msg.className = "auth-msg " + (ok ? "ok" : "err"); }
+        function closeOtp() { $("otpModal").hidden = true; try { sessionStorage.removeItem("xraykit_otp"); } catch (e) {} }
         function setMode(m) {
           mode = m; flow = null; pwMode = null;
           showOnly("form");
@@ -456,6 +494,7 @@
         }
         $("logoutBtn").addEventListener("click", async function () {
           await sb.auth.signOut();
+          try { sessionStorage.removeItem("xraykit_otp"); } catch (e) {}
           $("authSession").hidden = true;
           $("authForm").hidden = false;
           document.querySelector(".auth-tabs").hidden = false;
@@ -468,18 +507,18 @@
           var password = $("authPassword").value;
           if (mode === "reset") {
             if (!email) { showMsg("Enter your email first.", false); return; }
-            $("authSubmit").disabled = true;
+            setLoading($("authSubmit"), true, "Sending code\u2026");
             try {
               var rr = await sb.auth.resetPasswordForEmail(email, { redirectTo: "https://gmmostafijur.github.io/xraykit/auth.html" });
               if (rr.error) throw rr.error;
               showOtp(email, "recovery");
             } catch (err) {
               showMsg(err && err.message ? err.message : "Something went wrong. Try again.", false);
-            } finally { $("authSubmit").disabled = false; }
+            } finally { setLoading($("authSubmit"), false); }
             return;
           }
           if (!email || password.length < 6) { showMsg("Enter your email and a password of at least 6 characters.", false); return; }
-          $("authSubmit").disabled = true;
+          setLoading($("authSubmit"), true, mode === "signup" ? "Creating account\u2026" : "Logging in\u2026");
           try {
             if (mode === "signup") {
               var res = await sb.auth.signUp({
@@ -504,33 +543,48 @@
             }
           } catch (err) {
             var m = err && err.message ? err.message : "Something went wrong. Try again.";
-            if (/confirm/i.test(m)) m = "Please confirm your email first \u2014 check your inbox (and spam) for the verification code.";
-            showMsg(m, false);
+            if (/already registered/i.test(m)) {
+              try {
+                var rs = await sb.auth.resend({ type: "signup", email: email });
+                if (rs.error) throw rs.error;
+                showOtp(email, "signup");
+                showOtpMsg("This email already has an account \u2014 we sent a fresh code. Enter it to confirm.", true);
+              } catch (e2) {
+                setMode("login");
+                showMsg("This email is already registered \u2014 please log in instead.", false);
+              }
+            } else {
+              if (/confirm/i.test(m)) m = "Please confirm your email first \u2014 check your inbox (and spam) for the verification code.";
+              showMsg(m, false);
+            }
           } finally {
-            $("authSubmit").disabled = false;
+            setLoading($("authSubmit"), false);
           }
         });
         $("forgotLink").addEventListener("click", function (e) { e.preventDefault(); setMode("reset"); });
         $("otpForm").addEventListener("submit", async function (e) {
           e.preventDefault();
           var code = $("otpCode").value.trim();
-          if (!/^\d{6,8}$/.test(code)) { showMsg("Enter the code from your email.", false); return; }
-          $("otpVerifyBtn").disabled = true;
+          if (!/^\d{6,8}$/.test(code)) { showOtpMsg("Enter the code from your email.", false); return; }
+          setLoading($("otpVerifyBtn"), true, "Verifying\u2026");
           try {
             var v = await sb.auth.verifyOtp({ email: pendingEmail, token: code, type: flow });
             if (v.error) throw v.error;
+            try { sessionStorage.removeItem("xraykit_otp"); } catch (e) {}
             if (flow === "recovery") {
               pwMode = "recovery";
+              closeOtp();
               showOnly("newpw");
               showMsg("Code accepted \u2014 set your new password.", true);
             } else {
-              showMsg("Email confirmed \u2014 you are logged in.", true);
+              $("otpStepCode").hidden = true;
+              $("otpStepDone").hidden = false;
               showSession(v.data.user.email);
-              setTimeout(function () { window.location.href = "audit.html"; }, 1500);
+              setTimeout(function () { window.location.href = "audit.html"; }, 1400);
             }
           } catch (err) {
-            showMsg("That code is wrong or expired \u2014 tap Resend code for a fresh one.", false);
-          } finally { $("otpVerifyBtn").disabled = false; }
+            showOtpMsg("That code is wrong or expired \u2014 tap Resend code for a fresh one.", false);
+          } finally { setLoading($("otpVerifyBtn"), false); }
         });
         $("otpResendLink").addEventListener("click", async function (e) {
           e.preventDefault();
@@ -542,18 +596,18 @@
               var r2 = await sb.auth.resetPasswordForEmail(pendingEmail, { redirectTo: "https://gmmostafijur.github.io/xraykit/auth.html" });
               if (r2.error) throw r2.error;
             }
-            showMsg("A fresh code is on its way \u2014 check your inbox (and spam).", true);
+            showOtpMsg("A fresh code is on its way \u2014 check your inbox (and spam).", true);
           } catch (err) {
-            showMsg(err && err.message ? err.message : "Could not resend the code. Try again.", false);
+            showOtpMsg(err && err.message ? err.message : "Could not resend the code. Try again.", false);
           }
         });
-        $("otpBackLink").addEventListener("click", function (e) { e.preventDefault(); setMode("login"); });
+        $("otpBackLink").addEventListener("click", function (e) { e.preventDefault(); closeOtp(); setMode("login"); });
         $("newPwForm").addEventListener("submit", async function (e) {
           e.preventDefault();
           var p1 = $("newPassword").value, p2 = $("newPassword2").value;
           if (p1.length < 6) { showMsg("Use a password of at least 6 characters.", false); return; }
           if (p1 !== p2) { showMsg("The two passwords do not match.", false); return; }
-          $("newPwBtn").disabled = true;
+          setLoading($("newPwBtn"), true, "Saving\u2026");
           try {
             var u = await sb.auth.updateUser({ password: p1 });
             if (u.error) throw u.error;
@@ -567,7 +621,7 @@
             }
           } catch (err) {
             showMsg(err && err.message ? err.message : "Could not update the password. Try again.", false);
-          } finally { $("newPwBtn").disabled = false; }
+          } finally { setLoading($("newPwBtn"), false); }
         });
         $("newPwBackLink").addEventListener("click", function (e) {
           e.preventDefault();
@@ -579,10 +633,18 @@
           showOnly("newpw");
           showMsg("Enter your new password below.", true);
         });
+        $("otpModal").addEventListener("click", function (e) { if (e.target === this) { closeOtp(); setMode("login"); } });
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("otpModal").hidden) { closeOtp(); setMode("login"); } });
         sb.auth.getSession().then(function (res) {
           if (res.data && res.data.session && res.data.session.user) {
             showSession(res.data.session.user.email);
             showMsg("You are already logged in.", true);
+            try { sessionStorage.removeItem("xraykit_otp"); } catch (e) {}
+          } else {
+            try {
+              var saved = JSON.parse(sessionStorage.getItem("xraykit_otp") || "null");
+              if (saved && saved.email && (saved.flow === "signup" || saved.flow === "recovery")) showOtp(saved.email, saved.flow);
+            } catch (e) {}
           }
         });
       })();
