@@ -135,7 +135,8 @@
       @keyframes scanmove { 0%,100% { top: -70px; } 50% { top: 105%; } }
       .pc-tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--scan); display: flex; justify-content: space-between; gap: 10px; padding-bottom: 14px; border-bottom: 1.5px dashed var(--line); margin-bottom: 16px; }
       .pc-head { display: flex; gap: 14px; align-items: center; }
-      .pc-avatar { width: 54px; height: 54px; flex: none; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-weight: 900; font-size: 22px; border: 2px solid var(--scan); }
+      .pc-avatar { width: 54px; height: 54px; flex: none; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-weight: 900; font-size: 22px; border: 2px solid var(--scan); overflow: hidden; }
+.pc-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
       .pc-name { font-weight: 900; font-size: 18px; line-height: 1.2; overflow-wrap: anywhere; }
       .pc-handle { font-family: "IBM Plex Mono", monospace; font-size: 13.5px; color: var(--ink-faint); overflow-wrap: anywhere; }
       .pc-bio { margin: 14px 0 0; font-size: 14.5px; color: var(--ink-soft); white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -1301,6 +1302,35 @@
           el.classList.toggle("over", !!over);
         }
 
+        /* Live preview photo: free lookup via unavatar.io (no API key).
+           Shows the real X profile photo for a valid handle; falls back to
+           the letter avatar when the photo cannot load. */
+        var photoTimer = null, photoHandle = "", photoFailed = {};
+        function updatePreviewAvatar(handle, letter) {
+          var av = $("pvAvatar");
+          if (!/^[A-Za-z0-9_]{1,15}$/.test(handle) || photoFailed[handle]) {
+            if (photoTimer) { clearTimeout(photoTimer); photoTimer = null; }
+            if (handle !== photoHandle) { photoHandle = ""; av.textContent = letter; }
+            return;
+          }
+          if (handle === photoHandle) return; /* photo already showing */
+          av.textContent = letter; /* instant letter while the photo loads */
+          if (photoTimer) clearTimeout(photoTimer);
+          photoTimer = setTimeout(function () {
+            var img = new Image();
+            img.alt = "@" + handle;
+            img.onload = function () {
+              var cur = inHandle.value.replace(/^@+/, "").trim();
+              if (cur !== handle) return; /* user typed something else meanwhile */
+              photoHandle = handle;
+              av.textContent = "";
+              av.appendChild(img);
+            };
+            img.onerror = function () { photoFailed[handle] = true; };
+            img.src = "https://unavatar.io/twitter/" + handle;
+          }, 500);
+        }
+
         function refresh() {
           var handle = inHandle.value.replace(/^@+/, "").trim();
           var bio = inBio.value, pin = inPinned.value, posts = postLines();
@@ -1312,7 +1342,7 @@
           setCounter($("postCount"), posts.length + (posts.length === 1 ? " post" : " posts"), false);
 
           /* preview */
-          $("pvAvatar").textContent = (inProject.value.trim().charAt(0) || handle.charAt(0) || "?").toUpperCase();
+          updatePreviewAvatar(handle, (inProject.value.trim().charAt(0) || handle.charAt(0) || "?").toUpperCase());
           $("pvName").textContent = inProject.value.trim() || "Your project";
           $("pvHandle").textContent = "@" + (handle || "yourhandle");
           var pvBio = $("pvBio");
