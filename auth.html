@@ -330,10 +330,10 @@
             </form>
             <p id="forgotWrap" style="margin:10px 0 0"><a class="auth-back" href="#" id="forgotLink">Forgot password?</a></p>
             <form id="otpForm" hidden novalidate>
-              <label class="field"><span>6-digit code</span>
-                <input class="input" id="otpCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="6" />
+              <label class="field"><span>Verification code</span>
+                <input class="input" id="otpCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="12345678" maxlength="8" />
               </label>
-              <p class="auth-hint" id="otpHint">We emailed a 6-digit code to <strong id="otpEmail"></strong>. It expires in 60 minutes &mdash; check spam too.</p>
+              <p class="auth-hint" id="otpHint">We emailed a verification code to <strong id="otpEmail"></strong>. It expires in 60 minutes &mdash; check spam too.</p>
               <button class="btn btn-lime" type="submit" id="otpVerifyBtn">Verify code &rarr;</button>
               <p class="auth-hint"><a class="auth-back" href="#" id="otpResendLink">Resend code</a> &nbsp;&middot;&nbsp; <a class="auth-back" href="#" id="otpBackLink">&larr; Back to log in</a></p>
             </form>
@@ -356,7 +356,7 @@
                 <button class="btn" type="button" id="changePwBtn">Change password</button>
               </div>
             </div>
-            <p class="auth-note">After signing up, check your email for the 6-digit confirmation code (and the spam folder too). Your password is stored by Supabase &mdash; never in this page&apos;s code.</p>
+            <p class="auth-note">After signing up, check your email for the verification code (and the spam folder too). Your password is stored by Supabase &mdash; never in this page&apos;s code.</p>
             <a class="auth-back" href="index.html">&larr; Back to XRayKit</a>
           </div>
         </div>
@@ -419,7 +419,7 @@
           $("otpEmail").textContent = email;
           $("otpCode").value = "";
           showOnly("otp");
-          showMsg(purpose === "recovery" ? "Reset code sent \u2014 enter the 6-digit code from your email." : "Account created \u2014 enter the 6-digit code from your email.", true);
+          showMsg(purpose === "recovery" ? "Reset code sent \u2014 enter the code from your email." : "Account created \u2014 enter the code from your email.", true);
         }
         function $(id) { return document.getElementById(id); }
         var msg = $("authMsg");
@@ -437,7 +437,7 @@
             ? "Use the same email for your Pro trial and billing."
             : m === "signup"
             ? "Free plan: 1 audit a month. Pro is free for your first 3 days."
-            : "We will email a 6-digit reset code to this address.";
+            : "We will email a reset code to this address.";
           showMsg("", true);
         }
         $("tabLogin").addEventListener("click", function () { setMode("login"); });
@@ -504,7 +504,7 @@
             }
           } catch (err) {
             var m = err && err.message ? err.message : "Something went wrong. Try again.";
-            if (/confirm/i.test(m)) m = "Please confirm your email first \u2014 check your inbox (and spam) for the 6-digit code.";
+            if (/confirm/i.test(m)) m = "Please confirm your email first \u2014 check your inbox (and spam) for the verification code.";
             showMsg(m, false);
           } finally {
             $("authSubmit").disabled = false;
@@ -514,7 +514,7 @@
         $("otpForm").addEventListener("submit", async function (e) {
           e.preventDefault();
           var code = $("otpCode").value.trim();
-          if (!/^\d{6}$/.test(code)) { showMsg("Enter the 6-digit code from your email.", false); return; }
+          if (!/^\d{6,8}$/.test(code)) { showMsg("Enter the code from your email.", false); return; }
           $("otpVerifyBtn").disabled = true;
           try {
             var v = await sb.auth.verifyOtp({ email: pendingEmail, token: code, type: flow });
