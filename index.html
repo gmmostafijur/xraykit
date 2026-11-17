@@ -97,6 +97,15 @@
       .chip-ok { color: var(--chip-ok); } .chip-warn { color: var(--chip-warn); } .chip-bad { color: var(--chip-bad); }
       .scan-foot { margin-top: 12px; padding-top: 12px; border-top: 1.5px dashed var(--line); font-size: 13.5px; color: var(--ink-soft); }
       .scan-foot b { color: var(--ink); }
+      .demo-form { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 10px; }
+      .demo-form input { flex: 1 1 200px; min-width: 0; background: var(--panel); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: inherit; }
+      .demo-form input:focus { outline: 2px solid var(--lime); outline-offset: 1px; }
+      .demo-msg { font-size: 13px; color: var(--ink-faint); min-height: 18px; margin: 0 0 8px; }
+      .demo-msg.err { color: #d92d20; }
+      .demo-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none; border: 2px solid var(--line-strong); }
+      .scan-head .who-wrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+      .demo-cta { margin-top: 14px; padding-top: 14px; border-top: 1.5px dashed var(--line); }
+      .demo-cta p { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 10px; }
 
       /* film band */
       .film-band { background: var(--film); color: var(--film-ink); }
@@ -282,16 +291,22 @@
                 <a class="btn" href="#/about" data-page-link="about">About us</a>
                 <a class="btn" href="#scan" data-home-anchor="scan">See what it scans</a>
               </div>
+              <form class="demo-form" id="demoForm" novalidate>
+                <input id="demoHandle" type="text" placeholder="@yourhandle — try a sample score" autocomplete="off" maxlength="16" />
+                <button class="btn btn-lime" type="submit">See sample score &rarr;</button>
+              </form>
+              <p class="demo-msg" id="demoMsg">No signup — this is a sample scorecard. Your real audit reads your actual bio and posts.</p>
               <p class="hero-note">FREE PLAN — <b>1 audit / month</b> · PRO — <b>$7/mo</b> if you keep it after the trial</p>
             </div>
             <div class="scan-card" aria-label="Illustration of an XRayKit scan report card">
-              <div class="scan-head"><div class="who">@founder<span>Crypto founder · pre-launch</span></div><div class="stamp">Scan report<br />Profile X-ray</div></div>
+              <div class="scan-head"><div class="who-wrap"><img class="demo-avatar" id="demoAvatar" alt="" hidden /><div class="who" id="demoWho">@founder<span>Crypto founder · pre-launch</span></div></div><div class="stamp" id="demoStamp">Scan report<br />Profile X-ray</div></div>
               <div class="scan-row"><span class="lbl">Bio</span><span class="bar"><i style="width:38%"></i></span><span class="chip chip-bad">Unclear</span></div>
               <div class="scan-row"><span class="lbl">Pinned post</span><span class="bar"><i style="width:22%"></i></span><span class="chip chip-bad">No hook</span></div>
               <div class="scan-row"><span class="lbl">Cadence</span><span class="bar"><i style="width:55%"></i></span><span class="chip chip-warn">Sporadic</span></div>
               <div class="scan-row"><span class="lbl">Content mix</span><span class="bar"><i style="width:64%"></i></span><span class="chip chip-warn">All promo</span></div>
               <div class="scan-row"><span class="lbl">Proof</span><span class="bar"><i style="width:81%"></i></span><span class="chip chip-ok">Strong</span></div>
               <p class="scan-foot">Every weak spot comes with a <b>specific fix</b> — and Pro rewrites it for you, thread included.</p>
+              <div class="demo-cta" id="demoCta" hidden><p>This is a <b>sample</b> scorecard — your real score comes from a full audit of your bio, pinned post and recent posts.</p><a class="btn btn-lime" href="audit.html">Run your real audit &rarr;</a></div>
             </div>
           </div>
         </section>
@@ -811,6 +826,37 @@
             console.error("XRayKit Paddle checkout failed:", err);
             say("Checkout could not open — please try again.");
           }
+        });
+      })();
+    </script>
+    <script>
+      /* Landing demo: type a handle, see your photo + a sample scorecard. */
+      (function () {
+        "use strict";
+        var form = document.getElementById("demoForm");
+        if (!form) return;
+        var input = document.getElementById("demoHandle");
+        var msg = document.getElementById("demoMsg");
+        var who = document.getElementById("demoWho");
+        var stamp = document.getElementById("demoStamp");
+        var avatar = document.getElementById("demoAvatar");
+        var cta = document.getElementById("demoCta");
+        var token = 0;
+        function say(text, err) { msg.textContent = text; msg.className = "demo-msg" + (err ? " err" : ""); }
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          var h = input.value.trim().replace(/^@/, "");
+          if (!/^[A-Za-z0-9_]{1,15}$/.test(h)) { say("Enter a valid X handle — letters, numbers and _ only.", true); return; }
+          who.innerHTML = "@" + h + "<span>Sample preview</span>";
+          stamp.innerHTML = "Sample<br />Scorecard";
+          cta.hidden = false;
+          say("Sample scorecard for @" + h + " — your real audit reads your actual posts.", false);
+          var t = ++token;
+          avatar.hidden = true;
+          var img = new Image();
+          img.onload = function () { if (t !== token) return; avatar.src = img.src; avatar.hidden = false; };
+          img.onerror = function () { if (t !== token) return; avatar.hidden = true; };
+          img.src = "https://unavatar.io/twitter/" + h;
         });
       })();
     </script>
