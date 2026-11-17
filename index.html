@@ -139,6 +139,12 @@
       .explore-card h3 { margin: 0; font-size: 17px; font-weight: 800; }
       .explore-card p { margin: 0; color: var(--ink-soft); font-size: 14px; flex: 1; }
       .explore-card .btn { margin-top: 12px; width: 100%; }
+      .rev-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+      .rev-card { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 26px 24px; display: flex; flex-direction: column; }
+      .rev-card .stars { color: var(--scan); letter-spacing: 2px; font-size: 15px; margin: 0 0 12px; }
+      .rev-card blockquote { margin: 0 0 16px; font-size: 16px; line-height: 1.5; flex: 1; }
+      .rev-card .who { margin: 0; font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink-faint); }
+      .rev-note { margin: 18px 0 0; font-size: 14px; color: var(--ink-soft); }
 
       /* about */
       .about-grid { display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 36px; align-items: start; }
@@ -224,7 +230,7 @@
         .hero-x { right: auto; left: 46%; top: -30px; transform: rotate(-6deg); font-size: 300px; }
         .scan-card { transform: rotate(0.6deg); max-width: 520px; }
         .frames { grid-template-columns: repeat(2,1fr); } .frame:last-child { grid-column: span 2; }
-        .steps, .contact-grid { grid-template-columns: 1fr; }
+        .steps, .rev-grid, .contact-grid { grid-template-columns: 1fr; }
         .explore { grid-template-columns: 1fr 1fr; }
         .about-grid, .plans, .faq { grid-template-columns: 1fr; }
         .foot-grid { grid-template-columns: 1fr; gap: 28px; }
@@ -334,6 +340,19 @@
               <article class="step"><span class="num">02</span><h3>Get the diagnosis</h3><p>A 0–100 score with the problems ranked by impact — each one paired with the exact fix, not vague advice.</p><a class="btn step-btn" href="report.html">Step 2 — What the diagnosis includes →</a></article>
               <article class="step"><span class="num">03</span><h3>Post the fix</h3><p>Pro turns the diagnosis into a ready-to-post thread draft and a 7-day plan built around your next milestone.</p><a class="btn btn-lime step-btn" href="#/pricing" data-page-link="pricing" data-logged-out-only>Step 3 — Start 3 free days of Pro →</a></article>
             </div>
+          </div>
+        </section>
+
+        <section class="section" id="reviews" style="padding-top:0;">
+          <div class="wrap">
+            <div class="section-head"><span class="mono">What founders say</span><h2>The work behind XRayKit, in clients&rsquo; own words</h2><p>XRayKit is new — these are real Fiverr reviews of the X / Twitter management work it is built on. 4.7/5 &middot; 86 reviews &middot; 129+ orders.</p></div>
+            <div class="rev-grid">
+              <article class="rev-card"><p class="stars" aria-label="5 out of 5 stars">&starf;&starf;&starf;&starf;&starf;</p><blockquote>&ldquo;He is a great professional, he has worked very well for my company, making our Twitter community grow a lot, with exceptional data. He is a very proactive and hardworking person, you don&rsquo;t have to be on top of him. In the future I hope to work with him again.&rdquo;</blockquote><p class="who">ariadnalopezr &middot; Spain &middot; Social Media Management</p></article>
+              <article class="rev-card"><p class="stars" aria-label="5 out of 5 stars">&starf;&starf;&starf;&starf;&starf;</p><blockquote>&ldquo;Thank you for your service. I really appreciate it. You did a phenomenal job. I would recommend you to the world.&rdquo;</blockquote><p class="who">reina2717 &middot; United States &middot; Social Media Management</p></article>
+              <article class="rev-card"><p class="stars" aria-label="5 out of 5 stars">&starf;&starf;&starf;&starf;&starf;</p><blockquote>&ldquo;Great job will definitely work again&rdquo;</blockquote><p class="who">johnson9866 &middot; Tanzania &middot; Social Media Management</p></article>
+              <article class="rev-card"><p class="stars" aria-label="5 out of 5 stars">&starf;&starf;&starf;&starf;&starf;</p><blockquote>&ldquo;The best and very quick&rdquo;</blockquote><p class="who">karakasavraam &middot; Greece &middot; Profile Setup &amp; Integration</p></article>
+            </div>
+            <p class="rev-note"><a href="https://www.fiverr.com/md_mostafijur">Read all reviews on Fiverr &rarr;</a></p>
           </div>
         </section>
 
