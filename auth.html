@@ -430,6 +430,9 @@
         var flow = null; // 'signup' | 'recovery'
         var pendingEmail = "";
         var pwMode = null; // 'recovery' | 'change'
+        function $(id) { return document.getElementById(id); }
+        var msg = $("authMsg");
+        function showMsg(text, ok) { msg.textContent = text; msg.className = "auth-msg " + (ok ? "ok" : "err"); }
         function showOnly(which) {
           $("authForm").hidden = which !== "form";
           $("forgotWrap").hidden = which !== "form" || mode !== "login";
