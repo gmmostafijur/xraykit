@@ -941,12 +941,12 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
 
         /* ---------- share your score ---------- */
         function shareData() {
-          var handleEl = q(".sheet-who .handle");
+          var handleEl = document.querySelector(".sheet-who .handle");
           var handle = handleEl ? handleEl.textContent.trim().replace(/^@/, "") : "account";
           var score = (typeof SCORE === "number") ? SCORE : 0;
-          var vH = q(".verdict h2");
+          var vH = document.querySelector(".verdict h2");
           var verdict = vH ? vH.textContent.replace(/^Verdict:\s*/i, "").replace(/\.\s*$/, "") : "";
-          var stamp = q(".sheet-stamp");
+          var stamp = document.querySelector(".sheet-stamp");
           var isSample = stamp ? /sample report/i.test(stamp.textContent) : true;
           var site = "https://gmmostafijur.github.io/xraykit/";
           var text;
