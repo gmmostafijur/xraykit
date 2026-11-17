@@ -318,7 +318,7 @@
               <label class="field"><span>Email</span>
                 <input class="input" id="authEmail" type="email" required autocomplete="email" placeholder="you@project.xyz" maxlength="120" />
               </label>
-              <label class="field"><span>Password</span>
+              <label class="field" id="pwField"><span>Password</span>
                 <span class="pw-wrap">
                   <input class="input" id="authPassword" type="password" required autocomplete="current-password" placeholder="At least 6 characters" minlength="6" />
                   <button class="pw-toggle" type="button" id="togglePw">Show</button>
@@ -327,15 +327,35 @@
               <p class="auth-hint" id="authHint">Use the same email for your Pro trial and billing.</p>
               <button class="btn btn-lime" type="submit" id="authSubmit">Log in &rarr;</button>
             </form>
+            <p id="forgotWrap" style="margin:10px 0 0"><a class="auth-back" href="#" id="forgotLink">Forgot password?</a></p>
+            <form id="otpForm" hidden novalidate>
+              <label class="field"><span>6-digit code</span>
+                <input class="input" id="otpCode" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="6" />
+              </label>
+              <p class="auth-hint" id="otpHint">We emailed a 6-digit code to <strong id="otpEmail"></strong>. It expires in 60 minutes &mdash; check spam too.</p>
+              <button class="btn btn-lime" type="submit" id="otpVerifyBtn">Verify code &rarr;</button>
+              <p class="auth-hint"><a class="auth-back" href="#" id="otpResendLink">Resend code</a> &nbsp;&middot;&nbsp; <a class="auth-back" href="#" id="otpBackLink">&larr; Back to log in</a></p>
+            </form>
+            <form id="newPwForm" hidden novalidate>
+              <label class="field"><span>New password</span>
+                <input class="input" id="newPassword" type="password" required autocomplete="new-password" placeholder="At least 6 characters" minlength="6" />
+              </label>
+              <label class="field"><span>Confirm new password</span>
+                <input class="input" id="newPassword2" type="password" required autocomplete="new-password" placeholder="Repeat the new password" minlength="6" />
+              </label>
+              <button class="btn btn-lime" type="submit" id="newPwBtn">Save new password &rarr;</button>
+              <p class="auth-hint"><a class="auth-back" href="#" id="newPwBackLink">&larr; Back</a></p>
+            </form>
             <p class="auth-msg" id="authMsg" aria-live="polite"></p>
             <div class="auth-session" id="authSession" hidden>
               <p>Logged in as <strong id="sessionEmail"></strong></p>
               <div class="row">
                 <a class="btn btn-lime" href="audit.html">Go to the audit form &rarr;</a>
                 <button class="btn" type="button" id="logoutBtn">Log out</button>
+                <button class="btn" type="button" id="changePwBtn">Change password</button>
               </div>
             </div>
-            <p class="auth-note">After signing up, check your email for the confirmation link (and the spam folder too). Your password is stored by Supabase &mdash; never in this page&apos;s code.</p>
+            <p class="auth-note">After signing up, check your email for the 6-digit confirmation code (and the spam folder too). Your password is stored by Supabase &mdash; never in this page&apos;s code.</p>
             <a class="auth-back" href="index.html">&larr; Back to XRayKit</a>
           </div>
         </div>
@@ -384,18 +404,39 @@
         var SUPABASE_ANON_KEY = "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI";
         var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         var mode = "login";
+        var flow = null; // 'signup' | 'recovery'
+        var pendingEmail = "";
+        var pwMode = null; // 'recovery' | 'change'
+        function showOnly(which) {
+          $("authForm").hidden = which !== "form";
+          $("forgotWrap").hidden = which !== "form" || mode !== "login";
+          $("otpForm").hidden = which !== "otp";
+          $("newPwForm").hidden = which !== "newpw";
+        }
+        function showOtp(email, purpose) {
+          flow = purpose; pendingEmail = email;
+          $("otpEmail").textContent = email;
+          $("otpCode").value = "";
+          showOnly("otp");
+          showMsg(purpose === "recovery" ? "Reset code sent \u2014 enter the 6-digit code from your email." : "Account created \u2014 enter the 6-digit code from your email.", true);
+        }
         function $(id) { return document.getElementById(id); }
         var msg = $("authMsg");
         function showMsg(text, ok) { msg.textContent = text; msg.className = "auth-msg " + (ok ? "ok" : "err"); }
         function setMode(m) {
-          mode = m;
+          mode = m; flow = null; pwMode = null;
+          showOnly("form");
+          document.querySelector(".auth-tabs").hidden = m === "reset";
+          $("pwField").hidden = m === "reset";
           $("tabLogin").classList.toggle("active", m === "login");
           $("tabSignup").classList.toggle("active", m === "signup");
-          $("authSubmit").textContent = m === "login" ? "Log in \u2192" : "Create account \u2192";
-          document.getElementById("authTitle").textContent = m === "login" ? "Welcome back" : "Create your account";
+          $("authSubmit").textContent = m === "login" ? "Log in \u2192" : m === "signup" ? "Create account \u2192" : "Send reset code \u2192";
+          document.getElementById("authTitle").textContent = m === "login" ? "Welcome back" : m === "signup" ? "Create your account" : "Reset your password";
           $("authHint").textContent = m === "login"
             ? "Use the same email for your Pro trial and billing."
-            : "Free plan: 1 audit a month. Pro is free for your first 3 days.";
+            : m === "signup"
+            ? "Free plan: 1 audit a month. Pro is free for your first 3 days."
+            : "We will email a 6-digit reset code to this address.";
           showMsg("", true);
         }
         $("tabLogin").addEventListener("click", function () { setMode("login"); });
@@ -424,6 +465,18 @@
           e.preventDefault();
           var email = $("authEmail").value.trim();
           var password = $("authPassword").value;
+          if (mode === "reset") {
+            if (!email) { showMsg("Enter your email first.", false); return; }
+            $("authSubmit").disabled = true;
+            try {
+              var rr = await sb.auth.resetPasswordForEmail(email, { redirectTo: "https://gmmostafijur.github.io/xraykit/auth.html" });
+              if (rr.error) throw rr.error;
+              showOtp(email, "recovery");
+            } catch (err) {
+              showMsg(err && err.message ? err.message : "Something went wrong. Try again.", false);
+            } finally { $("authSubmit").disabled = false; }
+            return;
+          }
           if (!email || password.length < 6) { showMsg("Enter your email and a password of at least 6 characters.", false); return; }
           $("authSubmit").disabled = true;
           try {
@@ -439,7 +492,7 @@
                 showSession(res.data.user.email);
                 setTimeout(function () { window.location.href = "audit.html"; }, 1500);
               } else {
-                showMsg("Account created \u2014 check your email for the confirmation link (and the spam folder too), then log in.", true);
+                showOtp(email, "signup");
               }
             } else {
               var r2 = await sb.auth.signInWithPassword({ email: email, password: password });
@@ -450,11 +503,80 @@
             }
           } catch (err) {
             var m = err && err.message ? err.message : "Something went wrong. Try again.";
-            if (/confirm/i.test(m)) m = "Please confirm your email first \u2014 check your inbox (and spam) for the confirmation link.";
+            if (/confirm/i.test(m)) m = "Please confirm your email first \u2014 check your inbox (and spam) for the 6-digit code.";
             showMsg(m, false);
           } finally {
             $("authSubmit").disabled = false;
           }
+        });
+        $("forgotLink").addEventListener("click", function (e) { e.preventDefault(); setMode("reset"); });
+        $("otpForm").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          var code = $("otpCode").value.trim();
+          if (!/^\d{6}$/.test(code)) { showMsg("Enter the 6-digit code from your email.", false); return; }
+          $("otpVerifyBtn").disabled = true;
+          try {
+            var v = await sb.auth.verifyOtp({ email: pendingEmail, token: code, type: flow });
+            if (v.error) throw v.error;
+            if (flow === "recovery") {
+              pwMode = "recovery";
+              showOnly("newpw");
+              showMsg("Code accepted \u2014 set your new password.", true);
+            } else {
+              showMsg("Email confirmed \u2014 you are logged in.", true);
+              showSession(v.data.user.email);
+              setTimeout(function () { window.location.href = "audit.html"; }, 1500);
+            }
+          } catch (err) {
+            showMsg("That code is wrong or expired \u2014 tap Resend code for a fresh one.", false);
+          } finally { $("otpVerifyBtn").disabled = false; }
+        });
+        $("otpResendLink").addEventListener("click", async function (e) {
+          e.preventDefault();
+          try {
+            if (flow === "signup") {
+              var r = await sb.auth.resend({ type: "signup", email: pendingEmail });
+              if (r.error) throw r.error;
+            } else {
+              var r2 = await sb.auth.resetPasswordForEmail(pendingEmail, { redirectTo: "https://gmmostafijur.github.io/xraykit/auth.html" });
+              if (r2.error) throw r2.error;
+            }
+            showMsg("A fresh code is on its way \u2014 check your inbox (and spam).", true);
+          } catch (err) {
+            showMsg(err && err.message ? err.message : "Could not resend the code. Try again.", false);
+          }
+        });
+        $("otpBackLink").addEventListener("click", function (e) { e.preventDefault(); setMode("login"); });
+        $("newPwForm").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          var p1 = $("newPassword").value, p2 = $("newPassword2").value;
+          if (p1.length < 6) { showMsg("Use a password of at least 6 characters.", false); return; }
+          if (p1 !== p2) { showMsg("The two passwords do not match.", false); return; }
+          $("newPwBtn").disabled = true;
+          try {
+            var u = await sb.auth.updateUser({ password: p1 });
+            if (u.error) throw u.error;
+            if (pwMode === "recovery") {
+              showMsg("Password updated \u2014 taking you to the audit form\u2026", true);
+              setTimeout(function () { window.location.href = "audit.html"; }, 1500);
+            } else {
+              showMsg("Password changed.", true);
+              showOnly("form");
+              showSession(u.data.user.email);
+            }
+          } catch (err) {
+            showMsg(err && err.message ? err.message : "Could not update the password. Try again.", false);
+          } finally { $("newPwBtn").disabled = false; }
+        });
+        $("newPwBackLink").addEventListener("click", function (e) {
+          e.preventDefault();
+          if (pwMode === "change") { showOnly("form"); showSession($("sessionEmail").textContent); }
+          else { setMode("login"); }
+        });
+        $("changePwBtn").addEventListener("click", function () {
+          pwMode = "change";
+          showOnly("newpw");
+          showMsg("Enter your new password below.", true);
         });
         sb.auth.getSession().then(function (res) {
           if (res.data && res.data.session && res.data.session.user) {
