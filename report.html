@@ -113,6 +113,11 @@
       .mini-bar .n { font-family: "IBM Plex Mono", monospace; font-weight: 600; width: 30px; text-align: right; flex: none; }
       .sheet-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; padding-top: 20px; border-top: 1.5px dashed var(--line); }
       .sheet-note { margin: 14px 2px 0; font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); letter-spacing: 0.02em; }
+      .share-box { margin-top: 22px; padding: 20px; border: 1.5px dashed var(--line); border-radius: var(--radius); background: var(--bg-raise); }
+      .share-box h3 { margin: 0 0 6px; font-size: 18px; }
+      .share-box p { margin: 0 0 12px; font-size: 14px; color: var(--ink-soft); }
+      .share-text { background: var(--panel); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 12px 14px; font-size: 14.5px; line-height: 1.5; margin: 0 0 12px; overflow-wrap: break-word; }
+      .share-btns { display: flex; flex-wrap: wrap; gap: 10px; }
 
       /* sections */
       .section { padding: 64px 0; }
@@ -393,6 +398,16 @@
               <button class="btn btn-lime" type="button" id="downloadBtn">Download this report (.txt)</button>
               <a class="btn" href="#frames" data-anchor="frames">Frame-by-frame breakdown ↓</a>
               <a class="btn btn-ghost" href="audit.html">Run your own free scan</a>
+            </div>
+            <div class="share-box" id="shareBox">
+              <h3>Share your score</h3>
+              <p>Post it on X — every share brings the next founder to XRayKit.</p>
+              <p class="share-text" id="shareText"></p>
+              <div class="share-btns">
+                <button class="btn btn-lime" type="button" id="shareCopyBtn">Copy post</button>
+                <button class="btn" type="button" id="sharePostBtn">Post on X &rarr;</button>
+                <button class="btn" type="button" id="shareCardBtn">Download score card (PNG)</button>
+              </div>
             </div>
             <p class="sheet-note">SAMPLE — NOVASWAP IS THE DEMO PROFILE FROM STEP 2. RUN YOUR OWN SCAN AND EVERY NUMBER, QUOTE AND FIX BELOW IS YOURS.</p>
           </article>
@@ -923,6 +938,78 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
           if (txt) counters[k].textContent = Array.from(txt.textContent.trim()).length + " / 160 characters";
         }
 
+        /* ---------- share your score ---------- */
+        function shareData() {
+          var handleEl = q(".sheet-who .handle");
+          var handle = handleEl ? handleEl.textContent.trim().replace(/^@/, "") : "account";
+          var score = (typeof SCORE === "number") ? SCORE : 0;
+          var vH = q(".verdict h2");
+          var verdict = vH ? vH.textContent.replace(/^Verdict:\s*/i, "").replace(/\.\s*$/, "") : "";
+          var stamp = q(".sheet-stamp");
+          var isSample = stamp ? /sample report/i.test(stamp.textContent) : true;
+          var site = "https://gmmostafijur.github.io/xraykit/";
+          var text;
+          if (isSample) {
+            text = "This is what an XRayKit audit looks like — NovaSwap scored " + score + "/100. Get your free audit: " + site;
+          } else {
+            text = "I X-rayed my X account with XRayKit — scored " + score + "/100. \"" + verdict + "\" Get your free audit: " + site;
+          }
+          return { handle: handle, score: score, verdict: verdict, isSample: isSample, text: text };
+        }
+        function refreshShare() {
+          var t = document.getElementById("shareText");
+          if (t) t.textContent = shareData().text;
+        }
+        window.XRayKitRefreshShare = refreshShare;
+        function wrapText(c, text, x, y, maxW, lh) {
+          var words = String(text).split(/\s+/), line = "";
+          for (var i = 0; i < words.length; i++) {
+            var test = line ? line + " " + words[i] : words[i];
+            if (c.measureText(test).width > maxW && line) { c.fillText(line, x, y); line = words[i]; y += lh; }
+            else line = test;
+          }
+          if (line) c.fillText(line, x, y);
+          return y;
+        }
+        function downloadScoreCard() {
+          var d = shareData();
+          var W = 1200, H = 675;
+          var cv = document.createElement("canvas");
+          cv.width = W; cv.height = H;
+          var c = cv.getContext("2d");
+          c.fillStyle = "#06090a"; c.fillRect(0, 0, W, H);
+          c.fillStyle = "#a6f22e"; c.fillRect(0, 0, W, 10);
+          c.fillStyle = "#a6f22e"; c.font = "800 46px 'IBM Plex Mono', monospace"; c.fillText("XRAYKIT", 64, 98);
+          c.fillStyle = "#9aa5a0"; c.font = "600 26px 'IBM Plex Mono', monospace"; c.fillText("X AUDIT  ·  FOR CRYPTO FOUNDERS", 64, 142);
+          c.fillStyle = "#a6f22e"; c.font = "900 250px system-ui, -apple-system, sans-serif";
+          c.fillText(String(d.score), 64, 430);
+          var w = c.measureText(String(d.score)).width;
+          c.fillStyle = "#e9ede8"; c.font = "700 72px system-ui, -apple-system, sans-serif";
+          c.fillText("/ 100", 64 + w + 16, 430);
+          c.fillStyle = "#a6f22e"; c.font = "800 54px system-ui, -apple-system, sans-serif";
+          c.fillText("@" + d.handle, 64, 520);
+          c.fillStyle = "#e9ede8"; c.font = "400 34px system-ui, -apple-system, sans-serif";
+          wrapText(c, "\u201c" + d.verdict + "\u201d", 64, 580, W - 128, 46);
+          c.fillStyle = "#9aa5a0"; c.font = "600 24px 'IBM Plex Mono', monospace";
+          c.fillText("gmmostafijur.github.io/xraykit", 64, 640);
+          cv.toBlob(function (blob) {
+            if (!blob) { showToast("Could not make the card — try again."); return; }
+            var a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "xraykit-score-@" + d.handle + ".png";
+            document.body.appendChild(a); a.click();
+            setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+            showToast("Score card downloaded.");
+          }, "image/png");
+        }
+        refreshShare();
+        var shareCopyBtn = document.getElementById("shareCopyBtn");
+        if (shareCopyBtn) shareCopyBtn.addEventListener("click", function () { copyText(shareData().text, shareCopyBtn); });
+        var sharePostBtn = document.getElementById("sharePostBtn");
+        if (sharePostBtn) sharePostBtn.addEventListener("click", function () { window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareData().text), "_blank"); });
+        var shareCardBtn = document.getElementById("shareCardBtn");
+        if (shareCardBtn) shareCardBtn.addEventListener("click", downloadScoreCard);
+
         /* ---------- download the report as .txt ---------- */
         var REPORT_TXT = [
           "XRayKit — SCAN REPORT (SAMPLE)",
@@ -1168,6 +1255,7 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
           lines.push("");
           lines.push("Generated by XRayKit — X audit & thread generator for crypto founders. Free: 1 audit/month. Pro: $7/month, 3 days free.");
           if (window.XRayKitSetDownload) window.XRayKitSetDownload(lines.join("\n"), "xraykit-report-" + handle + ".txt");
+          if (window.XRayKitRefreshShare) window.XRayKitRefreshShare();
         });
       })();
     </script>
