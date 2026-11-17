@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hashtag research — tags that fit each post · XRayKit</title>
+    <meta name="description" content="Hashtag suggestions per crypto topic with a volume band, competition rating and suggested daily posts and comments — curated guidance, not live X data." />
+    <link rel="icon" href="logo.png" />
+    <style>
+      :root {
+        --bg: #e9ede8; --bg-raise: #f4f6f2; --panel: #fbfcf9;
+        --ink: #0c1210; --ink-soft: #3c4741; --ink-faint: #6c7871;
+        --line: #d6ddd4; --line-strong: #0c1210;
+        --lime: #9be315; --lime-ink: #131a05;
+        --scan: #0a7a5c; --scan-soft: #dcebe4;
+        --chip-ok: #0a7a5c; --chip-warn: #9a6700; --chip-bad: #b3261e;
+        --radius: 14px; --shadow: 0 18px 40px rgba(11,16,14,0.14);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #06090a; --bg-raise: #0a0f11; --panel: #0d1416;
+          --ink: #e9ede8; --ink-soft: #aab5ae; --ink-faint: #7d8881;
+          --line: #22302b; --line-strong: #e9ede8;
+          --lime: #a6f22e; --lime-ink: #131a05;
+          --scan: #4ade80; --scan-soft: #122b20;
+          --chip-ok: #4ade80; --chip-warn: #fbbf24; --chip-bad: #f87171;
+          --shadow: 0 18px 40px rgba(0,0,0,0.5);
+        }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+      .topbar { border-bottom: 1px solid var(--line); background: var(--bg-raise); }
+      .topbar-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 20px; }
+      .wordmark { display: inline-flex; align-items: center; gap: 10px; font-weight: 900; letter-spacing: 0.04em; text-decoration: none; color: var(--ink); font-size: 18px; }
+      .wordmark img { width: 34px; height: 34px; border-radius: 8px; }
+      .topnav { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+      .topnav a { color: var(--ink-soft); text-decoration: none; font-size: 14.5px; font-weight: 600; }
+      .topnav a:hover { color: var(--ink); }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 10px; border: 1.5px solid var(--line-strong); background: var(--panel); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px; text-decoration: none; cursor: pointer; }
+      .btn:hover { transform: translateY(-1px); }
+      .btn-lime { background: var(--lime); border-color: var(--lime-ink); color: var(--lime-ink); }
+      .btn-small { min-height: 36px; padding: 7px 12px; font-size: 13.5px; }
+      .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+      .hero { padding: 56px 0 8px; }
+      .hero .mono { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--scan); font-weight: 600; }
+      .hero h1 { margin: 10px 0 12px; font-size: clamp(30px,4vw,44px); font-weight: 900; line-height: 1.08; letter-spacing: -0.01em; }
+      .hero p { margin: 0 0 14px; color: var(--ink-soft); font-size: 16.5px; max-width: 44em; }
+      .hero .sample-note { font-size: 14px; }
+      .section { padding: 28px 0 64px; }
+      .card { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+      .card h2 { margin: 0 0 6px; font-size: 19px; }
+      .card .hint { margin: 0 0 16px; color: var(--ink-soft); font-size: 14.5px; }
+      .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field label { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+      .field input { background: var(--bg-raise); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; }
+      .day-pick { display: grid; gap: 10px; margin-top: 18px; }
+      .day-pick label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; cursor: pointer; }
+      .day-pick label.off { opacity: 0.5; }
+      .day-pick input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--scan); flex: none; }
+      .day-pick .t { font-weight: 800; font-size: 15px; }
+      .day-pick .w { color: var(--ink-soft); font-size: 13.5px; }
+      .week-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+      .sched-day { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 14px; }
+      .sched-day .d-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+      .sched-day .d-date { font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 700; color: var(--scan); }
+      .sched-day .d-no { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+      .sched-day h3 { margin: 0 0 6px; font-size: 18px; }
+      .sched-day .why { margin: 0 0 12px; color: var(--ink-soft); font-size: 14.5px; }
+      .sched-day .draft { background: var(--bg-raise); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 14.5px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 12px; }
+      .empty { color: var(--ink-soft); font-size: 15px; }
+      .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .foot { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--ink-faint); font-size: 13.5px; }
+      @media (max-width: 640px) { .topnav { gap: 12px; } .hero { padding-top: 36px; } }
+ 
+      .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+      .chip { border: 1.5px solid var(--line-strong); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 9px 16px; font: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer; }
+      .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+      .tag-table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+      .tag-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); padding: 8px 10px; border-bottom: 1.5px solid var(--line-strong); }
+      .tag-table td { padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+      .tag-table tr:last-child td { border-bottom: none; }
+      .tag-table .tag { font-weight: 800; color: var(--scan); white-space: nowrap; }
+      .tag-table .num { text-align: center; }
+      .band { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12.5px; font-weight: 700; }
+      .band-vh { background: #fde68a; color: #713f12; }
+      .band-h { background: var(--scan-soft); color: var(--scan); }
+      .band-m { background: var(--bg-raise); color: var(--ink-soft); border: 1px solid var(--line); }
+      .band-l { background: transparent; color: var(--ink-faint); border: 1px solid var(--line); }
+      .copy-tag { min-height: 34px; padding: 6px 12px; font-size: 13.5px; }
+      .mix { background: var(--scan-soft); border: 1.5px solid var(--scan); border-radius: var(--radius); padding: 16px 20px; font-size: 14.5px; margin-bottom: 20px; }
+      .mix strong { color: var(--scan); }
+      .honest { background: var(--bg-raise); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 14px 18px; font-size: 14px; color: var(--ink-soft); margin-bottom: 20px; }
+      .table-wrap { overflow-x: auto; }
+      @media (max-width: 640px) { .tag-table th:nth-child(4), .tag-table td:nth-child(4) { display: none; } }
+
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <a class="wordmark" href="index.html"><img src="logo.png" alt="" />XRayKit</a>
+        <nav class="topnav" aria-label="Main menu">
+          <a href="index.html">Home</a>
+          <a href="audit.html">Run a scan</a>
+          <a href="report.html">Sample report</a>
+          <a href="scheduler.html">Scheduler</a>
+          <a href="auth.html">Log in</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <span class="mono">Hashtag research</span>
+        <h1>Tags that fit <span style="color:var(--scan)">each post</span>.</h1>
+        <p>Pick a topic. Every tag shows a volume band, a competition rating, and how often to use it — so every draft ships with the right tags.</p>
+        <div class="honest"><strong>No live X numbers here.</strong> Live hashtag volumes need the X API, which is pay-per-use, so this page does not invent them. Volumes are rough bands (Very high / High / Medium / Low) and the per-day numbers are posting guidance — how often to use the tag — not measured counts.</div>
+      </section>
+
+      <section class="card">
+        <div class="chips" id="chips" role="group" aria-label="Topics"></div>
+        <h2 id="topicTitle" style="margin:0 0 4px;font-size:20px;"></h2>
+        <p class="hint" id="topicHint"></p>
+        <div class="table-wrap">
+          <table class="tag-table">
+            <thead><tr><th>Hashtag</th><th>Volume (guide)</th><th>Competition (guide)</th><th>Posts/day*</th><th>Comments/day*</th><th></th></tr></thead>
+            <tbody id="tagRows"></tbody>
+          </table>
+        </div>
+        <p class="hint" style="margin:14px 0 0;">*Suggested use — how often to post or comment with the tag — not measured X data.</p>
+        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-lime" id="copyAllBtn" type="button">Copy all tags for this topic</button>
+          <a class="btn" href="scheduler.html">Open the Scheduler &rarr;</a>
+        </div>
+      </section>
+
+      <section class="mix"><strong>How to mix them:</strong> one broad tag + two niche tags per post. Broad tags (Very high volume) get seen but rarely rank; niche tags (Low volume, Low competition) are where a small account can actually show up. Never more than 3–4 tags on a post.</section>
+
+      <p class="hint">Want live volumes for a tag? That needs the X API — it arrives later as a higher tier. Until then, these curated sets are the starting point.</p>
+    </main>
+
+    <footer class="foot"><div class="wrap">XRayKit — X audit &amp; thread generator for crypto founders. Posting is manual at launch; auto-posting arrives later as a higher tier.</div></footer>
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+      (function () {
+        "use strict";
+        var TOPICS = {"general": ["General crypto", [["#Crypto", "Very high", "High", 2, 8], ["#Bitcoin", "Very high", "High", 2, 8], ["#BTC", "Very high", "High", 2, 8], ["#Ethereum", "Very high", "High", 2, 6], ["#ETH", "High", "High", 2, 6], ["#Web3", "High", "Medium", 2, 6], ["#CryptoTwitter", "High", "Medium", 1, 6], ["#Altcoins", "High", "Medium", 1, 5], ["#Blockchain", "High", "Medium", 1, 4], ["#CryptoNews", "Medium", "Medium", 1, 4]]], "defi": ["DeFi", [["#DeFi", "Very high", "High", 2, 6], ["#DEX", "High", "Medium", 1, 5], ["#Staking", "High", "Medium", 1, 5], ["#YieldFarming", "Medium", "Medium", 1, 4], ["#Liquidity", "Medium", "Low", 1, 3], ["#Lending", "Medium", "Low", 1, 3], ["#Stablecoin", "Medium", "Low", 1, 3], ["#AMM", "Low", "Low", 1, 2], ["#TVL", "Low", "Low", 1, 2], ["#Crypto", "Very high", "High", 1, 6]]], "nft": ["NFT", [["#NFT", "Very high", "High", 2, 8], ["#NFTs", "High", "High", 2, 6], ["#NFTCommunity", "High", "Medium", 2, 6], ["#NFTartist", "Medium", "Medium", 1, 5], ["#DigitalArt", "Medium", "Medium", 1, 4], ["#NFTCollector", "Medium", "Low", 1, 4], ["#CryptoArt", "Low", "Low", 1, 3], ["#Mint", "Medium", "Medium", 1, 3], ["#Web3", "High", "Medium", 1, 5], ["#OpenSea", "Medium", "Medium", 1, 3]]], "trading": ["Trading", [["#Trading", "Very high", "High", 2, 6], ["#CryptoTrading", "High", "High", 2, 6], ["#BTC", "Very high", "High", 1, 6], ["#Bullish", "High", "Medium", 1, 5], ["#Altcoins", "High", "Medium", 1, 5], ["#TA", "Medium", "Medium", 1, 4], ["#Chart", "Medium", "Medium", 1, 4], ["#Bearish", "Medium", "Medium", 1, 4], ["#DayTrading", "High", "Medium", 1, 4], ["#Crypto", "Very high", "High", 1, 6]]], "memecoins": ["Memecoins", [["#Memecoin", "High", "High", 2, 8], ["#MemeCoin", "High", "High", 1, 6], ["#DOGE", "Very high", "High", 1, 6], ["#SHIB", "High", "High", 1, 5], ["#PEPE", "High", "Medium", 1, 5], ["#Memes", "High", "Medium", 1, 4], ["#Solana", "Very high", "High", 1, 5], ["#Pump", "Medium", "Medium", 1, 4], ["#Crypto", "Very high", "High", 1, 6], ["#Ape", "Low", "Low", 1, 2]]], "l1l2": ["L1 & L2", [["#Ethereum", "Very high", "High", 2, 6], ["#Solana", "Very high", "High", 2, 6], ["#Layer2", "High", "Medium", 1, 5], ["#Base", "High", "Medium", 1, 4], ["#BNB", "High", "Medium", 1, 4], ["#L2", "Medium", "Medium", 1, 4], ["#Arbitrum", "Medium", "Medium", 1, 4], ["#Optimism", "Medium", "Low", 1, 3], ["#Avalanche", "Medium", "Low", 1, 3], ["#Blockchain", "High", "Medium", 1, 4]]], "aicrypto": ["AI crypto", [["#AI", "Very high", "High", 2, 6], ["#AIAgent", "High", "Medium", 2, 6], ["#DeAI", "Medium", "Low", 1, 4], ["#MachineLearning", "High", "Medium", 1, 3], ["#CryptoAI", "Medium", "Low", 1, 4], ["#Web3", "High", "Medium", 1, 5], ["#LLM", "Medium", "Low", 1, 3], ["#Agents", "Medium", "Low", 1, 3], ["#Data", "High", "Medium", 1, 3], ["#Future", "High", "Medium", 1, 3]]], "web3gaming": ["Web3 gaming", [["#Web3Gaming", "High", "Medium", 2, 6], ["#GameFi", "High", "Medium", 2, 6], ["#P2E", "Medium", "Medium", 1, 4], ["#BlockchainGaming", "Medium", "Low", 1, 4], ["#NFTGaming", "Medium", "Low", 1, 4], ["#Metaverse", "High", "Medium", 1, 4], ["#CryptoGaming", "Medium", "Low", 1, 4], ["#PlayToEarn", "Medium", "Low", 1, 4], ["#Gaming", "Very high", "High", 1, 5], ["#Web3", "High", "Medium", 1, 5]]]};
+        var ORDER = ["general", "defi", "nft", "trading", "memecoins", "l1l2", "aicrypto", "web3gaming"];
+        var chipsEl = document.getElementById("chips");
+        var titleEl = document.getElementById("topicTitle");
+        var hintEl = document.getElementById("topicHint");
+        var rowsEl = document.getElementById("tagRows");
+        var toastEl = document.getElementById("toast");
+        var current = "general";
+        try { var saved = localStorage.getItem("xraykit_hashtag_topic"); if (saved && TOPICS[saved]) current = saved; } catch (e) {}
+
+        function showToast(msg) {
+          toastEl.textContent = msg;
+          toastEl.classList.add("show");
+          setTimeout(function () { toastEl.classList.remove("show"); }, 2200);
+        }
+        function copyText(text, msg) {
+          function done() { showToast(msg || "Copied — ready to paste into X."); }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); done(); });
+          } else { fallbackCopy(text); done(); }
+        }
+        function fallbackCopy(text) {
+          var ta = document.createElement("textarea");
+          ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand("copy"); } catch (e) {}
+          document.body.removeChild(ta);
+        }
+        function bandClass(v) {
+          return v === "Very high" ? "band-vh" : v === "High" ? "band-h" : v === "Medium" ? "band-m" : "band-l";
+        }
+        function renderTopic(key) {
+          current = key;
+          try { localStorage.setItem("xraykit_hashtag_topic", key); } catch (e) {}
+          var label = TOPICS[key][0], tags = TOPICS[key][1];
+          titleEl.textContent = label + " — " + tags.length + " tags";
+          hintEl.textContent = "Volume and competition are rough guides, not live X data. Posts/day and comments/day are suggested use.";
+          chipsEl.querySelectorAll(".chip").forEach(function (c) {
+            c.setAttribute("aria-pressed", c.getAttribute("data-topic") === key ? "true" : "false");
+          });
+          rowsEl.innerHTML = "";
+          tags.forEach(function (t) {
+            var tr = document.createElement("tr");
+            var tdTag = document.createElement("td"); tdTag.className = "tag"; tdTag.textContent = t[0]; tr.appendChild(tdTag);
+            var tdVol = document.createElement("td");
+            var b = document.createElement("span"); b.className = "band " + bandClass(t[1]); b.textContent = t[1]; tdVol.appendChild(b); tr.appendChild(tdVol);
+            var tdComp = document.createElement("td"); tdComp.textContent = t[2]; tr.appendChild(tdComp);
+            var tdP = document.createElement("td"); tdP.className = "num"; tdP.textContent = t[3]; tr.appendChild(tdP);
+            var tdC = document.createElement("td"); tdC.className = "num"; tdC.textContent = t[4]; tr.appendChild(tdC);
+            var tdBtn = document.createElement("td");
+            var btn = document.createElement("button");
+            btn.className = "btn copy-tag"; btn.type = "button"; btn.textContent = "Copy";
+            btn.addEventListener("click", function () { copyText(t[0], t[0] + " copied."); });
+            tdBtn.appendChild(btn); tr.appendChild(tdBtn);
+            rowsEl.appendChild(tr);
+          });
+        }
+        ORDER.forEach(function (key) {
+          var b = document.createElement("button");
+          b.className = "chip"; b.type = "button"; b.textContent = TOPICS[key][0];
+          b.setAttribute("data-topic", key); b.setAttribute("aria-pressed", key === current ? "true" : "false");
+          b.addEventListener("click", function () { renderTopic(key); });
+          chipsEl.appendChild(b);
+        });
+        document.getElementById("copyAllBtn").addEventListener("click", function () {
+          var all = TOPICS[current][1].map(function (t) { return t[0]; }).join(" ");
+          copyText(all, TOPICS[current][0] + " tags copied — " + TOPICS[current][1].length + " tags.");
+        });
+        renderTopic(current);
+      })();
+    </script>
+  </body>
+</html>
