@@ -760,7 +760,7 @@
           var btn = this;
           btn.disabled = true;
           try {
-            var r = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: "https://gmmostafijur.github.io/xraykit/auth.html" } });
+            var r = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: "https://xraykit.vercel.app/auth.html" } });
             if (r.error) throw r.error;
           } catch (err) {
             var m = err && err.message ? err.message : "Google login failed.";

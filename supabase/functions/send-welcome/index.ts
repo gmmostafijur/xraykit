@@ -50,7 +50,7 @@ const WELCOME_HTML = `<!DOCTYPE html>
           </tr>
           <tr>
             <td align="center" style="padding:20px 36px 8px 36px;">
-              <a href="https://gmmostafijur.github.io/xraykit/audit.html" style="display:inline-block; background-color:#a3e635; color:#0a0a0a; font-size:16px; font-weight:bold; text-decoration:none; padding:14px 32px; border-radius:8px;">Run your first audit &rarr;</a>
+              <a href="https://xraykit.vercel.app/audit.html" style="display:inline-block; background-color:#a3e635; color:#0a0a0a; font-size:16px; font-weight:bold; text-decoration:none; padding:14px 32px; border-radius:8px;">Run your first audit &rarr;</a>
             </td>
           </tr>
           <tr>
@@ -61,7 +61,7 @@ const WELCOME_HTML = `<!DOCTYPE html>
           <tr>
             <td align="center" style="background-color:#0a0a0a; padding:20px;">
               <p style="margin:0 0 6px 0; color:#ffffff; font-size:14px; font-weight:bold;">XRayKit</p>
-              <p style="margin:0; color:#999999; font-size:13px;">Built for crypto founders &middot; <a href="https://gmmostafijur.github.io/xraykit/" style="color:#a3e635; text-decoration:none;">xraykit</a> &middot; @xraykit</p>
+              <p style="margin:0; color:#999999; font-size:13px;">Built for crypto founders &middot; <a href="https://xraykit.vercel.app/" style="color:#a3e635; text-decoration:none;">xraykit</a> &middot; @xraykit</p>
             </td>
           </tr>
         </table>
