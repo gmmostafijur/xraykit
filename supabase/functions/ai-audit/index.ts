@@ -273,27 +273,36 @@ Deno.serve(async (req) => {
       console.error("ai-audit: insert failed", ins.error);
       return json({ error: "Could not save audit", detail: (ins.error && ins.error.message) || "" }, 500);
     }
-    await admin
+    const profUpd = await admin
       .from("profiles")
       .update({ audits_used: auditsUsed + 1 })
       .eq("id", user.id);
+    if (profUpd.error) console.error("ai-audit: profiles update failed", profUpd.error);
 
     // Track real Gemini usage: token counts from the provider response.
     // Cost in $ is computed in the admin dashboard from the prices the
     // admin sets in Settings (site_settings), so no price is hardcoded here.
+    // If the provider does not report usage, estimate from text length
+    // (~4 chars per token) so the audit is still tracked instead of
+    // silently recording nothing; the estimate is logged.
     const usage = aiData && aiData.usage ? aiData.usage : {};
-    const inTok = Number(usage.input_tokens) || 0;
-    const outTok = Number(usage.output_tokens) || 0;
-    if (inTok > 0 || outTok > 0) {
-      await admin.from("audit_costs").insert({
-        audit_id: ins.data.id,
-        user_id: user.id,
-        handle: handle,
-        model: MODEL,
-        input_tokens: inTok,
-        output_tokens: outTok,
-      });
+    let inTok = Number(usage.input_tokens) || 0;
+    let outTok = Number(usage.output_tokens) || 0;
+    if (inTok <= 0 && outTok <= 0) {
+      const promptText = buildPrompt(payload);
+      inTok = Math.max(1, Math.round(promptText.length / 4));
+      outTok = Math.max(1, Math.round(JSON.stringify(report).length / 4));
+      console.log("ai-audit: provider reported no usage; estimated tokens", { inTok, outTok });
     }
+    const costIns = await admin.from("audit_costs").insert({
+      audit_id: ins.data.id,
+      user_id: user.id,
+      handle: handle,
+      model: MODEL,
+      input_tokens: inTok,
+      output_tokens: outTok,
+    });
+    if (costIns.error) console.error("ai-audit: audit_costs insert failed", costIns.error);
 
     return json({
       audit_id: ins.data.id,
