@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Growth tracker — your score and followers, week by week · XRayKit</title>
+    <meta name="description" content="Track your X audit score and follower count week by week. Scores come from your XRayKit audits; followers are numbers you log yourself." />
+    <link rel="icon" href="logo.png" />
+    <style>
+      :root {
+        --bg: #e9ede8; --bg-raise: #f4f6f2; --panel: #fbfcf9;
+        --ink: #0c1210; --ink-soft: #3c4741; --ink-faint: #6c7871;
+        --line: #d6ddd4; --line-strong: #0c1210;
+        --lime: #9be315; --lime-ink: #131a05;
+        --scan: #0a7a5c; --scan-soft: #dcebe4;
+        --chip-ok: #0a7a5c; --chip-warn: #9a6700; --chip-bad: #b3261e;
+        --radius: 14px; --shadow: 0 18px 40px rgba(11,16,14,0.14);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #06090a; --bg-raise: #0a0f11; --panel: #0d1416;
+          --ink: #e9ede8; --ink-soft: #aab5ae; --ink-faint: #7d8881;
+          --line: #22302b; --line-strong: #e9ede8;
+          --lime: #a6f22e; --lime-ink: #131a05;
+          --scan: #4ade80; --scan-soft: #122b20;
+          --chip-ok: #4ade80; --chip-warn: #fbbf24; --chip-bad: #f87171;
+          --shadow: 0 18px 40px rgba(0,0,0,0.5);
+        }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+      .topbar { border-bottom: 1px solid var(--line); background: var(--bg-raise); }
+      .topbar-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 20px; }
+      .wordmark { display: inline-flex; align-items: center; gap: 10px; font-weight: 900; letter-spacing: 0.04em; text-decoration: none; color: var(--ink); font-size: 18px; }
+      .wordmark img { width: 34px; height: 34px; border-radius: 8px; }
+      .topnav { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+      .topnav a { color: var(--ink-soft); text-decoration: none; font-size: 14.5px; font-weight: 600; }
+      .topnav a:hover { color: var(--ink); }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 10px; border: 1.5px solid var(--line-strong); background: var(--panel); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px; text-decoration: none; cursor: pointer; }
+      .btn:hover { transform: translateY(-1px); }
+      .btn-lime { background: var(--lime); border-color: var(--lime-ink); color: var(--lime-ink); }
+      .btn-small { min-height: 36px; padding: 7px 12px; font-size: 13.5px; }
+      .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+      .hero { padding: 56px 0 8px; }
+      .hero .mono { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--scan); font-weight: 600; }
+      .hero h1 { margin: 10px 0 12px; font-size: clamp(30px,4vw,44px); font-weight: 900; line-height: 1.08; letter-spacing: -0.01em; }
+      .hero p { margin: 0 0 14px; color: var(--ink-soft); font-size: 16.5px; max-width: 44em; }
+      .hero .sample-note { font-size: 14px; }
+      .section { padding: 28px 0 64px; }
+      .card { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+      .card h2 { margin: 0 0 6px; font-size: 19px; }
+      .card .hint { margin: 0 0 16px; color: var(--ink-soft); font-size: 14.5px; }
+      .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field label { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+      .field input { background: var(--bg-raise); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; }
+      .day-pick { display: grid; gap: 10px; margin-top: 18px; }
+      .day-pick label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; cursor: pointer; }
+      .day-pick label.off { opacity: 0.5; }
+      .day-pick input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--scan); flex: none; }
+      .day-pick .t { font-weight: 800; font-size: 15px; }
+      .day-pick .w { color: var(--ink-soft); font-size: 13.5px; }
+      .week-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+      .sched-day { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 14px; }
+      .sched-day .d-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+      .sched-day .d-date { font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 700; color: var(--scan); }
+      .sched-day .d-no { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+      .sched-day h3 { margin: 0 0 6px; font-size: 18px; }
+      .sched-day .why { margin: 0 0 12px; color: var(--ink-soft); font-size: 14.5px; }
+      .sched-day .draft { background: var(--bg-raise); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 14.5px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 12px; }
+      .empty { color: var(--ink-soft); font-size: 15px; }
+      .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .foot { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--ink-faint); font-size: 13.5px; }
+      @media (max-width: 640px) { .topnav { gap: 12px; } .hero { padding-top: 36px; } }
+ 
+      .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 18px; }
+      .stat { background: var(--bg-raise); border: 1.5px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+      .stat .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+      .stat .v { font-size: 26px; font-weight: 800; margin-top: 2px; }
+      .stat .d { font-size: 13px; color: var(--ink-soft); }
+      .stat .d.up { color: var(--scan); font-weight: 700; }
+      .stat .d.down { color: #b3261e; font-weight: 700; }
+      .chart { width: 100%; height: auto; display: block; }
+      .chart-wrap { background: var(--bg-raise); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+      .log-table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+      .log-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); padding: 8px 10px; border-bottom: 1.5px solid var(--line-strong); }
+      .log-table td { padding: 10px; border-bottom: 1px solid var(--line); }
+      .log-table tr:last-child td { border-bottom: none; }
+      .log-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 16px; }
+      .log-form .field { flex: 1; min-width: 130px; }
+      .log-form label { display: block; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; margin-bottom: 5px; }
+      .log-form input { width: 100%; background: var(--bg-raise); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; box-sizing: border-box; }
+      .mini-btn { min-height: 34px; padding: 6px 12px; font-size: 13px; }
+      .empty { color: var(--ink-soft); font-size: 15px; }
+      .table-wrap { overflow-x: auto; }
+
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <a class="wordmark" href="index.html"><img src="logo.png" alt="" />XRayKit</a>
+        <nav class="topnav" aria-label="Main menu">
+          <a href="index.html">Home</a>
+          <a href="audit.html">Run a scan</a>
+          <a href="report.html">Sample report</a>
+          <a href="scheduler.html">Scheduler</a>
+          <a href="hashtags.html">Hashtags</a>
+          <a href="auth.html">Log in</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <span class="mono">Growth tracker</span>
+        <h1>Your growth, <span style="color:var(--scan)">week by week</span>.</h1>
+        <p>Your audit score over time, and your follower count as you log it. Scores come from your XRayKit audits — followers are numbers you enter yourself, because X does not share them without the X API.</p>
+      </section>
+
+      <div id="loginNeeded" class="card" hidden>
+        <p class="empty" style="margin:0 0 14px;">Log in to see your growth — your audits and follower log live on your account.</p>
+        <a class="btn btn-lime" href="auth.html">Log in</a>
+      </div>
+
+      <div id="trackerBody" hidden>
+        <section class="card">
+          <h2 style="margin:0 0 4px;">Audit score</h2>
+          <p class="hint">From your XRayKit audits, oldest to newest.</p>
+          <div class="stat-grid">
+            <div class="stat"><div class="k">Latest score</div><div class="v" id="latestScore">—</div><div class="d" id="latestScoreDate"></div></div>
+            <div class="stat"><div class="k">Change vs previous audit</div><div class="v" id="scoreDelta">—</div><div class="d" id="scoreDeltaNote"></div></div>
+            <div class="stat"><div class="k">Audits tracked</div><div class="v" id="auditCount">—</div><div class="d">on this account</div></div>
+          </div>
+          <div class="chart-wrap" id="scoreChartWrap"></div>
+          <p class="empty" id="scoreEmpty" hidden>No audits yet — run your first audit and it will appear here.</p>
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;"><a class="btn btn-lime" href="audit.html">Run a new audit</a><a class="btn" href="history.html">View full history</a><a class="btn" href="compare.html">Compare accounts</a></div>
+        </section>
+
+        <section class="card">
+          <h2 style="margin:0 0 4px;">Followers</h2>
+          <p class="hint">Log your follower count whenever you check it — the chart is built from your own entries.</p>
+          <form class="log-form" id="followForm">
+            <div class="field"><label for="followDate">Date</label><input type="date" id="followDate" required /></div>
+            <div class="field"><label for="followCount">Followers</label><input type="number" id="followCount" min="0" step="1" placeholder="e.g. 1240" required /></div>
+            <button class="btn btn-lime" type="submit">Log followers</button>
+          </form>
+          <div class="stat-grid">
+            <div class="stat"><div class="k">Latest followers</div><div class="v" id="latestFollowers">—</div><div class="d" id="latestFollowersDate"></div></div>
+            <div class="stat"><div class="k">Change vs previous log</div><div class="v" id="followDelta">—</div><div class="d" id="followDeltaNote"></div></div>
+          </div>
+          <div class="chart-wrap" id="followChartWrap"></div>
+          <p class="empty" id="followEmpty" hidden>No follower entries yet — log your first count above.</p>
+        </section>
+
+        <section class="card">
+          <h2 style="margin:0 0 4px;">Week by week</h2>
+          <p class="hint">Latest score and follower count in each week (weeks start Monday).</p>
+          <div class="table-wrap">
+            <table class="log-table">
+              <thead><tr><th>Week of</th><th>Score</th><th>Followers</th><th>Score vs last week</th></tr></thead>
+              <tbody id="weekRows"></tbody>
+            </table>
+          </div>
+          <p class="empty" id="weekEmpty" hidden>Nothing to show yet — audit or log followers and the weeks will fill in.</p>
+        </section>
+
+        <section class="card">
+          <h2 style="margin:0 0 4px;">Your audits</h2>
+          <div class="table-wrap">
+            <table class="log-table">
+              <thead><tr><th>Date</th><th>Account</th><th>Score</th><th></th></tr></thead>
+              <tbody id="auditRows"></tbody>
+            </table>
+          </div>
+          <p class="empty" id="auditEmpty" hidden>No audits on this account yet.</p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="foot"><div class="wrap">XRayKit — X audit &amp; thread generator for crypto founders. Posting is manual at launch; auto-posting arrives later as a higher tier.</div></footer>
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="nav-auth.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        var SUPABASE_URL = "https://elbddcclcmmpqdxsdahg.supabase.co";
+        var SUPABASE_ANON_KEY = "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI";
+        var toastEl = document.getElementById("toast");
+        function showToast(msg) {
+          toastEl.textContent = msg;
+          toastEl.classList.add("show");
+          setTimeout(function () { toastEl.classList.remove("show"); }, 2200);
+        }
+        function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+        function fmtDate(d) {
+          var dt = (d instanceof Date) ? d : new Date(d);
+          return dt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+        }
+        function weekStart(d) {
+          var dt = new Date(d); dt.setHours(0, 0, 0, 0);
+          var day = (dt.getDay() + 6) % 7; // Monday = 0
+          dt.setDate(dt.getDate() - day);
+          return dt;
+        }
+        function weekKey(d) { var w = weekStart(d); return w.getFullYear() + "-" + String(w.getMonth() + 1).padStart(2, "0") + "-" + String(w.getDate()).padStart(2, "0"); }
+        function svgLine(points, ymin, ymax, yLabel) {
+          var W = 600, H = 220, PL = 44, PR = 14, PT = 14, PB = 28;
+          if (!points.length) return "";
+          var min = ymin, max = ymax;
+          if (min == null) min = Math.min.apply(null, points.map(function (p) { return p.y; }));
+          if (max == null) max = Math.max.apply(null, points.map(function (p) { return p.y; }));
+          if (max === min) { max = min + 1; min = min - 1; }
+          var X = function (i) { return PL + (i * (W - PL - PR)) / Math.max(points.length - 1, 1); };
+          var Y = function (v) { return PT + (1 - (v - min) / (max - min)) * (H - PT - PB); };
+          var s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(yLabel) + ' over time">';
+          s += '<line x1="' + PL + '" y1="' + Y(min) + '" x2="' + (W - PR) + '" y2="' + Y(min) + '" stroke="var(--line)" />';
+          s += '<text x="6" y="' + (Y(max) + 4) + '" font-size="11" fill="var(--ink-faint)">' + max + '</text>';
+          s += '<text x="6" y="' + (Y(min) + 4) + '" font-size="11" fill="var(--ink-faint)">' + min + '</text>';
+          var line = points.map(function (p, i) { return (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(p.y).toFixed(1); }).join(" ");
+          s += '<path d="' + line + '" fill="none" stroke="var(--scan)" stroke-width="2.5" stroke-linejoin="round" />';
+          points.forEach(function (p, i) {
+            s += '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.y).toFixed(1) + '" r="4" fill="var(--scan)" />';
+            s += '<text x="' + X(i).toFixed(1) + '" y="' + (Y(p.y) - 10).toFixed(1) + '" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle">' + p.y + '</text>';
+            s += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 8) + '" font-size="11" fill="var(--ink-faint)" text-anchor="middle">' + esc(p.label) + '</text>';
+          });
+          return s + "</svg>";
+        }
+        function deltaText(cur, prev, unit) {
+          if (prev == null) return { text: "—", note: "first entry", cls: "" };
+          var d = cur - prev;
+          var sign = d > 0 ? "+" : "";
+          return { text: sign + d + (unit || ""), note: d > 0 ? "up since last time" : d < 0 ? "down since last time" : "no change", cls: d > 0 ? "up" : d < 0 ? "down" : "" };
+        }
+        function loadFollowers(uid) {
+          try { return JSON.parse(localStorage.getItem("xraykit_followers_" + uid) || "[]"); } catch (e) { return []; }
+        }
+        function saveFollowers(uid, list) {
+          try { localStorage.setItem("xraykit_followers_" + uid, JSON.stringify(list)); } catch (e) {}
+        }
+        function render(user, audits, followers) {
+          document.getElementById("trackerBody").hidden = false;
+          audits = (audits || []).slice().sort(function (a, b) { return new Date(a.created_at) - new Date(b.created_at); });
+          followers = (followers || []).slice().sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+          // score stats
+          var latest = audits[audits.length - 1], prev = audits[audits.length - 2];
+          document.getElementById("auditCount").textContent = audits.length;
+          if (latest) {
+            document.getElementById("latestScore").textContent = latest.score + "/100";
+            document.getElementById("latestScoreDate").textContent = esc(latest.handle || "") + " · " + fmtDate(latest.created_at);
+            var d = deltaText(latest.score, prev ? prev.score : null, "");
+            document.getElementById("scoreDelta").textContent = d.text;
+            document.getElementById("scoreDeltaNote").textContent = d.note;
+            document.getElementById("scoreDeltaNote").className = "d " + d.cls;
+            document.getElementById("scoreChartWrap").innerHTML = svgLine(audits.map(function (a) {
+              return { y: a.score, label: fmtDate(a.created_at) };
+            }), 0, 100, "Audit score");
+          } else {
+            document.getElementById("scoreEmpty").hidden = false;
+          }
+          // audit list
+          var rowsEl = document.getElementById("auditRows");
+          rowsEl.innerHTML = "";
+          audits.slice().reverse().forEach(function (a) {
+            var tr = document.createElement("tr");
+            var tdD = document.createElement("td"); tdD.textContent = fmtDate(a.created_at); tr.appendChild(tdD);
+            var tdH = document.createElement("td"); tdH.textContent = a.handle || ""; tr.appendChild(tdH);
+            var tdS = document.createElement("td"); tdS.textContent = a.score + "/100"; tr.appendChild(tdS);
+            var tdL = document.createElement("td");
+            var link = document.createElement("a"); link.href = "report.html?id=" + encodeURIComponent(a.id); link.textContent = "View report →"; tdL.appendChild(link);
+            tr.appendChild(tdL); rowsEl.appendChild(tr);
+          });
+          document.getElementById("auditEmpty").hidden = audits.length > 0;
+          // followers
+          var fl = followers[followers.length - 1], fp = followers[followers.length - 2];
+          if (fl) {
+            document.getElementById("latestFollowers").textContent = Number(fl.followers).toLocaleString("en-US");
+            document.getElementById("latestFollowersDate").textContent = fmtDate(fl.date);
+            var fd = deltaText(Number(fl.followers), fp ? Number(fp.followers) : null, "");
+            document.getElementById("followDelta").textContent = fd.text;
+            document.getElementById("followDeltaNote").textContent = fd.note;
+            document.getElementById("followDeltaNote").className = "d " + fd.cls;
+            document.getElementById("followChartWrap").innerHTML = svgLine(followers.map(function (f) {
+              return { y: Number(f.followers), label: fmtDate(f.date) };
+            }), null, null, "Followers");
+          } else {
+            document.getElementById("followEmpty").hidden = false;
+          }
+          // weekly table
+          var weeks = {};
+          audits.forEach(function (a) {
+            var k = weekKey(a.created_at);
+            weeks[k] = weeks[k] || { week: weekStart(a.created_at), score: null, followers: null };
+            weeks[k].score = a.score;
+          });
+          followers.forEach(function (f) {
+            var k = weekKey(f.date);
+            weeks[k] = weeks[k] || { week: weekStart(f.date), score: null, followers: null };
+            weeks[k].followers = Number(f.followers);
+          });
+          var keys = Object.keys(weeks).sort();
+          var weekRows = document.getElementById("weekRows");
+          weekRows.innerHTML = "";
+          var prevScore = null;
+          keys.forEach(function (k) {
+            var w = weeks[k];
+            var tr = document.createElement("tr");
+            var tdW = document.createElement("td"); tdW.textContent = fmtDate(w.week); tr.appendChild(tdW);
+            var tdS = document.createElement("td"); tdS.textContent = w.score == null ? "—" : w.score + "/100"; tr.appendChild(tdS);
+            var tdF = document.createElement("td"); tdF.textContent = w.followers == null ? "—" : w.followers.toLocaleString("en-US"); tr.appendChild(tdF);
+            var tdD = document.createElement("td");
+            if (w.score == null || prevScore == null) { tdD.textContent = "—"; }
+            else { var dd = w.score - prevScore; tdD.textContent = (dd > 0 ? "+" : "") + dd; }
+            tr.appendChild(tdD); weekRows.appendChild(tr);
+            if (w.score != null) prevScore = w.score;
+          });
+          document.getElementById("weekEmpty").hidden = keys.length > 0;
+          // follower form
+          var dateInput = document.getElementById("followDate");
+          if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+          document.getElementById("followForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            var date = dateInput.value;
+            var count = parseInt(document.getElementById("followCount").value, 10);
+            if (!date || isNaN(count) || count < 0) { showToast("Enter a date and a follower count."); return; }
+            var list = loadFollowers(user.id);
+            var i = list.findIndex(function (f) { return f.date === date; });
+            if (i >= 0) list[i].followers = count; else list.push({ date: date, followers: count });
+            saveFollowers(user.id, list);
+            showToast("Followers logged for " + fmtDate(date) + ".");
+            render(user, audits, list);
+          });
+        }
+        function init() {
+          if (!window.supabase) { document.getElementById("loginNeeded").hidden = false; return; }
+          var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          sb.auth.getSession().then(function (res) {
+            var user = res.data && res.data.session && res.data.session.user;
+            if (!user) { document.getElementById("loginNeeded").hidden = false; return; }
+            sb.from("audits").select("id,handle,score,created_at").eq("user_id", user.id).order("created_at", { ascending: true }).then(function (r) {
+              render(user, (r && !r.error && r.data) ? r.data : [], loadFollowers(user.id));
+            });
+          });
+        }
+        init();
+      })();
+    </script>
+  </body>
+</html>

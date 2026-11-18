@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Audit history — your past audits and scores · XRayKit</title>
+    <meta name="description" content="Every XRayKit audit on your account, newest first, with the score change vs the previous audit." />
+    <link rel="icon" href="logo.png" />
+    <style>
+      :root {
+        --bg: #e9ede8; --bg-raise: #f4f6f2; --panel: #fbfcf9;
+        --ink: #0c1210; --ink-soft: #3c4741; --ink-faint: #6c7871;
+        --line: #d6ddd4; --line-strong: #0c1210;
+        --lime: #9be315; --lime-ink: #131a05;
+        --scan: #0a7a5c; --scan-soft: #dcebe4;
+        --chip-ok: #0a7a5c; --chip-warn: #9a6700; --chip-bad: #b3261e;
+        --radius: 14px; --shadow: 0 18px 40px rgba(11,16,14,0.14);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #06090a; --bg-raise: #0a0f11; --panel: #0d1416;
+          --ink: #e9ede8; --ink-soft: #aab5ae; --ink-faint: #7d8881;
+          --line: #22302b; --line-strong: #e9ede8;
+          --lime: #a6f22e; --lime-ink: #131a05;
+          --scan: #4ade80; --scan-soft: #122b20;
+          --chip-ok: #4ade80; --chip-warn: #fbbf24; --chip-bad: #f87171;
+          --shadow: 0 18px 40px rgba(0,0,0,0.5);
+        }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+      .topbar { border-bottom: 1px solid var(--line); background: var(--bg-raise); }
+      .topbar-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 20px; }
+      .wordmark { display: inline-flex; align-items: center; gap: 10px; font-weight: 900; letter-spacing: 0.04em; text-decoration: none; color: var(--ink); font-size: 18px; }
+      .wordmark img { width: 34px; height: 34px; border-radius: 8px; }
+      .topnav { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+      .topnav a { color: var(--ink-soft); text-decoration: none; font-size: 14.5px; font-weight: 600; }
+      .topnav a:hover { color: var(--ink); }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 10px; border: 1.5px solid var(--line-strong); background: var(--panel); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px; text-decoration: none; cursor: pointer; }
+      .btn:hover { transform: translateY(-1px); }
+      .btn-lime { background: var(--lime); border-color: var(--lime-ink); color: var(--lime-ink); }
+      .btn-small { min-height: 36px; padding: 7px 12px; font-size: 13.5px; }
+      .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+      .hero { padding: 56px 0 8px; }
+      .hero .mono { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--scan); font-weight: 600; }
+      .hero h1 { margin: 10px 0 12px; font-size: clamp(30px,4vw,44px); font-weight: 900; line-height: 1.08; letter-spacing: -0.01em; }
+      .hero p { margin: 0 0 14px; color: var(--ink-soft); font-size: 16.5px; max-width: 44em; }
+      .hero .sample-note { font-size: 14px; }
+      .section { padding: 28px 0 64px; }
+      .card { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+      .card h2 { margin: 0 0 6px; font-size: 19px; }
+      .card .hint { margin: 0 0 16px; color: var(--ink-soft); font-size: 14.5px; }
+      .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field label { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+      .field input { background: var(--bg-raise); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; }
+      .day-pick { display: grid; gap: 10px; margin-top: 18px; }
+      .day-pick label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; cursor: pointer; }
+      .day-pick label.off { opacity: 0.5; }
+      .day-pick input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--scan); flex: none; }
+      .day-pick .t { font-weight: 800; font-size: 15px; }
+      .day-pick .w { color: var(--ink-soft); font-size: 13.5px; }
+      .week-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+      .sched-day { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 14px; }
+      .sched-day .d-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+      .sched-day .d-date { font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 700; color: var(--scan); }
+      .sched-day .d-no { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+      .sched-day h3 { margin: 0 0 6px; font-size: 18px; }
+      .sched-day .why { margin: 0 0 12px; color: var(--ink-soft); font-size: 14.5px; }
+      .sched-day .draft { background: var(--bg-raise); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 14.5px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 12px; }
+      .empty { color: var(--ink-soft); font-size: 15px; }
+      .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .foot { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--ink-faint); font-size: 13.5px; }
+      @media (max-width: 640px) { .topnav { gap: 12px; } .hero { padding-top: 36px; } }
+ 
+      .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 18px; }
+      .stat { background: var(--bg-raise); border: 1.5px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+      .stat .k { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+      .stat .v { font-size: 26px; font-weight: 800; margin-top: 2px; }
+      .stat .d { font-size: 13px; color: var(--ink-soft); }
+      .log-table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+      .log-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); padding: 8px 10px; border-bottom: 1.5px solid var(--line-strong); }
+      .log-table td { padding: 10px; border-bottom: 1px solid var(--line); }
+      .log-table tr:last-child td { border-bottom: none; }
+      .delta-up { color: var(--scan); font-weight: 700; }
+      .delta-down { color: #b3261e; font-weight: 700; }
+      .filter-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+      .filter-row input { flex: 1; min-width: 180px; background: var(--bg-raise); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; }
+      .empty { color: var(--ink-soft); font-size: 15px; }
+      .table-wrap { overflow-x: auto; }
+
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <a class="wordmark" href="index.html"><img src="logo.png" alt="" />XRayKit</a>
+        <nav class="topnav" aria-label="Main menu">
+          <a href="index.html">Home</a>
+          <a href="audit.html">Run a scan</a>
+          <a href="report.html">Sample report</a>
+          <a href="tracker.html">Growth tracker</a>
+          <a href="auth.html">Log in</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <span class="mono">Audit history</span>
+        <h1>Every audit, <span style="color:var(--scan)">compared</span>.</h1>
+        <p>All your past audits on this account, newest first — with the score change vs the previous audit, so you can see what moved.</p>
+      </section>
+
+      <div id="loginNeeded" class="card" hidden>
+        <p class="empty" style="margin:0 0 14px;">Log in to see your audit history — your audits live on your account.</p>
+        <a class="btn btn-lime" href="auth.html">Log in</a>
+      </div>
+
+      <div id="historyBody" hidden>
+        <section class="card">
+          <div class="stat-grid">
+            <div class="stat"><div class="k">Total audits</div><div class="v" id="totalAudits">—</div><div class="d">on this account</div></div>
+            <div class="stat"><div class="k">Latest score</div><div class="v" id="latestScore">—</div><div class="d" id="latestScoreDate"></div></div>
+            <div class="stat"><div class="k">Best score</div><div class="v" id="bestScore">—</div><div class="d" id="bestScoreDate"></div></div>
+            <div class="stat"><div class="k">Average score</div><div class="v" id="avgScore">—</div><div class="d">across all audits</div></div>
+          </div>
+          <div class="filter-row">
+            <input type="search" id="handleFilter" placeholder="Filter by handle — e.g. novaswap" aria-label="Filter by handle" />
+            <a class="btn btn-lime" href="audit.html">Run a new audit</a>
+            <a class="btn" href="tracker.html">Growth tracker</a><a class="btn" href="compare.html">Compare accounts</a>
+          </div>
+          <div class="table-wrap">
+            <table class="log-table">
+              <thead><tr><th>Date</th><th>Account</th><th>Score</th><th>Change vs previous</th><th></th></tr></thead>
+              <tbody id="auditRows"></tbody>
+            </table>
+          </div>
+          <p class="empty" id="historyEmpty" hidden>No audits on this account yet — run your first audit and it will appear here.</p>
+          <p class="empty" id="filterEmpty" hidden>No audits match that handle.</p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="foot"><div class="wrap">XRayKit — X audit &amp; thread generator for crypto founders. Posting is manual at launch; auto-posting arrives later as a higher tier.</div></footer>
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="nav-auth.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        var SUPABASE_URL = "https://elbddcclcmmpqdxsdahg.supabase.co";
+        var SUPABASE_ANON_KEY = "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI";
+        var allAudits = [];
+        function fmtDate(d) {
+          var dt = (d instanceof Date) ? d : new Date(d);
+          return dt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+        }
+        function renderRows() {
+          var q = (document.getElementById("handleFilter").value || "").trim().toLowerCase();
+          var rowsEl = document.getElementById("auditRows");
+          rowsEl.innerHTML = "";
+          // deltas are computed in date order (oldest -> newest), shown newest first
+          var asc = allAudits.slice().sort(function (a, b) { return new Date(a.created_at) - new Date(b.created_at); });
+          var deltaById = {};
+          asc.forEach(function (a, i) {
+            deltaById[a.id] = (i === 0) ? null : (a.score - asc[i - 1].score);
+          });
+          var shown = asc.slice().reverse().filter(function (a) {
+            return !q || (a.handle || "").toLowerCase().indexOf(q) !== -1;
+          });
+          shown.forEach(function (a) {
+            var tr = document.createElement("tr");
+            var tdD = document.createElement("td"); tdD.textContent = fmtDate(a.created_at); tr.appendChild(tdD);
+            var tdH = document.createElement("td"); tdH.textContent = a.handle || ""; tr.appendChild(tdH);
+            var tdS = document.createElement("td"); tdS.textContent = a.score + "/100"; tr.appendChild(tdS);
+            var tdC = document.createElement("td");
+            var d = deltaById[a.id];
+            if (d == null) { tdC.textContent = "—"; }
+            else {
+              tdC.textContent = (d > 0 ? "+" : "") + d;
+              tdC.className = d > 0 ? "delta-up" : d < 0 ? "delta-down" : "";
+            }
+            tr.appendChild(tdC);
+            var tdL = document.createElement("td");
+            var link = document.createElement("a"); link.href = "report.html?id=" + encodeURIComponent(a.id); link.textContent = "View report →"; tdL.appendChild(link);
+            tr.appendChild(tdL); rowsEl.appendChild(tr);
+          });
+          document.getElementById("filterEmpty").hidden = !(allAudits.length > 0 && shown.length === 0);
+          document.getElementById("historyEmpty").hidden = allAudits.length > 0;
+        }
+        function render(audits) {
+          allAudits = (audits || []).slice();
+          document.getElementById("historyBody").hidden = false;
+          var asc = allAudits.slice().sort(function (a, b) { return new Date(a.created_at) - new Date(b.created_at); });
+          document.getElementById("totalAudits").textContent = allAudits.length;
+          if (asc.length) {
+            var latest = asc[asc.length - 1];
+            document.getElementById("latestScore").textContent = latest.score + "/100";
+            document.getElementById("latestScoreDate").textContent = (latest.handle || "") + " · " + fmtDate(latest.created_at);
+            var best = asc.reduce(function (m, a) { return a.score > m.score ? a : m; }, asc[0]);
+            document.getElementById("bestScore").textContent = best.score + "/100";
+            document.getElementById("bestScoreDate").textContent = (best.handle || "") + " · " + fmtDate(best.created_at);
+            var avg = Math.round(asc.reduce(function (s, a) { return s + a.score; }, 0) / asc.length);
+            document.getElementById("avgScore").textContent = avg + "/100";
+          }
+          document.getElementById("handleFilter").addEventListener("input", renderRows);
+          renderRows();
+        }
+        function init() {
+          if (!window.supabase) { document.getElementById("loginNeeded").hidden = false; return; }
+          var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          sb.auth.getSession().then(function (res) {
+            var user = res.data && res.data.session && res.data.session.user;
+            if (!user) { document.getElementById("loginNeeded").hidden = false; return; }
+            sb.from("audits").select("id,handle,score,created_at").eq("user_id", user.id).order("created_at", { ascending: true }).then(function (r) {
+              render((r && !r.error && r.data) ? r.data : []);
+            });
+          });
+        }
+        init();
+      })();
+    </script>
+  </body>
+</html>

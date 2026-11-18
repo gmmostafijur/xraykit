@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Competitor compare — two audited accounts, side by side · XRayKit</title>
+    <meta name="description" content="Compare two X accounts you have audited with XRayKit: score, verdict, problems and strengths, side by side." />
+    <link rel="icon" href="logo.png" />
+    <style>
+      :root {
+        --bg: #e9ede8; --bg-raise: #f4f6f2; --panel: #fbfcf9;
+        --ink: #0c1210; --ink-soft: #3c4741; --ink-faint: #6c7871;
+        --line: #d6ddd4; --line-strong: #0c1210;
+        --lime: #9be315; --lime-ink: #131a05;
+        --scan: #0a7a5c; --scan-soft: #dcebe4;
+        --chip-ok: #0a7a5c; --chip-warn: #9a6700; --chip-bad: #b3261e;
+        --radius: 14px; --shadow: 0 18px 40px rgba(11,16,14,0.14);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #06090a; --bg-raise: #0a0f11; --panel: #0d1416;
+          --ink: #e9ede8; --ink-soft: #aab5ae; --ink-faint: #7d8881;
+          --line: #22302b; --line-strong: #e9ede8;
+          --lime: #a6f22e; --lime-ink: #131a05;
+          --scan: #4ade80; --scan-soft: #122b20;
+          --chip-ok: #4ade80; --chip-warn: #fbbf24; --chip-bad: #f87171;
+          --shadow: 0 18px 40px rgba(0,0,0,0.5);
+        }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5; }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+      .topbar { border-bottom: 1px solid var(--line); background: var(--bg-raise); }
+      .topbar-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 20px; }
+      .wordmark { display: inline-flex; align-items: center; gap: 10px; font-weight: 900; letter-spacing: 0.04em; text-decoration: none; color: var(--ink); font-size: 18px; }
+      .wordmark img { width: 34px; height: 34px; border-radius: 8px; }
+      .topnav { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+      .topnav a { color: var(--ink-soft); text-decoration: none; font-size: 14.5px; font-weight: 600; }
+      .topnav a:hover { color: var(--ink); }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 10px; border: 1.5px solid var(--line-strong); background: var(--panel); color: var(--ink); font: inherit; font-weight: 700; font-size: 15px; text-decoration: none; cursor: pointer; }
+      .btn:hover { transform: translateY(-1px); }
+      .btn-lime { background: var(--lime); border-color: var(--lime-ink); color: var(--lime-ink); }
+      .btn-small { min-height: 36px; padding: 7px 12px; font-size: 13.5px; }
+      .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+      .hero { padding: 56px 0 8px; }
+      .hero .mono { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--scan); font-weight: 600; }
+      .hero h1 { margin: 10px 0 12px; font-size: clamp(30px,4vw,44px); font-weight: 900; line-height: 1.08; letter-spacing: -0.01em; }
+      .hero p { margin: 0 0 14px; color: var(--ink-soft); font-size: 16.5px; max-width: 44em; }
+      .hero .sample-note { font-size: 14px; }
+      .section { padding: 28px 0 64px; }
+      .card { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+      .card h2 { margin: 0 0 6px; font-size: 19px; }
+      .card .hint { margin: 0 0 16px; color: var(--ink-soft); font-size: 14.5px; }
+      .controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field label { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+      .field input { background: var(--bg-raise); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; }
+      .day-pick { display: grid; gap: 10px; margin-top: 18px; }
+      .day-pick label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; cursor: pointer; }
+      .day-pick label.off { opacity: 0.5; }
+      .day-pick input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--scan); flex: none; }
+      .day-pick .t { font-weight: 800; font-size: 15px; }
+      .day-pick .w { color: var(--ink-soft); font-size: 13.5px; }
+      .week-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+      .sched-day { background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 14px; }
+      .sched-day .d-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+      .sched-day .d-date { font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 700; color: var(--scan); }
+      .sched-day .d-no { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; }
+      .sched-day h3 { margin: 0 0 6px; font-size: 18px; }
+      .sched-day .why { margin: 0 0 12px; color: var(--ink-soft); font-size: 14.5px; }
+      .sched-day .draft { background: var(--bg-raise); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 14.5px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 12px; }
+      .empty { color: var(--ink-soft); font-size: 15px; }
+      .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+      .foot { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--ink-faint); font-size: 13.5px; }
+      @media (max-width: 640px) { .topnav { gap: 12px; } .hero { padding-top: 36px; } }
+ 
+      .pick-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 18px; }
+      .pick-row .field { flex: 1; min-width: 180px; }
+      .pick-row label { display: block; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; margin-bottom: 5px; }
+      .pick-row select { width: 100%; background: var(--bg-raise); color: var(--ink); border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 15px; }
+      .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      @media (max-width: 640px) { .vs-grid { grid-template-columns: 1fr; } }
+      .vs-card { background: var(--bg-raise); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 20px; }
+      .vs-card.winner { border-color: var(--scan); box-shadow: 0 0 0 1px var(--scan); }
+      .vs-card .handle { font-size: 19px; font-weight: 800; }
+      .vs-card .score-big { font-size: 42px; font-weight: 900; line-height: 1.1; }
+      .vs-card .score-big span { font-size: 16px; color: var(--ink-soft); font-weight: 600; }
+      .vs-bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; margin: 10px 0 4px; }
+      .vs-bar i { display: block; height: 100%; background: var(--scan); }
+      .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; background: var(--scan); color: #fff; margin-top: 8px; }
+      .vs-card .verdict { font-size: 15px; font-weight: 700; margin: 10px 0 4px; }
+      .vs-card ul { margin: 8px 0 0; padding-left: 18px; font-size: 14.5px; color: var(--ink-soft); }
+      .vs-card .meta { font-size: 13px; color: var(--ink-faint); margin-top: 12px; }
+      .empty { color: var(--ink-soft); font-size: 15px; }
+      .notice { background: var(--scan-soft); border: 1.5px solid var(--scan); border-radius: 10px; padding: 12px 16px; font-size: 14.5px; margin-bottom: 16px; }
+
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="wrap topbar-in">
+        <a class="wordmark" href="index.html"><img src="logo.png" alt="" />XRayKit</a>
+        <nav class="topnav" aria-label="Main menu">
+          <a href="index.html">Home</a>
+          <a href="audit.html">Run a scan</a>
+          <a href="report.html">Sample report</a>
+          <a href="tracker.html">Growth tracker</a>
+          <a href="history.html">Audit history</a>
+          <a href="auth.html">Log in</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="hero">
+        <span class="mono">Competitor compare</span>
+        <h1>Two accounts, <span style="color:var(--scan)">side by side</span>.</h1>
+        <p>Pick two accounts you have audited and see their scores, verdicts, problems and strengths next to each other. Only audited accounts can be compared — live data for an account you have never audited needs the X API.</p>
+      </section>
+
+      <div id="loginNeeded" class="card" hidden>
+        <p class="empty" style="margin:0 0 14px;">Log in to compare your audits — your audits live on your account.</p>
+        <a class="btn btn-lime" href="auth.html">Log in</a>
+      </div>
+
+      <div id="compareBody" hidden>
+        <section class="card">
+          <div class="pick-row">
+            <div class="field"><label for="pickA">Account A</label><select id="pickA"></select></div>
+            <div class="field"><label for="pickB">Account B</label><select id="pickB"></select></div>
+            <a class="btn" href="audit.html">Audit a new account</a>
+          </div>
+          <p class="notice" id="sameNotice" hidden>Pick two different accounts to compare.</p>
+          <p class="empty" id="needMore" hidden>You have audited fewer than two accounts — run an audit for a second account and it will appear here.</p>
+          <div class="vs-grid" id="vsGrid"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="foot"><div class="wrap">XRayKit — X audit &amp; thread generator for crypto founders. Posting is manual at launch; auto-posting arrives later as a higher tier.</div></footer>
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="nav-auth.js"></script>
+    <script>
+      (function () {
+        "use strict";
+        var SUPABASE_URL = "https://elbddcclcmmpqdxsdahg.supabase.co";
+        var SUPABASE_ANON_KEY = "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI";
+        var latestByHandle = {};
+        function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+        function fmtDate(d) {
+          var dt = (d instanceof Date) ? d : new Date(d);
+          return dt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+        }
+        function band(score) {
+          return score >= 70 ? "ready to scale — fix the last few leaks"
+            : score >= 50 ? "strong product, invisible account"
+            : score >= 30 ? "good material, weak presentation"
+            : "invisible account — fix the basics first";
+        }
+        function card(a, isWinner) {
+          var r = (a && a.report) || {};
+          var problems = Array.isArray(r.problems) ? r.problems : [];
+          var strengths = Array.isArray(r.strengths) ? r.strengths : [];
+          var el = document.createElement("article");
+          el.className = "vs-card" + (isWinner ? " winner" : "");
+          var h = '<div class="handle">' + esc(a.handle || "") + "</div>";
+          h += '<div class="score-big">' + a.score + ' <span>/ 100</span></div>';
+          h += '<div class="vs-bar"><i style="width:' + a.score + '%"></i></div>';
+          if (isWinner) h += '<span class="badge">Leading</span>';
+          h += '<div class="verdict">Verdict: ' + esc(band(a.score)) + ".</div>";
+          h += "<div>" + problems.length + " problem" + (problems.length === 1 ? "" : "s") + " · " + strengths.length + " strength" + (strengths.length === 1 ? "" : "s") + "</div>";
+          if (problems.length) {
+            h += "<ul>" + problems.slice(0, 3).map(function (p) { return "<li>" + esc(p.title || p) + "</li>"; }).join("") + "</ul>";
+          }
+          h += '<div class="meta">Audited ' + fmtDate(a.created_at) + ' · <a href="report.html?id=' + encodeURIComponent(a.id) + '">View report →</a></div>';
+          el.innerHTML = h;
+          return el;
+        }
+        function render() {
+          var selA = document.getElementById("pickA");
+          var selB = document.getElementById("pickB");
+          var grid = document.getElementById("vsGrid");
+          grid.innerHTML = "";
+          var a = latestByHandle[selA.value];
+          var b = latestByHandle[selB.value];
+          var same = selA.value && selA.value === selB.value;
+          document.getElementById("sameNotice").hidden = !same;
+          if (!a || !b || same) return;
+          grid.appendChild(card(a, a.score > b.score));
+          grid.appendChild(card(b, b.score > a.score));
+        }
+        function init() {
+          if (!window.supabase) { document.getElementById("loginNeeded").hidden = false; return; }
+          var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          sb.auth.getSession().then(function (res) {
+            var user = res.data && res.data.session && res.data.session.user;
+            if (!user) { document.getElementById("loginNeeded").hidden = false; return; }
+            sb.from("audits").select("id,handle,score,report,created_at").eq("user_id", user.id).order("created_at", { ascending: true }).then(function (r) {
+              var audits = (r && !r.error && r.data) ? r.data : [];
+              document.getElementById("compareBody").hidden = false;
+              audits.forEach(function (a) {
+                var h = (a.handle || "").toLowerCase();
+                if (!latestByHandle[h] || new Date(a.created_at) > new Date(latestByHandle[h].created_at)) latestByHandle[h] = a;
+              });
+              var handles = Object.keys(latestByHandle).sort();
+              document.getElementById("needMore").hidden = handles.length >= 2;
+              var selA = document.getElementById("pickA");
+              var selB = document.getElementById("pickB");
+              handles.forEach(function (h) {
+                var label = latestByHandle[h].handle || h;
+                [selA, selB].forEach(function (sel) {
+                  var o = document.createElement("option");
+                  o.value = h; o.textContent = label + " — " + latestByHandle[h].score + "/100";
+                  sel.appendChild(o);
+                });
+              });
+              if (handles.length >= 2) { selA.value = handles[0]; selB.value = handles[1]; }
+              selA.addEventListener("change", render);
+              selB.addEventListener("change", render);
+              render();
+            });
+          });
+        }
+        init();
+      })();
+    </script>
+  </body>
+</html>
