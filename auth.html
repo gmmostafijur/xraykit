@@ -524,7 +524,7 @@
             if (!email) { showMsg("Enter your email first.", false); return; }
             setLoading($("authSubmit"), true, "Sending code\u2026");
             try {
-              var rr = await sb.auth.resetPasswordForEmail(email, { redirectTo: "https://gmmostafijur.github.io/xraykit/auth.html" });
+              var rr = await sb.auth.resetPasswordForEmail(email, { redirectTo: "https://xraykit.vercel.app/auth.html" });
               if (rr.error) throw rr.error;
               showOtp(email, "recovery");
             } catch (err) {
@@ -539,7 +539,7 @@
               var res = await sb.auth.signUp({
                 email: email,
                 password: password,
-                options: { emailRedirectTo: "https://gmmostafijur.github.io/xraykit/auth.html" }
+                options: { emailRedirectTo: "https://xraykit.vercel.app/auth.html" }
               });
               if (res.error) throw res.error;
               if (res.data.user && res.data.user.identities && res.data.user.identities.length === 0) { showExists(email); return; }
@@ -612,7 +612,7 @@
               var r = await sb.auth.resend({ type: "signup", email: pendingEmail });
               if (r.error) throw r.error;
             } else {
-              var r2 = await sb.auth.resetPasswordForEmail(pendingEmail, { redirectTo: "https://gmmostafijur.github.io/xraykit/auth.html" });
+              var r2 = await sb.auth.resetPasswordForEmail(pendingEmail, { redirectTo: "https://xraykit.vercel.app/auth.html" });
               if (r2.error) throw r2.error;
             }
             showOtpMsg("A fresh code is on its way \u2014 check your inbox (and spam).", true);

@@ -956,7 +956,7 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
           var verdict = vH ? vH.textContent.replace(/^Verdict:\s*/i, "").replace(/\.\s*$/, "") : "";
           var stamp = document.querySelector(".sheet-stamp");
           var isSample = stamp ? /sample report/i.test(stamp.textContent) : true;
-          var site = "https://gmmostafijur.github.io/xraykit/";
+          var site = "https://xraykit.vercel.app/";
           var text;
           if (isSample) {
             text = "This is what an XRayKit audit looks like — NovaSwap scored " + score + "/100. Get your free audit: " + site;
@@ -1000,7 +1000,7 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
           c.fillStyle = "#e9ede8"; c.font = "400 34px system-ui, -apple-system, sans-serif";
           wrapText(c, "\u201c" + d.verdict + "\u201d", 64, 580, W - 128, 46);
           c.fillStyle = "#9aa5a0"; c.font = "600 24px 'IBM Plex Mono', monospace";
-          c.fillText("gmmostafijur.github.io/xraykit", 64, 640);
+          c.fillText("xraykit.vercel.app", 64, 640);
           cv.toBlob(function (blob) {
             if (!blob) { showToast("Could not make the card — try again."); return; }
             var a = document.createElement("a");

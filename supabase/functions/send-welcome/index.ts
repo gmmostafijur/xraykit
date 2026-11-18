@@ -17,7 +17,7 @@ import nodemailer from "npm:nodemailer@6.9.14";
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
 
 const CORS = {
-  "Access-Control-Allow-Origin": "https://gmmostafijur.github.io",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
@@ -36,7 +36,7 @@ const WELCOME_HTML = `<!DOCTYPE html>
         <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; background-color:#ffffff; border-radius:12px; overflow:hidden;">
           <tr>
             <td align="center" style="background-color:#0a0a0a; padding:28px 20px 22px 20px;">
-              <img src="https://gmmostafijur.github.io/xraykit/logo.png" alt="XRayKit" width="140" style="display:block; width:140px; height:auto; border:0;">
+              <img src="https://xraykit.vercel.app/logo.png" alt="XRayKit" width="140" style="display:block; width:140px; height:auto; border:0;">
               <p style="margin:14px 0 0 0; color:#ffffff; font-size:13px; letter-spacing:3px; text-transform:uppercase;">X Audit &amp; Thread Generator</p>
             </td>
           </tr>
