@@ -105,14 +105,14 @@
         <nav class="topnav" aria-label="Main menu">
           <a href="index.html">Home</a>
           <a href="audit.html">Run a scan</a>
-          <a href="report.html">Sample report</a>
           <a href="scheduler.html">Scheduler</a>
           <a href="auth.html" id="navLogin">Log in</a><a href="account.html" id="navAccount" style="display:none">My account</a>
         </nav>
       </div>
     </header>
 
-    <main class="wrap">
+    <div id="featureOff" class="wrap" style="display:none;padding:40px 0"><p style="font-size:16px">This feature is paused by the admin right now — check back soon.</p><p><a href="index.html">&larr; Back to home</a></p></div>
+    <main class="wrap" data-feature-body>
       <section class="hero">
         <span class="mono">Hashtag research</span>
         <h1>Tags that fit <span style="color:var(--scan)">each post</span>.</h1>
@@ -219,5 +219,9 @@
         renderTopic(current);
       })();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="site-settings.js"></script>
+    <script>if (window.XRayKitSettings) window.XRayKitSettings.guard("hashtags");</script>
+    <script src="chat-widget.js"></script>
   </body>
 </html>

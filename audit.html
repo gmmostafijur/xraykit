@@ -1437,14 +1437,16 @@
             return client.rpc("my_plan");
           }).then(function (r) {
             if (!r || !r.data) return;
-            var isPro = r.data.plan === "pro";
-            var limit = isPro ? 30 : 1;
+            var planName = r.data.plan || "free";
+            var isPro = planName === "pro" || planName === "custom";
+            var limit = r.data.audit_limit ? Number(r.data.audit_limit) : (isPro ? 30 : 1);
             var used = Number(r.data.audits_used || 0);
-            var label = isPro ? "Pro" : "Free";
+            var label = planName === "custom" ? "Custom" : isPro ? "Pro" : "Free";
             var planCell = document.getElementById("bPlan");
             if (planCell) planCell.textContent = label + " — audit " + used + " of " + limit + " this month";
             var note = document.getElementById("planNote");
-            if (note) note.innerHTML = (isPro ? "PRO PLAN" : "FREE PLAN") + " — <b>" + used + " of " + limit + " audits used this month</b> · NO X PASSWORD, EVER · TAKES ABOUT A MINUTE";
+            var planTag = planName === "custom" ? "CUSTOM PLAN" : isPro ? "PRO PLAN" : "FREE PLAN";
+            if (note) note.innerHTML = planTag + " — <b>" + used + " of " + limit + " audits used this month</b> · NO X PASSWORD, EVER · TAKES ABOUT A MINUTE";
           }).catch(function () {});
         }
         window.addEventListener("load", refreshPlanNote);
@@ -1571,7 +1573,7 @@
               if (scanError) {
                 var msg = "Something went wrong — please try again.";
                 if (scanError.code === "not_logged_in") msg = "Please log in first — audits need an account. Use the Log in link in the menu, then run the scan again.";
-                else if (scanError.code === "limit_reached") msg = "You've used your free audit for this month. Start the 3-day Pro trial for 30 audits a month.";
+                else if (scanError.code === "limit_reached") msg = scanError.limit ? "You've used your " + scanError.limit + " audits for this month." + (scanError.plan === "free" ? " Start the 3-day Pro trial for 30 audits a month." : "") : "You've used your free audit for this month. Start the 3-day Pro trial for 30 audits a month.";
                 else if (scanError.message) msg = scanError.message;
                 $("briefTitle").textContent = "Audit didn't run";
                 $("briefLede").textContent = msg;
@@ -2619,6 +2621,8 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="nav-auth.js"></script>
+    <script src="site-settings.js"></script>
+    <script src="chat-widget.js"></script>
 <style>.trial-msg { min-height: 20px; margin: 12px 0 0; font-weight: 700; font-size: 14px; }</style>
     <script>
       (function () {

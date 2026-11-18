@@ -37,6 +37,10 @@
       .acct-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:24px; }
       .acct-actions .btn { flex:1; justify-content:center; }
       .acct-msg { min-height:22px; font-weight:600; margin:14px 0 0; font-size:14px; color:var(--ink-faint); }
+      .acct-field { margin: 12px 0; }
+      .acct-field label { display: block; font-size: 13px; color: var(--ink-faint); margin-bottom: 6px; }
+      .acct-input { width: 100%; max-width: 340px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; font-size: 15px; background: var(--panel); color: var(--ink); }
+      .acct-input:focus { outline: 2px solid var(--lime); outline-offset: 1px; }; }
       @media (max-width:820px) { .topnav { margin-left:0; width:100%; } }
     </style>
   </head>
@@ -68,11 +72,46 @@
           <a class="btn" href="index.html#/pricing">Manage plan</a>
           <button class="btn" type="button" id="logoutBtn">Log out</button>
         </div>
+        <div id="customBox"></div>
         <p class="acct-msg" id="acctMsg">Loading your account&hellip;</p>
       </div>
+      </div>
+      <div class="acct-card" style="margin-top:16px">
+        <h2 style="font-size:17px;margin:0 0 4px">Profile</h2>
+        <p class="acct-sub" style="margin-bottom:8px">The name shown on your account. You can change it any time.</p>
+        <div class="acct-field">
+          <label for="acctName">Display name</label>
+          <input class="acct-input" id="acctName" type="text" maxlength="60" placeholder="Your name" autocomplete="name" />
+        </div>
+        <div class="acct-actions" style="margin-top:12px">
+          <button class="btn btn-lime" type="button" id="saveNameBtn" style="flex:0 0 auto">Save name</button>
+          <span class="acct-msg" id="nameMsg" style="margin:0;align-self:center"></span>
+        </div>
+      </div>
+      <div class="acct-card" style="margin-top:16px">
+        <h2 style="font-size:17px;margin:0 0 4px">Security — two-factor authentication</h2>
+        <p class="acct-sub" style="margin-bottom:8px">With 2FA on, logging in also asks for a 6-digit code from your authenticator app (Google Authenticator, Authy, or any TOTP app).</p>
+        <p id="mfaStatus" style="font-size:14px;margin:0 0 10px">Checking&hellip;</p>
+        <div id="mfaSetup" hidden>
+          <div id="mfaQrWrap" hidden style="margin:10px 0">
+            <img id="mfaQr" alt="Scan this QR code with your authenticator app" style="width:180px;height:180px;border:1px solid var(--line);border-radius:12px;background:#fff" />
+            <p style="font-size:13px;color:var(--ink-soft);margin-top:8px">Or enter this secret by hand: <code id="mfaSecret"></code></p>
+          </div>
+          <div class="acct-actions" style="margin-top:12px;align-items:center">
+            <input class="acct-input" id="mfaCode" type="text" inputmode="numeric" placeholder="6-digit code" maxlength="6" style="max-width:150px" />
+            <button class="btn btn-lime" type="button" id="mfaEnrollBtn" style="flex:0 0 auto">Set up 2FA</button>
+            <button class="btn" type="button" id="mfaConfirmBtn" style="flex:0 0 auto" hidden>Verify &amp; enable</button>
+            <span class="acct-msg" id="mfaMsg" style="margin:0"></span>
+          </div>
+        </div>
+        <div class="acct-actions" id="mfaOn" style="margin-top:12px" hidden>
+          <button class="btn" type="button" id="mfaDisableBtn" style="flex:0 0 auto">Turn off 2FA</button>
+        </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="nav-auth.js"></script>
+    <script src="site-settings.js"></script>
+    <script src="chat-widget.js"></script>
     <script>
       (function () {
         "use strict";
@@ -89,7 +128,11 @@
             var planEl = document.getElementById("acctPlan");
             var trialEl = document.getElementById("acctTrial");
             var usageEl = document.getElementById("acctUsage");
-            if (plan === "pro" && r.data.trial_ends_at) {
+            if (plan === "custom") {
+              planEl.textContent = "Pro (Custom)";
+              planEl.classList.add("pro");
+              trialEl.textContent = "\u2014";
+            } else if (plan === "pro" && r.data.trial_ends_at) {
               planEl.textContent = "Pro (trial)";
               planEl.classList.add("pro");
               trialEl.textContent = fmtDate(r.data.trial_ends_at);
@@ -101,13 +144,100 @@
               planEl.textContent = "Free";
               trialEl.textContent = "\u2014";
             }
-            var limit = plan === "pro" ? 30 : 1;
+            var limit = r.data.audit_limit ? Number(r.data.audit_limit) : (plan === "pro" ? 30 : 1);
             usageEl.textContent = (r.data.audits_used || 0) + " of " + limit;
+            loadCustomBox(user);
             if (msg) msg.textContent = "";
           });
         });
+        function customFeatures(c) {
+          var f = [];
+          if (c.include_fixes) f.push("written fixes");
+          if (c.include_threads) f.push("thread generator");
+          if (c.include_plan7day) f.push("7-day plan");
+          return f.length ? f.join(" + ") : "audits only";
+        }
+        function loadCustomBox(user) {
+          var box = document.getElementById("customBox");
+          if (!box) return;
+          sb.from("custom_plans").select("amount_usd,audit_limit,include_fixes,include_threads,include_plan7day,status,note,created_at,paid_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).then(function (cr) {
+            if (cr.error || !cr.data || !cr.data.length) return;
+            var c = cr.data[0];
+            var feats = customFeatures(c);
+            if (c.status === "pending") {
+              box.innerHTML = '<div style="margin-top:16px;padding:14px 16px;border:1.5px solid var(--line-strong);border-radius:12px"><strong>Your custom package: $' + Number(c.amount_usd).toFixed(2) + '</strong><br>' + c.audit_limit + ' audits/month \u00b7 ' + feats + '<br><span style="color:var(--ink-soft)">Payment pending \u2014 your account becomes Pro once payment is confirmed.</span><br><a class="btn btn-lime" style="margin-top:10px" href="https://wa.me/8801613572749?text=Hi%20%E2%80%94%20I%20want%20to%20pay%20for%20my%20custom%20XRayKit%20package." target="_blank" rel="noopener">Chat on WhatsApp to pay</a></div>';
+            } else if (c.status === "paid") {
+              box.innerHTML = '<div style="margin-top:16px;padding:14px 16px;border:1.5px solid var(--line-strong);border-radius:12px"><strong>Custom Pro active \u2014 $' + Number(c.amount_usd).toFixed(2) + '</strong><br>' + c.audit_limit + ' audits/month \u00b7 ' + feats + '<br><span style="color:var(--ink-soft)">Paid ' + fmtDate(c.paid_at) + (c.note ? " \u00b7 " + c.note : "") + '</span></div>';
+            }
+          });
+        }
         var out = document.getElementById("logoutBtn");
         if (out) out.addEventListener("click", async function () { await sb.auth.signOut(); window.location.href = "auth.html"; });
+
+        /* ---- Display name + 2FA (profile settings) ---- */
+        sb.auth.getSession().then(function (res2) {
+          var u = res2.data && res2.data.session && res2.data.session.user;
+          if (!u) return;
+          var nameInput = document.getElementById("acctName");
+          var nameMsg = document.getElementById("nameMsg");
+          sb.from("profiles").select("display_name").eq("id", u.id).maybeSingle().then(function (pr) {
+            if (pr.data && pr.data.display_name) nameInput.value = pr.data.display_name;
+          });
+          document.getElementById("saveNameBtn").addEventListener("click", async function () {
+            var r = await sb.rpc("set_display_name", { p_name: nameInput.value.trim() });
+            nameMsg.textContent = r.error ? ("Could not save \u2014 " + (r.error.message || "try again.")) : "Name saved.";
+          });
+          var mfaFactorId = null;
+          var mfaStatus = document.getElementById("mfaStatus");
+          var mfaMsg = document.getElementById("mfaMsg");
+          function refreshMfa() {
+            sb.auth.mfa.listFactors().then(function (fl) {
+              var totp = (fl.data && fl.data.totp) || [];
+              var verified = totp.filter(function (f) { return f.status === "verified"; });
+              if (verified.length) {
+                mfaFactorId = verified[0].id;
+                mfaStatus.textContent = "2FA is ON \u2014 your logins ask for an authenticator code.";
+                document.getElementById("mfaSetup").hidden = true;
+                document.getElementById("mfaOn").hidden = false;
+              } else {
+                mfaStatus.textContent = "2FA is off \u2014 your account is protected by your password only.";
+                document.getElementById("mfaSetup").hidden = false;
+                document.getElementById("mfaOn").hidden = true;
+              }
+            });
+          }
+          document.getElementById("mfaEnrollBtn").addEventListener("click", async function () {
+            var r = await sb.auth.mfa.enroll({ factorType: "totp", friendlyName: "XRayKit" });
+            if (r.error || !r.data) { mfaMsg.textContent = "Could not start setup \u2014 " + ((r.error && r.error.message) || "try again."); return; }
+            mfaFactorId = r.data.id;
+            if (r.data.totp && r.data.totp.qr_code) {
+              document.getElementById("mfaQr").src = r.data.totp.qr_code;
+              document.getElementById("mfaQrWrap").hidden = false;
+            }
+            if (r.data.totp && r.data.totp.secret) document.getElementById("mfaSecret").textContent = r.data.totp.secret;
+            document.getElementById("mfaConfirmBtn").hidden = false;
+            mfaMsg.textContent = "Scan the code, then enter the 6-digit code from your app.";
+          });
+          document.getElementById("mfaConfirmBtn").addEventListener("click", async function () {
+            var code = document.getElementById("mfaCode").value.trim();
+            if (!/^\d{6}$/.test(code)) { mfaMsg.textContent = "Enter the 6-digit code from your app."; return; }
+            var ch = await sb.auth.mfa.challenge({ factorId: mfaFactorId });
+            if (ch.error || !ch.data) { mfaMsg.textContent = "Could not verify \u2014 try again."; return; }
+            var v = await sb.auth.mfa.verify({ factorId: mfaFactorId, challengeId: ch.data.id, code: code });
+            if (v.error) { mfaMsg.textContent = "That code didn't work \u2014 try the current code from your app."; return; }
+            mfaMsg.textContent = "2FA is on.";
+            refreshMfa();
+          });
+          document.getElementById("mfaDisableBtn").addEventListener("click", async function () {
+            if (!mfaFactorId) return;
+            var r = await sb.auth.mfa.unenroll({ factorId: mfaFactorId });
+            if (r.error) { mfaStatus.textContent = "Could not turn off 2FA \u2014 try again."; return; }
+            mfaFactorId = null;
+            mfaStatus.textContent = "2FA is off.";
+            refreshMfa();
+          });
+          refreshMfa();
+        });
       })();
     </script>
   </body>

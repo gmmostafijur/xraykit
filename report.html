@@ -343,14 +343,21 @@
 
     <main id="top">
 
-      <!-- ================= PAGE: SAMPLE REPORT ================= -->
+      <!-- ================= PAGE: REPORT ================= -->
       <div class="page" data-page="report">
+        <div id="reportEmpty" hidden style="padding:48px 0;text-align:center">
+          <div class="wrap">
+            <h2>No report selected</h2>
+            <p>Run a free audit and your report will appear here &mdash; score, problems ranked by impact, fixes written out, and a 7-day plan.</p>
+            <a class="btn btn-lime" href="audit.html">Run your free audit &rarr;</a>
+          </div>
+        </div>
 
         <section class="report-hero">
           <div class="wrap report-hero-in">
             <span class="hero-tag">Step 3 · The report</span>
-            <h1>This is what a finished <span class="hl">XRayKit report</span> looks like.</h1>
-            <p class="hero-sub">A real report, end to end — built from the sample profile used in the Step 2 audit demo: <b>NovaSwap</b>, a pre-launch DeFi protocol whose goal is to nail its token launch. Score first, problems ranked by impact, and a written fix for every weak frame. Your own report reads your profile the same way.</p>
+            <h1>Your <span class="hl">XRayKit report</span>.</h1>
+            <p class="hero-sub">Score first, problems ranked by impact, and a written fix for every weak frame. Run a free audit and your report appears here.</p>
             <div class="hero-ctas">
               <a class="btn btn-lime" href="#sheet" data-anchor="sheet">Read the report ↓</a>
               <a class="btn" href="#plan" data-anchor="plan">Skip to the 7-day fix plan</a>
@@ -360,19 +367,19 @@
         </section>
 
         <div class="wrap sheet-zone" id="sheet">
-          <article class="sheet" aria-label="XRayKit scan report for NovaSwap">
+          <article class="sheet" aria-label="XRayKit scan report">
             <div class="sheet-head">
               <div class="sheet-who">
-                <div class="avatar" aria-hidden="true">N</div>
+                <div class="avatar" aria-hidden="true">?</div>
                 <div>
-                  <div class="name">NovaSwap</div>
-                  <div class="handle">@novaswap</div>
-                  <div class="meta">DeFi protocol · Pre-launch · Goal: Nail the launch</div>
+                  <div class="name">Your project</div>
+                  <div class="handle">@yourhandle</div>
+                  <div class="meta">Your X account</div>
                 </div>
               </div>
               <div class="sheet-stamp">
-                <span class="sample">Sample report</span><br />
-                Scan ref <b>XR-5599</b> · 15 Nov 2026<br />
+                <span class="sample">Scan report</span><br />
+                Scan ref <b>&mdash;</b> · &mdash;<br />
                 Material: bio · pinned post · 4 recent posts
               </div>
             </div>
@@ -389,7 +396,7 @@
                 <div class="ring-cap">Overall profile score</div>
               </div>
               <div class="verdict">
-                <h2>Verdict: strong product, invisible account.</h2>
+                <h2>Verdict: run an audit to see yours.</h2>
                 <p>The material is better than the presentation. NovaSwap has a <b>live testnet</b> and a <b>closed seed round</b> — proof most pre-launch accounts would kill for — yet the bio still says “coming soon”, the pinned post is a shrug, and all four recent posts are teasers. Nothing here is broken beyond repair: <b>every weak frame has a same-day fix</b>, listed below.</p>
                 <div class="mini-bars" aria-label="Frame scores at a glance">
                   <div class="mini-bar"><span class="lbl">Bio</span><span class="bar"><i style="width:38%"></i></span><span class="n">38</span></div>
@@ -417,7 +424,7 @@
                 <button class="btn" type="button" id="shareCardBtn">Download score card (PNG)</button>
               </div>
             </div>
-            <p class="sheet-note">SAMPLE — NOVASWAP IS THE DEMO PROFILE FROM STEP 2. RUN YOUR OWN SCAN AND EVERY NUMBER, QUOTE AND FIX BELOW IS YOURS.</p>
+            <p class="sheet-note">Run a free audit and your report appears here.</p>
           </article>
         </div>
 
@@ -668,7 +675,7 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
                 <p>It was built by <strong>Md. Mostafijur Rahman</strong>, a digital marketer and social media manager whose work is mostly in the crypto and NFT sector — managing X accounts, growing communities, and seeing first-hand how a weak bio or a hookless pinned post quietly costs a project reach right before a launch.</p>
                 <p>So XRayKit gives you the diagnosis <strong>and</strong> the fix: a 0–100 score, the problems ranked by impact, the thread drafts, a 7-day plan and hashtag research — every facility in one place.</p>
                 <div class="page-ctas">
-                  <a class="btn btn-lime" href="#/report" data-page-link="report">Read the sample report</a>
+                  <a class="btn btn-lime" href="audit.html">Run your free audit</a>
                   <a class="btn" href="#/pricing" data-page-link="pricing">See Pricing — Pro $7/mo</a>
                   <a class="btn" href="https://x.com/mdmostafizur000" target="_blank" rel="noopener">Follow on X ↗</a>
                 </div>
@@ -716,7 +723,7 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
             </div>
             <p class="pricing-note">TRIAL TERMS — 3 days of full Pro, no card up front and nothing to cancel. When the trial ends, Pro simply pauses; add a card only if you want to keep it at $7/month. POSTING IS MANUAL AT LAUNCH — DRAFTS + COPY, NO X API CREDITS NEEDED.</p>
             <div class="page-ctas">
-              <a class="btn" href="#/report" data-page-link="report">See a sample report first →</a>
+              <a class="btn" href="audit.html">Run your free audit →</a>
               <a class="btn" href="#/faq" data-page-link="faq">Questions? Read the FAQ →</a>
             </div>
           </div>
@@ -737,7 +744,7 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
               <div><h3>How does the 3-day trial work?</h3><p>You get full Pro from the moment you start — no card required. When day 3 ends, the trial stops on its own; if you want to keep Pro, add a card then and it continues at $7/month.</p></div>
             </div>
             <div class="page-ctas">
-              <a class="btn btn-lime" href="#/report" data-page-link="report">Read the sample report →</a>
+              <a class="btn btn-lime" href="audit.html">Run your free audit →</a>
               <a class="btn" href="#/pricing" data-page-link="pricing">See Pricing →</a>
               <a class="btn" href="#/contact" data-page-link="contact">Contact us →</a>
             </div>
@@ -756,7 +763,7 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
               <article class="contact-card"><span class="mono">LinkedIn</span><h3>Md. Mostafijur Rahman</h3><p>Connect on LinkedIn for work enquiries and partnerships.</p><a class="btn" href="https://www.linkedin.com/in/md-mostafijur/" target="_blank" rel="noopener">Open LinkedIn ↗</a></article>
             </div>
             <div class="page-ctas">
-              <a class="btn btn-lime" href="#/report" data-page-link="report">Read the sample report →</a>
+              <a class="btn btn-lime" href="audit.html">Run your free audit →</a>
               <a class="btn" href="#/pricing" data-page-link="pricing">See Pricing — start free →</a>
               <a class="btn" href="#/faq" data-page-link="faq">Read the FAQ →</a>
             </div>
@@ -954,16 +961,9 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
           var score = (typeof SCORE === "number") ? SCORE : 0;
           var vH = document.querySelector(".verdict h2");
           var verdict = vH ? vH.textContent.replace(/^Verdict:\s*/i, "").replace(/\.\s*$/, "") : "";
-          var stamp = document.querySelector(".sheet-stamp");
-          var isSample = stamp ? /sample report/i.test(stamp.textContent) : true;
           var site = "https://xraykit.vercel.app/";
-          var text;
-          if (isSample) {
-            text = "This is what an XRayKit audit looks like — NovaSwap scored " + score + "/100. Get your free audit: " + site;
-          } else {
-            text = "I X-rayed my X account with XRayKit — scored " + score + "/100. \"" + verdict + "\" Get your free audit: " + site;
-          }
-          return { handle: handle, score: score, verdict: verdict, isSample: isSample, text: text };
+          var text = "I X-rayed my X account with XRayKit — scored " + score + "/100. \"" + verdict + "\" Get your free audit: " + site;
+          return { handle: handle, score: score, verdict: verdict, text: text };
         }
         function refreshShare() {
           var t = document.getElementById("shareText");
@@ -1021,48 +1021,11 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
 
         /* ---------- download the report as .txt ---------- */
         var REPORT_TXT = [
-          "XRayKit — SCAN REPORT (SAMPLE)",
-          "Account: NovaSwap (@novaswap) · DeFi protocol · Pre-launch",
-          "Goal: Nail the launch · Scan ref XR-5599 · 15 Nov 2026",
-          "",
-          "OVERALL SCORE: 34 / 100",
-          "Verdict: strong product, invisible account. The testnet is live and the seed round is closed, but the bio says 'coming soon', the pinned post has no hook, and all four recent posts are teasers.",
-          "",
-          "FRAME SCORES",
-          "Bio & positioning — 38/100 (Unclear)",
-          "Pinned post — 22/100 (No hook)",
-          "Posting cadence — 45/100 (Promises, no payoffs)",
-          "Content mix — 28/100 (All teaser)",
-          "Launch angle — 35/100 (Drifting)",
-          "",
-          "TOP PROBLEMS (RANKED BY IMPACT)",
-          "1. The pinned post wastes your highest-traffic slot. [High]",
-          "2. The bio hides your best fact — the live testnet. [High]",
-          "3. An all-teaser feed gives the algorithm nothing. [High]",
-          "4. Promises without payoffs erode trust. [Medium]",
-          "5. No launch runway: no date, countdown or waitlist. [Medium]",
-          "",
-          "REWRITTEN BIO (PRO DRAFT)",
-          "The DEX for first-time swappers: one click, no bridging, no gas juggling. Testnet is LIVE — try it free today. Token launch next month",
-          "",
-          "NEW PINNED THREAD (PRO DRAFT)",
-          "1/ We raised our seed round to build the DEX we kept wishing existed. Here's the problem we're fixing, what the testnet already does, and how to try it today.",
-          "2/ Swapping today means 4 tabs, 2 bridges and a prayer. NovaSwap does it in one click. The testnet is live and free — feedback goes straight to the team.",
-          "",
-          "7-DAY FIX PLAN",
-          "Day 1 — Ship the new bio.",
-          "Day 2 — Replace the pinned post with the story thread.",
-          "Day 3 — Post a screen recording of one full swap.",
-          "Day 4 — Teach one thing (education post).",
-          "Day 5 — Ask the community a real question.",
-          "Day 6 — Deliver the teased partnership announcement.",
-          "Day 7 — Start the launch runway: date reveal + countdown.",
-          "",
-          "AFTER THE 7-DAY PLAN: re-scan to see the new score.",
-          "",
-          "Generated by XRayKit — X audit & thread generator for crypto founders. Free: 1 audit/month. Pro: $7/month, 3 days free."
+          "XRayKit — SCAN REPORT",
+          "No report selected.",
+          "Run a free audit and your report will appear here: https://gmmostafijur.github.io/xraykit/audit.html",
         ].join("\n");
-        var REPORT_NAME = "xraykit-report-novaswap-sample.txt";
+        var REPORT_NAME = "xraykit-report.txt";
         var dl = document.getElementById("downloadBtn");
         if (dl) dl.addEventListener("click", function () {
           var blob = new Blob([REPORT_TXT], { type: "text/plain;charset=utf-8" });
@@ -1085,13 +1048,26 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="nav-auth.js"></script>
+    <script src="site-settings.js"></script>
+    <script>
+      (function () {
+        if (!window.XRayKitSettings) return;
+        window.XRayKitSettings.load().then(function (st) {
+          if (st.features && st.features.share_card === false) {
+            var b = document.getElementById("shareBox");
+            if (b) b.style.display = "none";
+          }
+        });
+      })();
+    </script>
+    <script src="chat-widget.js"></script>
     <script>
       /* ---------- real report (?id=) — fetches a saved audit and fills the page ---------- */
       (function () {
         "use strict";
         var params = new URLSearchParams(window.location.search);
         var id = params.get("id");
-        if (!id) return; // no id: the NovaSwap sample stays
+        var noId = !id;
         var sb = window.supabase.createClient("https://elbddcclcmmpqdxsdahg.supabase.co", "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI");
         function esc(v) { return String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
         function q(sel) { return document.querySelector(sel); }
@@ -1099,12 +1075,18 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
         function fmtDate(iso) { var d = new Date(iso); return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
         function clamp(n) { n = Math.round(Number(n) || 0); return Math.max(0, Math.min(100, n)); }
         function shortTitle(t, n) { t = String(t || ""); return t.length > (n || 14) ? t.slice(0, n || 14) + "\u2026" : t; }
+        function showEmpty() {
+          var e = document.getElementById("reportEmpty"); if (e) e.hidden = false;
+          var h = q(".report-hero"); if (h) h.style.display = "none";
+          var z = q(".sheet-zone"); if (z) z.style.display = "none";
+        }
+        if (noId) { showEmpty(); return; }
 
         sb.from("audits").select("id,handle,score,report,created_at").eq("id", id).single().then(function (res) {
-          if (res.error || !res.data) return; // keep the sample
+          if (res.error || !res.data) { showEmpty(); return; }
           var audit = res.data;
           var r = audit.report || {};
-          if (typeof r.score !== "number" || !Array.isArray(r.problems)) return;
+          if (typeof r.score !== "number" || !Array.isArray(r.problems)) { showEmpty(); return; }
           var meta = r.meta || {};
           var handle = audit.handle || meta.handle || "account";
           var project = meta.project || handle;
@@ -1177,12 +1159,13 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
             var cols = card.querySelectorAll(".fcol");
             if (cols[0]) { var saw = cols[0].querySelector(".saw"); if (saw) saw.textContent = "\u201c" + p.saw + "\u201d"; }
             if (cols[1]) { var why = cols[1].querySelector("p"); if (why) why.textContent = p.why; }
-            if (cols[2]) { var fix = cols[2].querySelector("p"); if (fix) fix.textContent = p.fix; }
+            if (cols[2]) { cols[2].style.display = p.fix ? "" : "none"; var fix = cols[2].querySelector("p"); if (fix) fix.textContent = p.fix || ""; }
             var fixBox = card.querySelector(".fix-box");
             if (fixBox) {
+              fixBox.style.display = p.fix ? "" : "none";
               var k = fixBox.querySelector(".k span:first-child"); if (k) k.textContent = "The fix — copy-ready";
-              var txt = fixBox.querySelector("[data-copy-text]"); if (txt) txt.textContent = p.fix;
-              var cc = fixBox.querySelector("[data-charcount]"); if (cc) cc.textContent = String(p.fix).length + " chars";
+              var txt = fixBox.querySelector("[data-copy-text]"); if (txt) txt.textContent = p.fix || "";
+              var cc = fixBox.querySelector("[data-charcount]"); if (cc) cc.textContent = String(p.fix || "").length + " chars";
             }
           });
 
@@ -1213,6 +1196,8 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
             var para = el.querySelector("p"); if (para) para.textContent = d.why || "";
             var dr = el.querySelector(".draft"); if (dr && d.draft) dr.textContent = d.draft;
           });
+          var planBand = q("#plan");
+          if (planBand) planBand.style.display = plan.length ? "" : "none";
           var planLede = q("#plan .lede");
           if (planLede) planLede.textContent = "One move a day, in impact order. Every draft below is written for " + project + "'s voice and goal — copy it, post it, done.";
 
@@ -1237,7 +1222,7 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
             lines.push((i + 1) + ". " + p.title + " (" + clamp(p.score) + "/100, " + p.impact + " impact)");
             lines.push("   Saw: " + p.saw);
             lines.push("   Why it costs you: " + p.why);
-            lines.push("   Fix: " + p.fix);
+            if (p.fix) lines.push("   Fix: " + p.fix);
           });
           if (strengths.length) {
             lines.push("");

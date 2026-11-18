@@ -91,11 +91,13 @@
       .brand-name { font-weight: 700; font-size: 17px; letter-spacing: .01em; }
       .brand-sub { font-size: 11px; color: var(--sidebar-dim); text-transform: uppercase; letter-spacing: .12em; }
       .nav-label { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--sidebar-dim); padding: 14px 10px 6px; }
-      .nav-btn {
+      .nav-btn, .nav-link {
         display: flex; align-items: center; gap: 10px; width: 100%;
         background: none; border: 0; color: var(--sidebar-ink);
         padding: 9px 10px; border-radius: 8px; text-align: left; font-size: 14.5px;
       }
+      .nav-link { text-decoration: none; }
+      .nav-link:hover { background: var(--sidebar-active); }
       .nav-btn svg { flex: none; opacity: .85; }
       .nav-btn:hover { background: var(--sidebar-active); }
       .nav-btn.active { background: var(--sidebar-active); color: #fff; box-shadow: inset 3px 0 0 var(--accent); }
@@ -169,6 +171,23 @@
       .pill.active { background: var(--accent-soft); color: var(--accent); }
       .pill.suspended { background: var(--red-soft); color: var(--red); }
       .pill.flag { background: var(--amber-soft); color: var(--amber); }
+      .pill.custom { background: var(--blue-soft); color: var(--blue); }
+      .menu-wrap { position: relative; display: inline-block; }
+      .menu { position: absolute; right: 0; top: calc(100% + 4px); min-width: 180px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); z-index: 50; padding: 4px; }
+      .menu button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 9px 12px; border-radius: 7px; font: inherit; font-size: 14px; color: var(--ink); }
+      .menu button:hover:not(:disabled) { background: var(--surface-2); }
+      .menu button:disabled { opacity: .45; cursor: default; }
+      .modal-overlay { position: fixed; inset: 0; background: rgba(6, 12, 9, .55); display: none; align-items: flex-start; justify-content: center; z-index: 100; padding: 40px 16px; overflow-y: auto; }
+      .modal-overlay.open { display: flex; }
+      .modal { background: var(--surface); color: var(--ink); border-radius: 14px; max-width: 560px; width: 100%; padding: 24px; box-shadow: var(--shadow); }
+      .modal h2 { font-size: 20px; margin-bottom: 4px; }
+      .modal .sub { color: var(--ink-2); font-size: 13.5px; margin-bottom: 16px; }
+      .check-row { display: flex; flex-wrap: wrap; gap: 14px; margin: 4px 0 12px; }
+      .check-row label { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; }
+      .modal .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+      .plan-item { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-top: 10px; font-size: 14px; }
+      .plan-item .row1 { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+      .plan-item .meta { color: var(--ink-2); font-size: 13px; margin-top: 4px; }
       .num { font-variant-numeric: tabular-nums; }
 
       /* Audit rows */
@@ -235,7 +254,7 @@
         .sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 12px; }
         .brand { padding: 2px 6px; }
         .nav-label, .sidebar-foot { display: none; }
-        .nav-btn { width: auto; padding: 8px 12px; }
+        .nav-btn, .nav-link { width: auto; padding: 8px 12px; }
         .nav-btn.active { box-shadow: inset 0 -3px 0 var(--accent); }
         .main { padding: 20px 16px 50px; }
         .grid-2 { grid-template-columns: 1fr; }
@@ -247,7 +266,39 @@
         td.user-td { justify-content: flex-start; }
         td.user-td::before { display: none; }
       }
+      /* Messages + export + live charts + user detail */
+      .msg-wrap { display: grid; grid-template-columns: 300px 1fr; gap: 14px; }
+      @media (max-width: 760px) { .msg-wrap { grid-template-columns: 1fr; } }
+      .thread-row { display: block; width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; color: var(--ink); font-size: 14px; }
+      .thread-row.active { border-color: var(--accent); }
+      .thread-row .t-name { display: block; font-weight: 700; font-size: 14px; }
+      .thread-row .t-last { display: block; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .thread-row .t-when { font-size: 11.5px; color: var(--ink-3); }
+      #msgList { max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 0 12px; }
+      .msg-line { max-width: 82%; padding: 8px 11px; border-radius: 12px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+      .msg-line.me { align-self: flex-end; background: var(--accent); color: var(--accent-ink); }
+      .msg-line.them { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); }
+      .msg-line .who { display: block; font-size: 11px; font-weight: 700; margin-bottom: 2px; opacity: .7; }
+      .msg-reply { display: flex; gap: 8px; }
+      .msg-reply input { flex: 1; min-width: 0; padding: 9px 11px; border: 1.5px solid var(--line); border-radius: 9px; font-size: 14px; background: var(--surface); color: var(--ink); }
+      .export-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+      .export-row label { font-size: 13.5px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; }
+      .export-row input[type="date"] { padding: 7px 9px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 14px; background: var(--surface); color: var(--ink); }
+      .user-row { cursor: pointer; }
+      .user-row:hover td { background: var(--surface-2); }
+      .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 150px; padding-top: 8px; }
+      .chart-bars .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; min-width: 0; height: 100%; }
+      .chart-bars .bar { width: 100%; max-width: 34px; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 2px; }
+      .chart-bars .bar-v { font-size: 11px; font-weight: 700; }
+      .chart-bars .bar-d { font-size: 10.5px; color: var(--ink-3); }
+      .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 12px 0; }
+      .stat-grid .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+      .stat-grid .stat .l { font-size: 12px; color: var(--ink-2); }
+      .stat-grid .stat .v { font-size: 17px; font-weight: 700; margin-top: 2px; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   </head>
   <body>
     <div id="gateOverlay" style="position:fixed;inset:0;background:#06090a;color:#e9f2ec;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:Archivo,system-ui,sans-serif;">
@@ -289,10 +340,26 @@
           Abuse control
           <span class="nav-badge" id="abuseBadge">3</span>
         </button>
+        <button class="nav-btn" data-view="messages" type="button">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Messages
+          <span class="nav-badge" id="msgBadge" style="display:none">0</span>
+        </button>
         <button class="nav-btn" data-view="settings" type="button">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M19 12a7 7 0 0 0-.14-1.4l2-1.55-2-3.46-2.36.95A7 7 0 0 0 14.1 5.1L13.7 2.6h-3.4l-.4 2.5a7 7 0 0 0-2.4 1.44l-2.36-.95-2 3.46 2 1.55a7 7 0 0 0 0 2.8l-2 1.55 2 3.46 2.36-.95a7 7 0 0 0 2.4 1.44l.4 2.5h3.4l.4-2.5a7 7 0 0 0 2.4-1.44l2.36.95 2-3.46-2-1.55c.1-.45.14-.92.14-1.4z"/></svg>
           Settings
         </button>
+
+        <div class="nav-label">Website</div>
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="audit.html">Run a scan</a>
+        <a class="nav-link" href="index.html#pricing">Pricing</a>
+        <a class="nav-link" href="tracker.html">Growth tracker</a>
+        <a class="nav-link" href="history.html">Audit history</a>
+        <a class="nav-link" href="compare.html">Compare</a>
+        <a class="nav-link" href="scheduler.html">Scheduler</a>
+        <a class="nav-link" href="hashtags.html">Hashtags</a>
+        <a class="nav-link" href="account.html">My account</a>
 
         <div class="sidebar-foot">
           <strong>Md. Mostafijur Rahman</strong>
@@ -309,7 +376,7 @@
           </div>
           <div class="topbar-actions">
             <a class="btn" href="index.html">← XRayKit site</a>
-            <span class="demo-chip" id="dataChip">Connecting to live data…</span>
+            <span class="demo-chip" id="dataChip">Loading live data…</span>
           </div>
         </div>
 
@@ -337,7 +404,7 @@
               <div class="delta" id="kpiAuditsD">Loading…</div>
             </div>
             <div class="kpi">
-              <div class="label">API cost this month</div>
+              <div class="label">Gemini cost this month</div>
               <div class="value" id="kpiApi">—</div>
               <div class="delta" id="kpiApiD">Loading…</div>
             </div>
@@ -347,57 +414,32 @@
             <div class="card">
               <div class="card-head">
                 <div>
-                  <h2>Revenue — last 6 months</h2>
-                  <div class="card-sub">MRR in USD, from Pro subscriptions at $7/mo.</div>
+                  <h2>Audits — last 14 days</h2>
+                  <div class="card-sub">One bar per day, from real audit data.</div>
                 </div>
               </div>
-              <svg viewBox="0 0 560 220" width="100%" style="height:auto" role="img" aria-label="Bar chart of monthly recurring revenue: June 84 dollars, July 119, August 154, September 203, October 252, November 294">
-                <line x1="44" y1="10" x2="44" y2="182" stroke="var(--line)"/>
-                <line x1="44" y1="182" x2="548" y2="182" stroke="var(--line)"/>
-                <line x1="44" y1="126" x2="548" y2="126" stroke="var(--line)" stroke-dasharray="3 4"/>
-                <line x1="44" y1="69" x2="548" y2="69" stroke="var(--line)" stroke-dasharray="3 4"/>
-                <text x="38" y="186" text-anchor="end" font-size="11" fill="var(--ink-3)">$0</text>
-                <text x="38" y="130" text-anchor="end" font-size="11" fill="var(--ink-3)">$100</text>
-                <text x="38" y="73" text-anchor="end" font-size="11" fill="var(--ink-3)">$200</text>
-                <text x="38" y="16" text-anchor="end" font-size="11" fill="var(--ink-3)">$300</text>
-                <!-- bars: scale 0.573 px per $ -->
-                <g fill="var(--accent)">
-                  <rect x="70" y="134" width="52" height="48" rx="5"/>
-                  <rect x="152" y="114" width="52" height="68" rx="5"/>
-                  <rect x="234" y="94" width="52" height="88" rx="5"/>
-                  <rect x="316" y="66" width="52" height="116" rx="5"/>
-                  <rect x="398" y="38" width="52" height="144" rx="5"/>
-                  <rect x="480" y="14" width="52" height="168" rx="5"/>
-                </g>
-                <g font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle">
-                  <text x="96" y="126">$84</text>
-                  <text x="178" y="106">$119</text>
-                  <text x="260" y="86">$154</text>
-                  <text x="342" y="58">$203</text>
-                  <text x="424" y="30">$252</text>
-                  <text x="506" y="8">$294</text>
-                </g>
-                <g font-size="11.5" fill="var(--ink-3)" text-anchor="middle">
-                  <text x="96" y="200">Jun</text>
-                  <text x="178" y="200">Jul</text>
-                  <text x="260" y="200">Aug</text>
-                  <text x="342" y="200">Sep</text>
-                  <text x="424" y="200">Oct</text>
-                  <text x="506" y="200">Nov</text>
-                </g>
-              </svg>
+              <div id="auditsChart"></div>
             </div>
 
             <div class="card">
               <h2>Users by plan</h2>
-              <div class="card-sub">128 accounts in total.</div>
-              <div class="plan-row"><span class="plan-dot" style="background:var(--accent)"></span><span class="name">Pro — $7/mo</span><span class="count">42 users</span></div>
-              <div class="plan-bar"><i style="width:33%; background:var(--accent)"></i></div>
-              <div class="plan-row"><span class="plan-dot" style="background:var(--blue)"></span><span class="name">Pro trial (3 days)</span><span class="count">19 users</span></div>
-              <div class="plan-bar"><i style="width:15%; background:var(--blue)"></i></div>
-              <div class="plan-row"><span class="plan-dot" style="background:var(--ink-3)"></span><span class="name">Free</span><span class="count">67 users</span></div>
-              <div class="plan-bar"><i style="width:52%; background:var(--ink-3)"></i></div>
-              <p class="cost-note" style="margin-top:14px">Trial → Pro conversion is the number to watch: about 1 in 3 trials currently converts.</p>
+              <div id="planMix"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2>Export data</h2>
+                <div class="card-sub">All audits and users in a date range — as a real Excel file or PDF.</div>
+              </div>
+            </div>
+            <div class="export-row">
+              <label>From <input type="date" id="exportFrom" /></label>
+              <label>To <input type="date" id="exportTo" /></label>
+              <button class="btn primary" type="button" id="exportXlsx">Export Excel (.xlsx)</button>
+              <button class="btn" type="button" id="exportPdf">Export PDF</button>
+              <span class="key-msg" id="exportMsg" role="status" aria-live="polite"></span>
             </div>
           </div>
 
@@ -462,15 +504,15 @@
             <div class="kpi"><div class="label">Cost per AI draft</div><div class="value" id="kpiCostPerDraft">—</div><div class="delta" id="kpiCostPerDraftD">Loading…</div></div>
           </div>
           <div class="card">
-            <h2>Where the money goes — November</h2>
+            <h2>Where the money goes — this month</h2>
             <div class="card-sub">Pay-per-use only. No fixed monthly API fees.</div>
             <div class="cost-row">
-              <div class="top"><span>Claude API — audits &amp; reports</span><span class="amt" id="costAmtAudits">$0.00</span></div>
+              <div class="top"><span>Gemini API — audits &amp; reports</span><span class="amt" id="costAmtAudits">$0.00</span></div>
               <div class="cost-bar"><i id="costBarAudits" style="width:0%"></i></div>
               <div class="cost-note" id="costNoteAudits">No audits billed yet</div>
             </div>
             <div class="cost-row">
-              <div class="top"><span>Claude API — AI Create drafts</span><span class="amt" id="costAmtDrafts">$0.00</span></div>
+              <div class="top"><span>Gemini API — AI Create drafts</span><span class="amt" id="costAmtDrafts">$0.00</span></div>
               <div class="cost-bar"><i id="costBarDrafts" style="width:0%"></i></div>
               <div class="cost-note" id="costNoteDrafts">No drafts billed yet</div>
             </div>
@@ -493,37 +535,64 @@
           </div>
         </section>
 
+        <!-- ===== MESSAGES ===== -->
+        <section class="view" id="view-messages">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2>Live chat messages</h2>
+                <div class="card-sub">Visitors write from the chat button on the site. Pick a conversation and reply — they see it in the same chatbox.</div>
+              </div>
+              <span class="spacer"></span>
+              <button class="btn" type="button" id="msgRefresh">Refresh</button>
+            </div>
+            <div class="msg-wrap">
+              <div id="msgThreads"></div>
+              <div id="msgPane">
+                <p class="empty-note" id="msgEmpty">Pick a conversation on the left.</p>
+                <div id="msgThread" style="display:none">
+                  <div id="msgHead" style="margin-bottom:10px"></div>
+                  <div id="msgList"></div>
+                  <div class="msg-reply">
+                    <input id="msgReplyInput" type="text" placeholder="Reply as XRayKit&hellip;" maxlength="2000" />
+                    <button class="btn primary" type="button" id="msgSend">Send</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- ===== SETTINGS ===== -->
         <section class="view" id="view-settings">
           <div class="card" style="margin-bottom:14px">
             <div class="card-head">
               <div>
-                <h2>Claude API key</h2>
+                <h2>Gemini API key</h2>
                 <div class="card-sub">This is where you add the key that powers audits, reports and AI Create. Owner-only — customers never see it.</div>
               </div>
               <span class="spacer"></span>
               <span class="pill flag" id="keyPill">Not connected</span>
             </div>
 
-            <div class="key-status" id="keyStatus"><span class="dot"></span><span>Not connected yet. Until a key is added in the live version, the product runs on sample logic.</span></div>
+            <div class="key-status" id="keyStatus"><span class="dot"></span><span>Checking the server key&hellip;</span></div>
 
             <form id="apiKeyForm" novalidate>
               <div class="form-grid">
                 <div class="field">
                   <label for="claudeKeyInput">API key</label>
                   <div class="secret-row">
-                    <input id="claudeKeyInput" type="password" placeholder="sk-ant-… or coa_…" autocomplete="off" autocapitalize="off" spellcheck="false" />
+                    <input id="claudeKeyInput" type="password" placeholder="coa_…" autocomplete="off" autocapitalize="off" spellcheck="false" />
                     <button class="btn" type="button" id="toggleKeyVisibility" aria-label="Show or hide the API key">Show</button>
                   </div>
-                  <div class="hint">Use a Claude key (<strong>sk-ant-…</strong>) from the Anthropic Console, or a Coarena key (<strong>coa_…</strong>) from coarena.ai → Model API → Keys.</div>
+                  <div class="hint">Use a Coarena key (<strong>coa_…</strong>) from coarena.ai → Model API → Keys. This is the key that powers Gemini audits.</div>
                 </div>
                 <div class="field">
                   <label for="claudeModelSelect">Default AI model</label>
                   <select id="claudeModelSelect">
                     <option value="gemini-flash">Gemini 3.8 Flash — audits &amp; reports (in use)</option>
-                    <option value="deepseek-flash">DeepSeek V4.1 Flash — faster, cheaper drafts</option>
-                  </select>
-                  <div class="hint">Gemini Flash for quality on full audits; DeepSeek Flash if draft volume grows and cost matters more. (Claude models are currently off on Coarena.)</div>
+                                      </select>
+                  <div class="hint">The audit function runs Gemini 3.8 Flash (via Coarena). Changing the model needs a function update.</div>
                 </div>
               </div>
 
@@ -560,6 +629,21 @@
                   <input id="auditLimitInput" type="number" min="0" max="10" step="1" value="1" />
                   <div class="hint">Free plan limit before the Pro upgrade prompt appears.</div>
                 </div>
+                <div class="field">
+                  <label for="proLimitInput">Pro audits per account</label>
+                  <input id="proLimitInput" type="number" min="1" max="100" step="1" value="30" />
+                  <div class="hint">Pro plan monthly cap. Custom plans set their own limit per user.</div>
+                </div>
+                <div class="field">
+                  <label for="geminiInInput">Gemini price — input (USD per 1M tokens)</label>
+                  <input id="geminiInInput" type="number" min="0" step="0.01" placeholder="e.g. 0.50" />
+                  <div class="hint">Your real Coarena price. Until you set it, costs show token counts only.</div>
+                </div>
+                <div class="field">
+                  <label for="geminiOutInput">Gemini price — output (USD per 1M tokens)</label>
+                  <input id="geminiOutInput" type="number" min="0" step="0.01" placeholder="e.g. 3.00" />
+                  <div class="hint">Your real Coarena price. Until you set it, costs show token counts only.</div>
+                </div>
               </div>
 
               <div style="margin-top:20px">
@@ -575,22 +659,47 @@
                   <div class="t-text"><strong>Auto-posting (X API credits)</strong><span>Off at launch — posting stays manual (copy-paste / X native scheduler) until credits are enabled.</span></div>
                   <label class="switch"><input type="checkbox" id="autoToggle" /><span class="track"></span></label>
                 </div>
+                <div class="toggle-row">
+                  <div class="t-text"><strong>Growth tracker</strong><span>Show the tracker page to users.</span></div>
+                  <label class="switch"><input type="checkbox" id="trackerToggle" checked /><span class="track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="t-text"><strong>Audit history</strong><span>Show the history page to users.</span></div>
+                  <label class="switch"><input type="checkbox" id="historyToggle" checked /><span class="track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="t-text"><strong>Compare</strong><span>Show the compare page to users.</span></div>
+                  <label class="switch"><input type="checkbox" id="compareToggle" checked /><span class="track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="t-text"><strong>Scheduler</strong><span>Show the scheduler page to users.</span></div>
+                  <label class="switch"><input type="checkbox" id="schedulerToggle" checked /><span class="track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="t-text"><strong>Custom packages</strong><span>Show the Custom card on the pricing page and allow custom service in Users.</span></div>
+                  <label class="switch"><input type="checkbox" id="customToggle" checked /><span class="track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="t-text"><strong>Share card</strong><span>Show the share box (copy post / Post on X / PNG card) on report pages.</span></div>
+                  <label class="switch"><input type="checkbox" id="shareToggle" checked /><span class="track"></span></label>
+                </div>
               </div>
 
               <div style="margin-top:22px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
                 <button class="btn primary" type="submit">Save settings</button>
-                <span class="saved-note" id="savedNote">Saved for this preview — live saving arrives with the backend.</span>
+                <span class="saved-note" id="savedNote">Saved — live on the site now.</span>
               </div>
             </form>
           </div>
 
           <div class="card">
             <h2>Danger zone</h2>
-            <div class="card-sub">Owner-only actions. Nothing here runs in this demo.</div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap">
-              <button class="btn danger" type="button" disabled>Pause all new signups</button>
-              <button class="btn danger" type="button" disabled>Reset all free audit limits</button>
+            <div class="card-sub">Owner-only actions.</div>
+            <div class="toggle-row">
+              <div class="t-text"><strong>Pause new signups</strong><span>While on, the signup form tells visitors signups are paused. Logins still work.</span></div>
+              <label class="switch"><input type="checkbox" id="pauseSignupsToggle" /><span class="track"></span></label>
             </div>
+            <p class="key-msg" id="pauseMsg" aria-live="polite"></p>
           </div>
         </section>
 
@@ -602,40 +711,22 @@
       (function () {
         "use strict";
 
-        /* ---------- Demo data (replaced by live data at load) ---------- */
-        var users = [
-          { initials: "DK", name: "Dana Kim", handle: "@danabuilds", email: "dana@lumenchain.xyz", plan: "Pro", planClass: "pro", audits: 6, joined: "14 Nov 2026", status: "Active" },
-          { initials: "MR", name: "Marco Ruiz", handle: "@marcoonchain", email: "marco@vaultdao.io", plan: "Trial", planClass: "trial", audits: 2, joined: "13 Nov 2026", status: "Active" },
-          { initials: "AS", name: "Aisha Bello", handle: "@aishadefi", email: "aisha@orbitfi.app", plan: "Pro", planClass: "pro", audits: 11, joined: "11 Nov 2026", status: "Active" },
-          { initials: "JT", name: "Jonas Weber", handle: "@jonasweb3", email: "jonas@peakprotocol.com", plan: "Free", planClass: "free", audits: 1, joined: "10 Nov 2026", status: "Active" },
-          { initials: "SL", name: "Sofia Marino", handle: "@sofiacryptos", email: "sofia@mintgarden.art", plan: "Pro", planClass: "pro", audits: 4, joined: "8 Nov 2026", status: "Active" },
-          { initials: "KP", name: "Kenji Park", handle: "@kenjinft", email: "kenji@driftbay.gg", plan: "Free", planClass: "free", audits: 1, joined: "6 Nov 2026", status: "Suspended" },
-          { initials: "LP", name: "Lena Fischer", handle: "@lenabuilds", email: "lena@stackline.dev", plan: "Trial", planClass: "trial", audits: 3, joined: "4 Nov 2026", status: "Active" },
-          { initials: "OT", name: "Omar Haddad", handle: "@omartrades", email: "omar@signalarena.io", plan: "Pro", planClass: "pro", audits: 9, joined: "1 Nov 2026", status: "Active" }
-        ];
+        /* Supabase client for this block — block 1 has its own `sb` inside
+           its IIFE, so this block needs its own (bare `sb` here used to
+           throw ReferenceError and the key pill always fell back to
+           "Check unavailable"). */
+        var sb = window.supabase.createClient("https://elbddcclcmmpqdxsdahg.supabase.co", "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI");
 
-        var audits = [
-          { handle: "@danabuilds", project: "LumenChain", score: 78, goal: "Fundraise", when: "Today, 09:12" },
-          { handle: "@aishadefi", project: "OrbitFi", score: 64, goal: "Community", when: "Yesterday, 18:40" },
-          { handle: "@marcoonchain", project: "VaultDAO", score: 52, goal: "Fundraise", when: "Yesterday, 11:05" },
-          { handle: "@sofiacryptos", project: "MintGarden", score: 71, goal: "Sales", when: "13 Nov, 15:22" },
-          { handle: "@jonasweb3", project: "Peak Protocol", score: 38, goal: "Community", when: "12 Nov, 08:47" }
-        ];
-
-        var flags = [
-          { id: 1, handle: "@spamfounder99", reason: "41 audits in one day from a single IP — likely scraping scores.", when: "Flagged today" },
-          { id: 2, handle: "@growthbot_x", reason: "6 free accounts created with near-identical emails to bypass the 1-audit limit.", when: "Flagged yesterday" },
-          { id: 3, handle: "@copytradepro", reason: "Draft generator used to mass-produce near-duplicate spam threads.", when: "Flagged 12 Nov" }
-        ];
 
         /* ---------- View switching ---------- */
         var titles = {
           overview: ["Overview", "How XRayKit is doing right now — users, revenue, trials and costs."],
           users: ["Users", "Every account on XRayKit — plan, usage and status."],
           audits: ["Audits", "Profile scans run through the audit tool."],
-          costs: ["API costs", "What the product spends to run — Claude API and X API."],
+          costs: ["API costs", "What the product spends to run — Gemini API and X API."],
           abuse: ["Abuse control", "Flagged accounts and the actions you can take on them."],
-          settings: ["Settings", "Claude API key, pricing, trial length, limits and feature switches."]
+          settings: ["Settings", "Gemini API key, pricing, trial length, limits and feature switches."],
+          messages: ["Messages", "Live chat from the website — answer visitors here."]
         };
         var navBtns = document.querySelectorAll(".nav-btn");
         function showView(name) {
@@ -654,89 +745,13 @@
           b.addEventListener("click", function () { showView(b.getAttribute("data-goto")); });
         });
 
-        /* ---------- Render helpers ---------- */
-        function esc(s) {
-          return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-        function userCell(u) {
-          return '<div class="user-cell"><span class="avatar">' + esc(u.initials) + '</span>' +
-            '<span><span class="handle">' + esc(u.handle) + '</span><br><span class="email">' + esc(u.email) + '</span></span></div>';
-        }
-        function statusPill(u) {
-          return '<span class="pill ' + (u.status === "Active" ? "active" : "suspended") + '">' + u.status + '</span>';
-        }
 
-        /* Latest signups (overview) — first 5 users */
-        document.getElementById("latestBody").innerHTML = users.slice(0, 5).map(function (u) {
-          return "<tr>" +
-            '<td class="user-td">' + userCell(u) + "</td>" +
-            '<td data-label="Plan"><span class="pill ' + u.planClass + '">' + u.plan + "</span></td>" +
-            '<td data-label="Goal">' + ["Fundraise", "Community", "Sales", "Community", "Sales"][users.indexOf(u)] + "</td>" +
-            '<td data-label="Joined" class="num">' + u.joined + "</td>" +
-            '<td data-label="Status">' + statusPill(u) + "</td></tr>";
-        }).join("");
 
-        /* All users with suspend / reactivate */
-        var usersBody = document.getElementById("usersBody");
-        function renderUsers() {
-          usersBody.innerHTML = users.map(function (u, i) {
-            var btn = u.status === "Active"
-              ? '<button class="btn small danger" type="button" data-toggle="' + i + '">Suspend</button>'
-              : '<button class="btn small" type="button" data-toggle="' + i + '">Reactivate</button>';
-            return "<tr>" +
-              '<td class="user-td">' + userCell(u) + "</td>" +
-              '<td data-label="Plan"><span class="pill ' + u.planClass + '">' + u.plan + "</span></td>" +
-              '<td data-label="Audits used" class="num">' + u.audits + "</td>" +
-              '<td data-label="Joined" class="num">' + u.joined + "</td>" +
-              '<td data-label="Status">' + statusPill(u) + "</td>" +
-              '<td data-label="Action">' + btn + "</td></tr>";
-          }).join("");
-          document.getElementById("userCount").textContent = users.length + " accounts shown (demo set)";
-          usersBody.querySelectorAll("[data-toggle]").forEach(function (b) {
-            b.addEventListener("click", function () {
-              var u = users[Number(b.getAttribute("data-toggle"))];
-              u.status = u.status === "Active" ? "Suspended" : "Active";
-              renderUsers();
-            });
-          });
-        }
-        renderUsers();
 
-        /* Audits */
-        document.getElementById("auditList").innerHTML = audits.map(function (a) {
-          var cls = a.score >= 70 ? "" : (a.score >= 50 ? "mid" : "low");
-          return '<div class="audit-row">' +
-            '<span class="score-ring ' + cls + '">' + a.score + "</span>" +
-            '<span><span class="who">' + esc(a.handle) + " · " + esc(a.project) + '</span><br><span class="meta">' + esc(a.when) + "</span></span>" +
-            '<span class="goal"><span class="pill free">Goal: ' + esc(a.goal) + "</span></span></div>";
-        }).join("");
 
-        /* Abuse flags */
-        var abuseList = document.getElementById("abuseList");
-        function renderFlags() {
-          abuseList.innerHTML = flags.map(function (f) {
-            return '<div class="audit-row">' +
-              '<span><span class="who">' + esc(f.handle) + '</span> <span class="pill flag">Flagged</span><br>' +
-              '<span class="meta">' + esc(f.reason) + " · " + esc(f.when) + "</span></span>" +
-              '<span class="goal" style="display:flex; gap:8px; flex-wrap:wrap">' +
-              '<button class="btn small" type="button" data-warn="' + f.id + '">Warn</button>' +
-              '<button class="btn small danger" type="button" data-suspend="' + f.id + '">Suspend</button></span></div>';
-          }).join("");
-          document.getElementById("abuseEmpty").style.display = flags.length ? "none" : "block";
-          var badge = document.getElementById("abuseBadge");
-          badge.textContent = flags.length;
-          badge.style.display = flags.length ? "" : "none";
-          abuseList.querySelectorAll("[data-warn],[data-suspend]").forEach(function (b) {
-            b.addEventListener("click", function () {
-              var id = Number(b.getAttribute("data-warn") || b.getAttribute("data-suspend"));
-              flags = flags.filter(function (f) { return f.id !== id; });
-              renderFlags();
-            });
-          });
-        }
-        renderFlags();
 
-        /* Claude API key (preview only — the key is never sent or stored by this page) */
+        /* Gemini API key — the key itself is never sent or stored by this page.
+           The status below is checked live against the server (ai-status function). */
         var keyInput = document.getElementById("claudeKeyInput");
         var keyMsg = document.getElementById("keyMsg");
         var keyMsgTimer = null;
@@ -749,8 +764,8 @@
         function checkKeyFormat() {
           var v = keyInput.value.trim();
           if (!v) { showKeyMsg("Paste your API key first.", false); keyInput.focus(); return null; }
-          if ((v.indexOf("sk-ant-") !== 0 && v.indexOf("coa_") !== 0) || v.length < 20) {
-            showKeyMsg("That doesn't look right — a Claude key starts with sk-ant-, a Coarena key starts with coa_", false);
+          if (v.indexOf("coa_") !== 0 || v.length < 20) {
+            showKeyMsg("That doesn't look right — a Coarena key starts with coa_", false);
             return null;
           }
           return v;
@@ -769,38 +784,55 @@
             pill.className = "pill flag";
           }
         }
+        /* Live key status: ask the server (ai-status) whether the secret is
+           set and the key still works. Runs on page load (from main()) and
+           on Test. Exposed so the live script can call it. */
+        async function refreshKeyStatus(showMessages) {
+          var pill = document.getElementById("keyPill");
+          var status = document.getElementById("keyStatus");
+          var last = status ? status.querySelector("span:last-child") : null;
+          try {
+            var res = await sb.functions.invoke("ai-status");
+            if (res.error) throw new Error("not-deployed");
+            if (res.data && res.data.configured && res.data.key_valid) {
+              pill.textContent = "Connected";
+              pill.className = "pill pro";
+              status.classList.add("connected");
+              if (last) last.textContent = "Gemini key is live on the server as ANTHROPIC_AUTH_TOKEN — last checked just now.";
+              if (showMessages) showKeyMsg("Connected — the server secret is set and the key works. Real audits can run now.", true);
+              return true;
+            }
+            if (res.data && res.data.configured) {
+              pill.textContent = "Key invalid";
+              pill.className = "pill flag";
+              if (last) last.textContent = "Secret is set, but Coarena rejected the key (HTTP " + (res.data.status || "?") + (res.data.coarena_error ? " — " + res.data.coarena_error : "") + "). Check the secret in Supabase → Edge Functions → Manage secrets.";
+              if (showMessages) showKeyMsg("Secret is set, but Coarena says the key is not valid. The secret probably still holds the old key — update ANTHROPIC_AUTH_TOKEN and test again.", false);
+              return false;
+            }
+            pill.textContent = "Not connected";
+            pill.className = "pill flag";
+            if (last) last.textContent = "No key on the server yet — add ANTHROPIC_AUTH_TOKEN in Supabase → Edge Functions → Manage secrets.";
+            if (showMessages) showKeyMsg("Server secret is not set yet. Add ANTHROPIC_AUTH_TOKEN in Supabase → Edge Functions → Manage secrets, then test again.", false);
+            return false;
+          } catch (e) {
+            pill.textContent = "Check unavailable";
+            pill.className = "pill flag";
+            if (last) last.textContent = "The ai-status check is not deployed yet — deploy it in Supabase → Edge Functions. Audits below still prove whether the key works.";
+            if (showMessages) showKeyMsg("ai-status function is not deployed yet — deploy it in Supabase → Edge Functions, then test again.", false);
+            return false;
+          }
+        }
+        window.XRayKitKeyStatus = refreshKeyStatus;
         document.getElementById("toggleKeyVisibility").addEventListener("click", function () {
           var show = keyInput.type === "password";
           keyInput.type = show ? "text" : "password";
           this.textContent = show ? "Hide" : "Show";
         });
         document.getElementById("testKeyBtn").addEventListener("click", async function () {
-          var v = checkKeyFormat();
-          if (!v) return;
           var btn = this;
           btn.disabled = true;
           showKeyMsg("Checking the server secret…", true);
-          try {
-            var sb = window.supabase.createClient("https://elbddcclcmmpqdxsdahg.supabase.co", "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI");
-            var res = await sb.functions.invoke("ai-status");
-            if (res.error) {
-              showKeyMsg("ai-status function is not deployed yet — deploy it in Supabase → Edge Functions, then test again.", false);
-            } else if (res.data && res.data.configured && res.data.key_valid) {
-              setKeyPill(true, v.slice(-4));
-              showKeyMsg("Connected — the server secret is set and the key works. Real audits can run now.", true);
-            } else if (res.data && res.data.configured) {
-              var st = res.data.status;
-              var extra = res.data.coarena_error ? " — " + res.data.coarena_error : "";
-              if (st === 401) showKeyMsg("Secret is set, but Coarena says the key is not valid (401). The secret probably still holds the old key — re-save the NEW key in Supabase secrets." + extra, false);
-              else if (st === 429) showKeyMsg("Secret is set, but Coarena says the daily limit is reached (429). Try again later." + extra, false);
-              else if (st === 404 || st === 400) showKeyMsg("Secret is set, but Coarena rejected the request (HTTP " + st + "). This looks like a model problem, not the key — tell Muse." + extra, false);
-              else showKeyMsg("Secret is set, but the key check failed (HTTP " + (st || "?") + ")." + extra, false);
-            } else {
-              showKeyMsg("Server secret is not set yet. Add ANTHROPIC_AUTH_TOKEN in Supabase → Edge Functions → Manage secrets, then test again.", false);
-            }
-          } catch (_e) {
-            showKeyMsg("Could not reach the server — check your connection and try again.", false);
-          }
+          await refreshKeyStatus(true);
           btn.disabled = false;
         });
         document.getElementById("apiKeyForm").addEventListener("submit", function (e) {
@@ -813,16 +845,47 @@
           showKeyMsg("Key copied. This page never stores it — paste it as the ANTHROPIC_AUTH_TOKEN secret in Supabase → Edge Functions → Manage secrets, then click Test connection.", true);
         });
 
-        /* Settings save (in-memory preview only) */
-        document.getElementById("settingsForm").addEventListener("submit", function (e) {
-          e.preventDefault();
-          var note = document.getElementById("savedNote");
-          note.classList.add("show");
-          window.setTimeout(function () { note.classList.remove("show"); }, 4000);
-        });
+
       })();
     </script>
 
+    <div class="modal-overlay" id="customOverlay" role="dialog" aria-modal="true" aria-labelledby="customTitle">
+      <div class="modal">
+        <h2 id="customTitle">Custom service</h2>
+        <p class="sub" id="customSub">Set a custom package for this user. It stays pending — and the account stays Free — until you mark it paid.</p>
+        <form id="customForm">
+          <div class="form-grid">
+            <div class="field"><label for="customEmail">User email</label><input id="customEmail" type="email" readonly /></div>
+            <div class="field"><label for="customAmount">Price (USD)</label><input id="customAmount" type="number" min="0" step="0.01" placeholder="e.g. 15" required /></div>
+            <div class="field"><label for="customLimit">Audits per month</label><input id="customLimit" type="number" min="1" step="1" value="10" required /></div>
+            <div class="field"><label for="customNote">Note (optional)</label><input id="customNote" type="text" placeholder="e.g. Launch offer, 3 months" /></div>
+          </div>
+          <div class="check-row">
+            <label><input type="checkbox" id="customFixes" checked /> Written fixes</label>
+            <label><input type="checkbox" id="customThreads" checked /> Thread generator</label>
+            <label><input type="checkbox" id="customPlan7" checked /> 7-day plan</label>
+          </div>
+          <p class="key-msg" id="customMsg" aria-live="polite"></p>
+          <div class="actions">
+            <button class="btn primary" type="submit">Save custom package</button>
+            <button class="btn" type="button" id="customClose">Close</button>
+          </div>
+        </form>
+        <div id="customPlans"></div>
+      </div>
+    </div>
+    <div class="modal-overlay" id="userOverlay" role="dialog" aria-modal="true" aria-labelledby="userTitle">
+      <div class="modal">
+        <h2 id="userTitle">User</h2>
+        <p class="sub" id="userSub"></p>
+        <div class="stat-grid" id="userStats"></div>
+        <h3 style="margin:6px 0 8px;font-size:15px">Audits</h3>
+        <div id="userAudits"></div>
+        <div class="actions">
+          <button class="btn" type="button" id="userClose">Close</button>
+        </div>
+      </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       (function () {
@@ -835,20 +898,286 @@
         function setHtml(id, html) { var el = $(id); if (el) el.innerHTML = html; }
         function deny(text) { var m = $("gateMsg"); if (m) m.textContent = text; }
         function initials(email) { var local = String(email || "?").split("@")[0].replace(/[^a-zA-Z0-9]/g, ""); return (local.slice(0, 2) || "??").toUpperCase(); }
-        function planPill(plan) { var p = String(plan || "free"); return '<span class="pill ' + (p === "pro" ? "pro" : "free") + '">' + esc(p) + "</span>"; }
+        function planPill(plan) { var p = String(plan || "free"); return '<span class="pill ' + (p === "pro" ? "pro" : p === "custom" ? "custom" : "free") + '">' + esc(p) + "</span>"; }
         function userRow(u, withAction) {
-          return "<tr>" +
-            '<td class="user-td"><div class="user-cell"><span class="avatar">' + esc(initials(u.email)) + "</span>" +
-            '<span><span class="handle">' + esc(u.email) + '</span><br><span class="email">' + esc(u.email) + "</span></span></div></td>" +
+          return '<tr data-uid="' + esc(u.id) + '" class="user-row" title="Click for details">' +
+            '<td class="user-td"><div class="user-cell"><span class="avatar">' + esc(initials(u.display_name || u.email)) + "</span>" +
+            '<span><span class="handle">' + esc(u.display_name || u.email) + '</span><br><span class="email">' + esc(u.email) + "</span></span></div></td>" +
             '<td data-label="Plan">' + planPill(u.plan) + "</td>" +
             (withAction
               ? '<td data-label="Audits used" class="num">' + Number(u.audits_used || 0) + "</td>"
               : '<td data-label="Goal">\u2014</td>') +
             '<td data-label="Joined" class="num">' + esc(fmtDate(u.created_at)) + "</td>" +
             '<td data-label="Status"><span class="pill active">Active</span></td>' +
-            (withAction ? '<td data-label="Action"><button class="btn small" type="button" disabled title="Suspend controls coming soon">Suspend</button></td>' : "") +
+            (withAction ? '<td data-label="Action"><div class="menu-wrap"><button class="btn small menu-btn" type="button" data-uid="' + esc(u.id) + '" aria-haspopup="true" aria-label="More actions">&#8230;</button><div class="menu" hidden><button type="button" data-custom="' + esc(u.id) + '">Custom service</button><button type="button" disabled title="Suspend controls coming soon">Suspend</button></div></div></td>' : "") +
             "</tr>";
         }
+        /* ---- Live charts ---- */
+        function fmtMoney(n) { return "$" + (n < 0.01 ? n.toFixed(4) : n.toFixed(2)); }
+        function renderAuditsChart(audits) {
+          var box = $("auditsChart");
+          if (!box) return;
+          var days = [];
+          var now = new Date();
+          for (var i = 13; i >= 0; i--) {
+            var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+            days.push({ key: d.toDateString(), label: d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }), count: 0 });
+          }
+          var map = {};
+          days.forEach(function (x) { map[x.key] = x; });
+          (audits || []).forEach(function (a) { var k = new Date(a.created_at).toDateString(); if (map[k]) map[k].count++; });
+          var max = Math.max.apply(null, days.map(function (x) { return x.count; }));
+          if (max === 0) { box.innerHTML = '<p class="empty-note">No audits in the last 14 days — the first real audit will draw the bars here.</p>'; return; }
+          box.innerHTML = '<div class="chart-bars">' + days.map(function (x) {
+            var h = Math.max(2, Math.round((x.count / max) * 120));
+            return '<div class="bar-col"><span class="bar-v">' + x.count + '</span><div class="bar" style="height:' + h + 'px"></div><span class="bar-d">' + esc(x.label) + "</span></div>";
+          }).join("") + "</div>";
+        }
+        function renderPlanMix(profiles, trialing, paying) {
+          var box = $("planMix");
+          if (!box) return;
+          var total = profiles.length || 1;
+          var custom = profiles.filter(function (p) { return p.plan === "custom"; }).length;
+          var free = Math.max(0, profiles.length - paying - trialing - custom);
+          function row(color, name, n) {
+            var pct = Math.round((n / total) * 100);
+            return '<div class="plan-row"><span class="plan-dot" style="background:' + color + '"></span><span class="name">' + esc(name) + '</span><span class="count">' + n + " user" + (n === 1 ? "" : "s") + "</span></div>" +
+              '<div class="plan-bar"><i style="width:' + pct + "%; background:" + color + '"></i></div>';
+          }
+          box.innerHTML = '<div class="card-sub">' + profiles.length + " account" + (profiles.length === 1 ? "" : "s") + " in total.</div>" +
+            row("var(--accent)", "Pro (paying)", paying) +
+            row("var(--blue)", "Pro trial", trialing) +
+            row("var(--amber)", "Custom", custom) +
+            row("var(--ink-3)", "Free", free);
+        }
+
+        /* ---- Settings (real save to site_settings) ---- */
+        var SETTING_INPUTS = { pro_price_usd: "priceInput", trial_days: "trialInput", free_audit_limit: "auditLimitInput", pro_audit_limit: "proLimitInput", gemini_input_usd_per_million: "geminiInInput", gemini_output_usd_per_million: "geminiOutInput" };
+        var FEATURE_TOGGLES = { ai_image: "imgToggle", hashtags: "hashToggle", auto_posting: "autoToggle", tracker: "trackerToggle", history: "historyToggle", compare: "compareToggle", scheduler: "schedulerToggle", custom_packages: "customToggle", share_card: "shareToggle" };
+        async function loadSettings() {
+          var res = await sb.from("site_settings").select("key,value");
+          if (res.error || !res.data) return;
+          var map = {};
+          res.data.forEach(function (r) { map[r.key] = r.value; });
+          Object.keys(SETTING_INPUTS).forEach(function (k) { var el = $(SETTING_INPUTS[k]); if (el && map[k] !== undefined && map[k] !== null) el.value = map[k]; });
+          var feats = map.features || {};
+          Object.keys(FEATURE_TOGGLES).forEach(function (k) { var el = $(FEATURE_TOGGLES[k]); if (el && feats[k] !== undefined) el.checked = !!feats[k]; });
+          var pause = $("pauseSignupsToggle");
+          if (pause) pause.checked = map.signups_paused === true;
+        }
+        document.getElementById("settingsForm").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          var note = document.getElementById("savedNote");
+          var rows = [];
+          Object.keys(SETTING_INPUTS).forEach(function (k) {
+            var el = $(SETTING_INPUTS[k]);
+            if (!el) return;
+            rows.push({ key: k, value: el.value === "" ? null : Number(el.value) });
+          });
+          var feats = {};
+          Object.keys(FEATURE_TOGGLES).forEach(function (k) { var el = $(FEATURE_TOGGLES[k]); feats[k] = el ? !!el.checked : true; });
+          rows.push({ key: "features", value: feats });
+          var res = await sb.from("site_settings").upsert(rows);
+          if (res.error) { note.textContent = "Could not save — " + (res.error.message || "try again."); note.classList.add("show"); return; }
+          note.textContent = "Saved — live on the site now.";
+          note.classList.add("show");
+          window.setTimeout(function () { note.classList.remove("show"); }, 4000);
+        });
+        document.getElementById("pauseSignupsToggle").addEventListener("change", async function () {
+          var msg = $("pauseMsg");
+          var res = await sb.from("site_settings").upsert({ key: "signups_paused", value: this.checked });
+          if (msg) msg.textContent = res.error ? "Could not save — try again." : (this.checked ? "New signups are paused." : "Signups are open again.");
+        });
+
+        /* ---- Messages (live chat inbox) ---- */
+        var currentThread = null;
+        async function loadThreads() {
+          var box = $("msgThreads");
+          if (!box) return;
+          var res = await sb.rpc("get_chat_threads");
+          if (res.error || !res.data) {
+            box.innerHTML = '<p class="empty-note">Could not load messages — run migration 007 in Supabase first.</p>';
+            return;
+          }
+          var rows = res.data || [];
+          var total = 0;
+          rows.forEach(function (t) { total += Number(t.unread || 0); });
+          var badge = $("msgBadge");
+          if (badge) { badge.style.display = total ? "" : "none"; badge.textContent = String(total); }
+          if (!rows.length) { box.innerHTML = '<p class="empty-note">No chat messages yet.</p>'; return; }
+          box.innerHTML = rows.map(function (t) {
+            return '<button class="thread-row' + (currentThread === t.visitor_id ? " active" : "") + '" type="button" data-vid="' + esc(t.visitor_id) + '">' +
+              '<span class="t-name">' + esc(t.name || t.email || "Visitor") + (t.unread ? ' <span class="nav-badge">' + t.unread + "</span>" : "") + "</span>" +
+              '<span class="t-last">' + esc(t.last_body || "") + "</span>" +
+              '<span class="t-when">' + esc(fmtDate(t.last_at)) + "</span></button>";
+          }).join("");
+          box.querySelectorAll(".thread-row").forEach(function (b) {
+            b.addEventListener("click", function () { openThread(b.getAttribute("data-vid")); });
+          });
+        }
+        async function openThread(vid) {
+          currentThread = vid;
+          var res = await sb.from("chat_messages").select("*").eq("visitor_id", vid).order("created_at", { ascending: true });
+          $("msgEmpty").style.display = "none";
+          $("msgThread").style.display = "";
+          var rows = res.data || [];
+          var first = rows[0] || {};
+          $("msgHead").innerHTML = "<strong>" + esc(first.name || first.email || "Visitor") + "</strong> <span>" + esc(first.email || "") + "</span>";
+          var list = $("msgList");
+          list.innerHTML = rows.length ? rows.map(function (m) {
+            return '<div class="msg-line ' + (m.is_admin ? "me" : "them") + '"><span class="who">' + esc(m.is_admin ? "You (XRayKit)" : (m.name || "Visitor")) + "</span>" + esc(m.body) + "</div>";
+          }).join("") : '<p class="empty-note">No messages in this thread.</p>';
+          list.scrollTop = list.scrollHeight;
+          await sb.from("chat_messages").update({ read_at: new Date().toISOString() }).eq("visitor_id", vid).eq("is_admin", false).is("read_at", null);
+          loadThreads();
+        }
+        async function sendReply() {
+          var input = $("msgReplyInput");
+          var text = input.value.trim();
+          if (!text || !currentThread) return;
+          var res = await sb.from("chat_messages").insert({ visitor_id: currentThread, name: "XRayKit", email: null, body: text, is_admin: true });
+          if (res.error) return;
+          input.value = "";
+          openThread(currentThread);
+        }
+        $("msgSend").addEventListener("click", sendReply);
+        $("msgReplyInput").addEventListener("keydown", function (e) { if (e.key === "Enter") sendReply(); });
+        $("msgRefresh").addEventListener("click", function () { loadThreads(); if (currentThread) openThread(currentThread); });
+        var msgNav = document.querySelector('[data-view="messages"]');
+        if (msgNav) msgNav.addEventListener("click", loadThreads);
+
+        /* ---- Export (date-wise Excel / PDF) ---- */
+        (function setExportDefaults() {
+          var to = new Date(); var from = new Date(); from.setDate(from.getDate() - 29);
+          var f = $("exportFrom"), t = $("exportTo");
+          if (f) f.value = from.toISOString().slice(0, 10);
+          if (t) t.value = to.toISOString().slice(0, 10);
+        })();
+        function exportRange() {
+          var from = $("exportFrom").value;
+          var to = $("exportTo").value;
+          if (!from || !to) return null;
+          return { fromISO: from + "T00:00:00.000Z", toISO: to + "T23:59:59.999Z" };
+        }
+        function exportMsg(text, ok) {
+          var m = $("exportMsg");
+          if (m) { m.textContent = text; m.classList.add("show"); m.classList.toggle("ok", !!ok); m.classList.toggle("err", !ok); }
+        }
+        async function fetchExportData() {
+          var range = exportRange();
+          if (!range) { exportMsg("Pick a from and to date first.", false); return null; }
+          exportMsg("Loading…", true);
+          var a = await sb.from("audits").select("id,user_id,handle,score,created_at").gte("created_at", range.fromISO).lte("created_at", range.toISO).order("created_at", { ascending: true }).limit(1000);
+          var c = await sb.from("audit_costs").select("user_id,input_tokens,output_tokens,created_at").gte("created_at", range.fromISO).lte("created_at", range.toISO).limit(1000);
+          var s = await sb.from("site_settings").select("key,value");
+          var map = {};
+          if (s.data) s.data.forEach(function (r) { map[r.key] = r.value; });
+          if (a.error) { exportMsg("Could not load audits — " + (a.error.message || "try again."), false); return null; }
+          return {
+            audits: a.data || [], costs: (c.data || []),
+            inP: (typeof map.gemini_input_usd_per_million === "number") ? map.gemini_input_usd_per_million : null,
+            outP: (typeof map.gemini_output_usd_per_million === "number") ? map.gemini_output_usd_per_million : null,
+            range: range
+          };
+        }
+        function buildExportRows(d) {
+          var auditRows = d.audits.map(function (x) {
+            var u = usersById[x.user_id];
+            return { Date: fmtDate(x.created_at), User: u ? (u.display_name || u.email) : x.user_id, Email: u ? u.email : "", Handle: "@" + (x.handle || ""), Score: x.score };
+          });
+          var perUser = {};
+          d.audits.forEach(function (x) {
+            var u = usersById[x.user_id];
+            if (!perUser[x.user_id]) perUser[x.user_id] = { name: u ? (u.display_name || u.email) : x.user_id, email: u ? u.email : "", plan: u ? u.plan : "", audits: 0, inTok: 0, outTok: 0 };
+            perUser[x.user_id].audits++;
+          });
+          d.costs.forEach(function (x) {
+            if (!perUser[x.user_id]) perUser[x.user_id] = { name: "", email: "", plan: "", audits: 0, inTok: 0, outTok: 0 };
+            perUser[x.user_id].inTok += Number(x.input_tokens) || 0;
+            perUser[x.user_id].outTok += Number(x.output_tokens) || 0;
+          });
+          var userRows = Object.keys(perUser).map(function (k) {
+            var p = perUser[k];
+            var cost = (d.inP === null || d.outP === null) ? "" : Number(((p.inTok * d.inP + p.outTok * d.outP) / 1000000).toFixed(4));
+            return { User: p.name, Email: p.email, Plan: p.plan, Audits: p.audits, "Input tokens": p.inTok, "Output tokens": p.outTok, "Gemini cost ($)": cost };
+          });
+          return { auditRows: auditRows, userRows: userRows };
+        }
+        async function doExportXlsx() {
+          if (typeof XLSX === "undefined") { exportMsg("Excel library failed to load — check your connection and reload.", false); return; }
+          var d = await fetchExportData();
+          if (!d) return;
+          var rows = buildExportRows(d);
+          var wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.auditRows), "Audits");
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows.userRows), "Users");
+          XLSX.writeFile(wb, "xraykit-export-" + d.range.fromISO.slice(0, 10) + "-to-" + d.range.toISO.slice(0, 10) + ".xlsx");
+          exportMsg("Excel exported — " + rows.auditRows.length + " audits, " + rows.userRows.length + " users.", true);
+        }
+        async function doExportPdf() {
+          if (typeof window.jspdf === "undefined" || !window.jspdf.jsPDF) { exportMsg("PDF library failed to load — check your connection and reload.", false); return; }
+          var d = await fetchExportData();
+          if (!d) return;
+          var rows = buildExportRows(d);
+          var doc = new window.jspdf.jsPDF();
+          doc.setFontSize(15);
+          doc.text("XRayKit export — " + d.range.fromISO.slice(0, 10) + " to " + d.range.toISO.slice(0, 10), 14, 16);
+          doc.setFontSize(11);
+          doc.text("Audits (" + rows.auditRows.length + ")", 14, 26);
+          doc.autoTable({ startY: 30, head: [["Date", "User", "Handle", "Score"]], body: rows.auditRows.map(function (r) { return [r.Date, r.User, r.Handle, String(r.Score)]; }) });
+          var y = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 40;
+          doc.text("Users (" + rows.userRows.length + ")", 14, y);
+          doc.autoTable({ startY: y + 4, head: [["User", "Plan", "Audits", "Input tok.", "Output tok.", "Gemini cost ($)"]], body: rows.userRows.map(function (r) { return [r.User, r.Plan, String(r.Audits), String(r["Input tokens"]), String(r["Output tokens"]), r["Gemini cost ($)"] === "" ? "—" : String(r["Gemini cost ($)"])]; }) });
+          doc.save("xraykit-export-" + d.range.fromISO.slice(0, 10) + "-to-" + d.range.toISO.slice(0, 10) + ".pdf");
+          exportMsg("PDF exported — " + rows.auditRows.length + " audits, " + rows.userRows.length + " users.", true);
+        }
+        $("exportXlsx").addEventListener("click", doExportXlsx);
+        $("exportPdf").addEventListener("click", doExportPdf);
+
+        /* ---- Per-user detail (click a user row) ---- */
+        function statCell(l, v) { return '<div class="stat"><div class="l">' + esc(l) + '</div><div class="v">' + esc(v) + "</div></div>"; }
+        async function openUserDetail(uid) {
+          var u = usersById[uid];
+          if (!u) return;
+          $("userTitle").textContent = u.display_name || u.email;
+          $("userSub").textContent = u.email + " · joined " + fmtDate(u.created_at) + " · " + (u.plan || "free");
+          $("userStats").innerHTML = "<p>Loading…</p>";
+          $("userAudits").innerHTML = "";
+          $("userOverlay").classList.add("open");
+          var a = await sb.from("audits").select("id,handle,score,created_at").eq("user_id", uid).order("created_at", { ascending: false }).limit(50);
+          var c = await sb.from("audit_costs").select("input_tokens,output_tokens,created_at").eq("user_id", uid).limit(1000);
+          var s = await sb.from("site_settings").select("key,value");
+          var map = {};
+          if (s.data) s.data.forEach(function (r) { map[r.key] = r.value; });
+          var inP = (typeof map.gemini_input_usd_per_million === "number") ? map.gemini_input_usd_per_million : null;
+          var outP = (typeof map.gemini_output_usd_per_million === "number") ? map.gemini_output_usd_per_million : null;
+          var audits = (a.data || []);
+          var costs = (c.data || []);
+          var inTok = costs.reduce(function (t, x) { return t + (Number(x.input_tokens) || 0); }, 0);
+          var outTok = costs.reduce(function (t, x) { return t + (Number(x.output_tokens) || 0); }, 0);
+          var totalCost = (inP === null || outP === null) ? null : (inTok * inP + outTok * outP) / 1000000;
+          var now = new Date(); var ms = new Date(now.getFullYear(), now.getMonth(), 1);
+          var thisMonth = audits.filter(function (x) { return new Date(x.created_at) >= ms; }).length;
+          $("userStats").innerHTML =
+            statCell("Audits total", String(audits.length)) +
+            statCell("This month", String(thisMonth)) +
+            statCell("Input tokens", inTok.toLocaleString("en-US")) +
+            statCell("Output tokens", outTok.toLocaleString("en-US")) +
+            statCell("Gemini cost", totalCost === null ? (costs.length ? "set prices in Settings" : "not tracked yet") : fmtMoney(totalCost));
+          $("userAudits").innerHTML = audits.length ? audits.map(function (x) {
+            return '<div class="audit-row"><span class="score-ring">' + (typeof x.score === "number" ? x.score : "—") + '</span><span><span class="who">' + esc(x.handle || "—") + '</span><br><span class="meta">' + esc(fmtDate(x.created_at)) + "</span></span></div>";
+          }).join("") : '<p class="empty-note">No audits yet.</p>';
+        }
+        document.querySelectorAll("#usersBody, #latestBody").forEach(function (tb) {
+          tb.addEventListener("click", function (e) {
+            if (e.target.closest(".menu-wrap")) return;
+            var tr = e.target.closest("tr[data-uid]");
+            if (tr) openUserDetail(tr.getAttribute("data-uid"));
+          });
+        });
+        $("userClose").addEventListener("click", function () { $("userOverlay").classList.remove("open"); });
+        $("userOverlay").addEventListener("click", function (e) { if (e.target === $("userOverlay")) $("userOverlay").classList.remove("open"); });
+
         async function main() {
           var sess = await sb.auth.getSession();
           var user = sess.data && sess.data.session && sess.data.session.user;
@@ -864,22 +1193,42 @@
             return;
           }
           var res = await Promise.all([
-            sb.from("profiles").select("id,email,plan,trial_ends_at,audits_used,is_admin,created_at").order("created_at", { ascending: false }).limit(200),
+            sb.from("profiles").select("id,email,display_name,plan,trial_ends_at,audits_used,is_admin,created_at").order("created_at", { ascending: false }).limit(200),
             sb.from("subscriptions").select("user_id,status"),
             sb.from("audits").select("id,user_id,handle,score,created_at").order("created_at", { ascending: false }).limit(100)
           ]);
           var profiles = res[0].data || [];
+          profiles.forEach(function (u) { usersById[u.id] = u; });
           var subs = res[1].data || [];
           var audits = res[2].data || [];
           if (res[0].error || res[1].error || res[2].error) {
             deny("Could not load live data \u2014 please reload the page.");
             return;
           }
+          /* Settings + Gemini usage: fetched separately so a table that is
+             not migrated yet (006/008) can never block the dashboard. */
+          var settingsMap = {};
+          var costRows = [];
+          try {
+            var sres = await sb.from("site_settings").select("key,value");
+            if (sres.data) sres.data.forEach(function (r) { settingsMap[r.key] = r.value; });
+          } catch (e) { /* site_settings not migrated yet */ }
+          try {
+            var cres = await sb.from("audit_costs").select("id,user_id,audit_id,handle,model,input_tokens,output_tokens,created_at").order("created_at", { ascending: false }).limit(1000);
+            if (cres.data) costRows = cres.data;
+          } catch (e) { /* audit_costs not migrated yet */ }
+          var proPrice = Number(settingsMap.pro_price_usd) || 7;
+          var trialDays = Number(settingsMap.trial_days) || 3;
+          var freeLim = Number(settingsMap.free_audit_limit) || 1;
+          var inPrice = (typeof settingsMap.gemini_input_usd_per_million === "number") ? settingsMap.gemini_input_usd_per_million : null;
+          var outPrice = (typeof settingsMap.gemini_output_usd_per_million === "number") ? settingsMap.gemini_output_usd_per_million : null;
+          function fmtMoney(n) { return "$" + (n < 0.01 ? n.toFixed(4) : n.toFixed(2)); }
+
           var proCount = profiles.filter(function (p) { return p.plan === "pro"; }).length;
           var freeCount = profiles.length - proCount;
           var trialing = subs.filter(function (x) { return x.status === "trialing"; }).length;
           var paying = subs.filter(function (x) { return x.status === "active"; }).length;
-          var mrr = paying * 7;
+          var mrr = paying * proPrice;
           var now = new Date();
           var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
           var auditsMonth = audits.filter(function (a) { return new Date(a.created_at) >= monthStart; }).length;
@@ -892,11 +1241,15 @@
           setText("kpiMrr", "$" + mrr);
           setText("kpiMrrD", paying ? paying + " paying subscriber" + (paying === 1 ? "" : "s") : "No paying subscribers yet");
           setText("kpiTrials", String(trialing));
-          setText("kpiTrialsD", "3-day free trial");
+          setText("kpiTrialsD", trialDays + "-day free trial");
           setText("kpiAudits", String(audits.length));
           setText("kpiAuditsD", auditsMonth + " this month");
-          setText("kpiApi", "$0.00");
-          setText("kpiApiD", "No paid API calls yet");
+          var monthCosts = costRows.filter(function (c) { return new Date(c.created_at) >= monthStart; });
+          var monthIn = monthCosts.reduce(function (t, c) { return t + (Number(c.input_tokens) || 0); }, 0);
+          var monthOut = monthCosts.reduce(function (t, c) { return t + (Number(c.output_tokens) || 0); }, 0);
+          var monthCost = (inPrice === null || outPrice === null) ? null : (monthIn * inPrice + monthOut * outPrice) / 1000000;
+          setText("kpiApi", monthCost === null ? "\u2014" : fmtMoney(monthCost));
+          setText("kpiApiD", monthCosts.length ? monthCosts.length + " tracked audit" + (monthCosts.length === 1 ? "" : "s") + " this month" + (monthCost === null ? " \u00b7 set Gemini prices in Settings" : "") : "No tracked audits yet");
           setText("kpiAuditsTotal", String(audits.length));
           setText("kpiAuditsTotalD", "All time");
           setText("kpiAuditsMonth", String(auditsMonth));
@@ -905,20 +1258,20 @@
           if (avgEl) avgEl.innerHTML = (avg === null ? "\u2014" : String(avg)) + '<span style="font-size:17px; color:var(--ink-3)"> / 100</span>';
           setText("kpiAvgScoreD", scored.length ? "Across " + scored.length + " scored audit" + (scored.length === 1 ? "" : "s") : "No scored audits yet");
           setText("kpiFreeHits", String(freeHits));
-          setText("kpiFreeHitsD", "Free users who used their 1 audit");
-          setText("kpiCostTotal", "$0.00");
+          setText("kpiFreeHitsD", "Free users who used their " + freeLim + " audit" + (freeLim === 1 ? "" : "s"));
+          setText("kpiCostTotal", monthCost === null ? "\u2014" : fmtMoney(monthCost));
           setText("kpiCostTotalD", "Against $" + mrr + " MRR");
-          setText("kpiCostPerAudit", "\u2014");
-          setText("kpiCostPerAuditD", "No audits billed yet");
+          setText("kpiCostPerAudit", (monthCost === null || !monthCosts.length) ? "\u2014" : fmtMoney(monthCost / monthCosts.length));
+          setText("kpiCostPerAuditD", monthCosts.length ? "Across " + monthCosts.length + " tracked audit" + (monthCosts.length === 1 ? "" : "s") : "No audits billed yet");
           setText("kpiCostPerDraft", "\u2014");
           setText("kpiCostPerDraftD", "No drafts billed yet");
-          setText("costAmtAudits", "$0.00");
+          setText("costAmtAudits", monthCost === null ? "\u2014" : fmtMoney(monthCost));
           setText("costAmtDrafts", "$0.00");
           setText("costAmtX", "$0.00");
-          setText("costNoteAudits", audits.length + " audits run \u00b7 $0 billed so far");
+          setText("costNoteAudits", monthCosts.length + " tracked audit" + (monthCosts.length === 1 ? "" : "s") + " this month \u00b7 " + monthIn.toLocaleString("en-US") + " in / " + monthOut.toLocaleString("en-US") + " out tokens" + (monthCost === null ? " \u00b7 set Gemini prices in Settings to see $" : ""));
           setText("costNoteDrafts", "No drafts billed yet");
           setText("costNoteX", "$0.005 per read \u00b7 posting stays manual at launch, so post credits are $0");
-          ["costBarAudits", "costBarDrafts", "costBarX"].forEach(function (id) { var b = $(id); if (b) b.style.width = "0%"; });
+          ["costBarAudits", "costBarDrafts", "costBarX"].forEach(function (id) { var b = $(id); if (b) b.style.width = id === "costBarAudits" && monthCost ? "100%" : "0%"; });
 
           var chip = $("dataChip");
           if (chip) chip.textContent = "Live data";
@@ -938,8 +1291,140 @@
           var ae = $("abuseEmpty"); if (ae) ae.style.display = "block";
           var badge = $("abuseBadge"); if (badge) badge.style.display = "none";
 
+          renderAuditsChart(audits);
+          renderPlanMix(profiles, trialing, paying);
+          loadSettings();
+          loadThreads();
+          if (window.XRayKitKeyStatus) window.XRayKitKeyStatus(false);
+
           var ov = $("gateOverlay"); if (ov) ov.remove();
         }
+        /* ---- Custom service (per-user '...' menu) ---- */
+        var usersById = {};
+        var customUid = null;
+        function closeMenus() {
+          document.querySelectorAll(".menu").forEach(function (m) { m.hidden = true; });
+        }
+        function showCustomMsg(text, ok) {
+          var el = $("customMsg");
+          if (!el) return;
+          el.textContent = text;
+          el.classList.add("show");
+          el.classList.toggle("ok", !!ok);
+          el.classList.toggle("err", !ok);
+        }
+        function customFeatures(c) {
+          var f = [];
+          if (c.include_fixes) f.push("fixes");
+          if (c.include_threads) f.push("threads");
+          if (c.include_plan7day) f.push("7-day plan");
+          return f.length ? f.join(" + ") : "audits only";
+        }
+        function loadCustomPlans(uid) {
+          var box = $("customPlans");
+          if (!box) return;
+          box.innerHTML = "<p class=\"empty-note\">Loading packages\u2026</p>";
+          sb.from("custom_plans").select("id,amount_usd,audit_limit,include_fixes,include_threads,include_plan7day,status,note,created_at,paid_at").eq("user_id", uid).order("created_at", { ascending: false }).then(function (r) {
+            var rows = (r && !r.error && r.data) ? r.data : [];
+            if (r && r.error) { box.innerHTML = "<p class=\"empty-note\">Could not load packages \u2014 the custom_plans table may not exist yet (run migration 005).</p>"; return; }
+            if (!rows.length) { box.innerHTML = "<p class=\"empty-note\">No custom package yet for this user.</p>"; return; }
+            box.innerHTML = "<h3 style=\"margin-top:18px\">Packages for this user</h3>" + rows.map(function (c) {
+              var acts = "";
+              if (c.status === "pending") acts = '<button class="btn small primary" type="button" data-paid="' + c.id + '">Mark as paid</button> <button class="btn small" type="button" data-cancel="' + c.id + '">Cancel</button>';
+              if (c.status === "paid") acts = '<button class="btn small danger" type="button" data-revoke="' + c.id + '">Revoke (back to Free)</button>';
+              return '<div class="plan-item"><div class="row1"><strong>$' + Number(c.amount_usd).toFixed(2) + '</strong><span>' + c.audit_limit + ' audits/month</span><span class="pill ' + (c.status === "paid" ? "pro" : c.status === "cancelled" ? "suspended" : "trial") + '">' + esc(c.status) + '</span><span style="margin-left:auto">' + acts + '</span></div>' +
+                '<div class="meta">' + esc(customFeatures(c)) + (c.note ? " \u00b7 " + esc(c.note) : "") + " \u00b7 " + esc(fmtDate(c.created_at)) + (c.paid_at ? " \u00b7 paid " + esc(fmtDate(c.paid_at)) : "") + '</div></div>';
+            }).join("");
+          });
+        }
+        function openCustom(uid) {
+          var u = usersById[uid];
+          if (!u) return;
+          customUid = uid;
+          closeMenus();
+          $("customEmail").value = u.email || "";
+          $("customSub").textContent = "Set a custom package for " + (u.email || "this user") + ". It stays pending \u2014 and the account stays Free \u2014 until you mark it paid.";
+          $("customOverlay").classList.add("open");
+          loadCustomPlans(uid);
+        }
+        function setPlanPill(uid, plan) {
+          var row = document.querySelector('tr[data-uid="' + uid + '"] td[data-label="Plan"]');
+          if (row) row.innerHTML = planPill(plan);
+        }
+        document.addEventListener("click", function (e) {
+          var btn = e.target.closest ? e.target.closest(".menu-btn") : null;
+          if (btn) {
+            var menu = btn.parentElement.querySelector(".menu");
+            var wasHidden = menu.hidden;
+            closeMenus();
+            menu.hidden = !wasHidden;
+            e.stopPropagation();
+            return;
+          }
+          var customBtn = e.target.closest ? e.target.closest("[data-custom]") : null;
+          if (customBtn) { openCustom(customBtn.getAttribute("data-custom")); return; }
+          if (!e.target.closest || !e.target.closest(".menu-wrap")) closeMenus();
+        });
+        $("customClose").addEventListener("click", function () { $("customOverlay").classList.remove("open"); });
+        $("customOverlay").addEventListener("click", function (e) { if (e.target === $("customOverlay")) $("customOverlay").classList.remove("open"); });
+        $("customForm").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var u = usersById[customUid];
+          if (!u) return;
+          var amount = Number($("customAmount").value);
+          var limit = parseInt($("customLimit").value, 10);
+          if (!(amount >= 0) || !(limit >= 1)) { showCustomMsg("Enter a price (0 or more) and at least 1 audit per month.", false); return; }
+          sb.from("custom_plans").insert({
+            user_id: u.id, email: u.email, amount_usd: amount, audit_limit: limit,
+            include_fixes: $("customFixes").checked, include_threads: $("customThreads").checked,
+            include_plan7day: $("customPlan7").checked, note: $("customNote").value || null, status: "pending"
+          }).then(function (r) {
+            if (r.error) { showCustomMsg("Could not save \u2014 " + (r.error.message || "check migration 005 ran."), false); return; }
+            showCustomMsg("Custom package saved as pending. The account stays Free until you mark it paid.", true);
+            loadCustomPlans(u.id);
+          });
+        });
+        $("customPlans").addEventListener("click", function (e) {
+          var paidBtn = e.target.closest ? e.target.closest("[data-paid]") : null;
+          var cancelBtn = e.target.closest ? e.target.closest("[data-cancel]") : null;
+          var revokeBtn = e.target.closest ? e.target.closest("[data-revoke]") : null;
+          if (paidBtn) {
+            var id = paidBtn.getAttribute("data-paid");
+            sb.from("custom_plans").update({ status: "paid", paid_at: new Date().toISOString() }).eq("id", id).then(function (r) {
+              if (r.error) { showCustomMsg("Could not mark paid \u2014 " + (r.error.message || ""), false); return; }
+              sb.from("profiles").update({ plan: "custom" }).eq("id", customUid).then(function (r2) {
+                if (r2.error) { showCustomMsg("Marked paid, but the plan did not flip \u2014 " + (r2.error.message || ""), false); return; }
+                if (usersById[customUid]) usersById[customUid].plan = "custom";
+                setPlanPill(customUid, "custom");
+                showCustomMsg("Paid \u2014 this account is now Custom Pro.", true);
+                loadCustomPlans(customUid);
+              });
+            });
+            return;
+          }
+          if (cancelBtn) {
+            sb.from("custom_plans").update({ status: "cancelled" }).eq("id", cancelBtn.getAttribute("data-cancel")).then(function (r) {
+              if (r.error) { showCustomMsg("Could not cancel \u2014 " + (r.error.message || ""), false); return; }
+              showCustomMsg("Package cancelled.", true);
+              loadCustomPlans(customUid);
+            });
+            return;
+          }
+          if (revokeBtn) {
+            sb.from("custom_plans").update({ status: "cancelled" }).eq("id", revokeBtn.getAttribute("data-revoke")).then(function (r) {
+              if (r.error) { showCustomMsg("Could not revoke \u2014 " + (r.error.message || ""), false); return; }
+              sb.from("profiles").update({ plan: "free" }).eq("id", customUid).then(function (r2) {
+                if (r2.error) { showCustomMsg("Revoked the package, but the plan did not flip \u2014 " + (r2.error.message || ""), false); return; }
+                if (usersById[customUid]) usersById[customUid].plan = "free";
+                setPlanPill(customUid, "free");
+                showCustomMsg("Revoked \u2014 account is Free again.", true);
+                loadCustomPlans(customUid);
+              });
+            });
+            return;
+          }
+        });
+
         main();
       })();
     </script>

@@ -83,13 +83,13 @@
         <nav class="topnav" aria-label="Main menu">
           <a href="index.html">Home</a>
           <a href="audit.html">Run a scan</a>
-          <a href="report.html">Sample report</a>
           <a href="auth.html" id="navLogin">Log in</a><a href="account.html" id="navAccount" style="display:none">My account</a>
         </nav>
       </div>
     </header>
 
-    <main class="wrap">
+    <div id="featureOff" class="wrap" style="display:none;padding:40px 0"><p style="font-size:16px">This feature is paused by the admin right now — check back soon.</p><p><a href="index.html">&larr; Back to home</a></p></div>
+    <main class="wrap" data-feature-body>
       <section class="hero">
         <span class="mono">Scheduler</span>
         <h1>Your 7-day plan, <span style="color:var(--scan)">dated</span>.</h1>
@@ -121,18 +121,19 @@
     <div class="toast" id="toast" role="status"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="site-settings.js"></script>
+    <script>if (window.XRayKitSettings) window.XRayKitSettings.guard("scheduler");</script>
+    <script src="chat-widget.js"></script>
     <script>
       (function () {
         "use strict";
-        var SAMPLE_PLAN = [{"day": "DAY 1", "chip": "Fixes FR.01", "post": "Ship the new bio", "why": "Two minutes in profile settings. Leads with the live testnet instead of “coming soon”.", "draft": "The DEX for first-time swappers: one click, no bridging, no gas juggling. Testnet is LIVE — try it free today. Token launch next month 👇"}, {"day": "DAY 2", "chip": "Fixes FR.02", "post": "Replace the pinned post", "why": "Unpin the announcement. Pin the seed-round story thread — problem, product, invitation.", "draft": "1/ We raised our seed round to build the DEX we kept wishing existed.\n\nHere's the problem we're fixing, what the testnet already does, and how to try it today 🧵\n\n2/ Swapping today means 4 tabs, 2 bridges and a prayer. NovaSwap does it in one click.\n\nThe testnet is live and free — link below. Feedback goes straight to the team, and the best of it ships before launch."}, {"day": "DAY 3", "chip": "Fixes FR.04", "post": "Show the product, don't describe it", "why": "A short screen recording of one full swap. Proof beats adjectives — this is the post that gets bookmarked.", "draft": "Watch a complete swap on NovaSwap testnet: 11 seconds, start to finish.\n\nNo bridge. No second tab. No gas maths.\n\nThat's the whole product. Try it yourself — link in bio, free while it's on testnet."}, {"day": "DAY 4", "chip": "Fixes FR.04", "post": "Teach one thing", "why": "The first education post in the feed's history. Simple, specific, saveable.", "draft": "Why does one swap touch 3 different contracts — and what does that cost you?\n\nA 60-second explainer, no jargon 🧵\n\n(Short version: every extra hop is extra gas, extra slippage, and one more place things break. We built NovaSwap to cut it to one.)"}, {"day": "DAY 5", "chip": "Fixes FR.04", "post": "Ask the community a real question", "why": "Not “gm”. A question testnet users can actually answer — with a payoff for answering.", "draft": "Testnet swappers: what's the ONE thing that still feels slower than it should?\n\nBest answer gets fixed this week — and quoted in the launch thread.\n\nWe read every reply."}, {"day": "DAY 6", "chip": "Fixes FR.03", "post": "Deliver the teased partnership", "why": "The announcement that was “coming this week” — shipped as the announcement itself, with what it means for users.", "draft": "Announced properly this time: NovaSwap is partnering with [partner] — so testnet swaps settle against deeper liquidity from day one.\n\nWhat it means for you: tighter spreads on every pair at launch.\n\nNo “details soon”. The integration is live on testnet now — try a swap and feel it."}, {"day": "DAY 7", "chip": "Fixes FR.05", "post": "Start the launch runway", "why": "A date, a promise with specifics, and a reason for testnet users to care. The countdown begins.", "draft": "Token launch date drops Monday.\n\nHere's what testnet users get on day one:\n· Early access window before public trading\n· Launch-week fee rebates\n· Your feedback, shipped — check the changelog\n\nTry the testnet this weekend. It counts."}];
         var SUPABASE_URL = "https://elbddcclcmmpqdxsdahg.supabase.co";
         var SUPABASE_ANON_KEY = "sb_publishable_hQlsoIPtOA5buM9KWk0pow_aa9t5OAI";
         var params = new URLSearchParams(window.location.search);
         var reportId = params.get("id") || "";
-        var plan = SAMPLE_PLAN.slice();
-        var handle = "novaswap";
-        var isSample = true;
-        var storeKey = "xraykit_sched_" + (reportId || "sample");
+        var plan = [];
+        var handle = "";
+        var storeKey = "xraykit_sched_" + (reportId || "none");
 
         var startInput = document.getElementById("startDate");
         var timeInput = document.getElementById("postTime");
@@ -145,6 +146,7 @@
         var copyWeekBtn = document.getElementById("copyWeekBtn");
         var backReport = document.getElementById("backReport");
         if (reportId) backReport.href = "report.html?id=" + encodeURIComponent(reportId);
+        else { backReport.href = "audit.html"; backReport.textContent = "Run a free audit \u2192"; }
 
         function showToast(msg) {
           toast.textContent = msg;
@@ -227,6 +229,10 @@
           var days = datedDays();
           icsBtn.disabled = days.length === 0;
           copyWeekBtn.disabled = days.length === 0;
+          if (!plan.length) {
+            weekList.innerHTML = '<p class="empty">No plan yet — <a href="audit.html">run a free audit</a> first and your 7-day plan will appear here, dated.</p>';
+            return;
+          }
           if (!days.length) {
             weekList.innerHTML = '<p class="empty">Pick at least one day above — your dated week will appear here.</p>';
             return;
@@ -284,7 +290,7 @@
           days.forEach(function (dd, k) {
             var end = new Date(dd.date.getTime() + 30 * 60000);
             lines.push("BEGIN:VEVENT");
-            lines.push("UID:xraykit-" + (reportId || "sample") + "-" + (dd.idx + 1) + "@xraykit");
+            lines.push("UID:xraykit-" + (reportId || "none") + "-" + (dd.idx + 1) + "@xraykit");
             lines.push("DTSTAMP:" + stamp);
             lines.push("DTSTART:" + icsDate(dd.date));
             lines.push("DTEND:" + icsDate(end));
@@ -315,12 +321,12 @@
         timeInput.addEventListener("change", function () { state.time = timeInput.value; saveState(); renderWeek(); });
 
         function renderAll() {
-          planNote.textContent = isSample
-            ? "Sample plan — NovaSwap. Run your own scan and this page dates YOUR plan instead."
-            : "Your plan for @" + handle + " — from your latest report.";
-          heroSub.textContent = isSample
-            ? "Pick a start date and time, tick the days you will actually post, and get a dated week of ready drafts. Posting is manual at launch — copy a draft, post it on X, or use X's own free scheduler. No X connection, no auto-post."
-            : "Your 7-day plan for @" + handle + ", dated. Posting is manual at launch — copy a draft, post it on X, or use X's own free scheduler. No X connection, no auto-post.";
+          if (!plan.length) {
+            planNote.textContent = "No plan yet — run a free audit first and your 7-day plan will appear here, dated.";
+          } else {
+            planNote.textContent = "Your plan for @" + handle + " — from your latest report.";
+            heroSub.textContent = "Your 7-day plan for @" + handle + ", dated. Posting is manual at launch — copy a draft, post it on X, or use X's own free scheduler. No X connection, no auto-post.";
+          }
           renderPick();
           renderWeek();
         }
@@ -329,18 +335,17 @@
           try {
             var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             sb.from("audits").select("handle,report").eq("id", reportId).single().then(function (res) {
-              if (res.error || !res.data || !res.data.report) return; // keep the sample
+              if (res.error || !res.data || !res.data.report) return; // keep the empty state
               var r = res.data.report;
               if (!Array.isArray(r.plan7day) || r.plan7day.length < 1) return;
               plan = r.plan7day.slice(0, 7).map(function (d, i) {
                 return { day: "DAY " + (i + 1), chip: "", post: d.post || ("Day " + (i + 1)), why: d.why || "", draft: d.draft || "" };
               });
               handle = res.data.handle || handle;
-              isSample = false;
               state = loadState();
               renderAll();
             });
-          } catch (e) { /* keep the sample */ }
+          } catch (e) { /* keep the empty state */ }
         }
       })();
     </script>

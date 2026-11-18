@@ -163,7 +163,7 @@
 
       /* pricing */
       .pricing-page { background: var(--bg-raise); }
-      .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 880px; }
+      .plans { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; max-width: 1180px; }
       .plan { background: var(--panel); border: 2px solid var(--line); border-radius: 18px; padding: 30px 28px; display: flex; flex-direction: column; }
       .plan-pro { background: var(--film); color: var(--film-ink); border-color: var(--film); box-shadow: var(--shadow); position: relative; }
       .plan-badge { position: absolute; top: -15px; right: 22px; background: var(--lime); color: var(--lime-ink); font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; padding: 6px 12px; border-radius: 999px; border: 2px solid var(--lime-ink); transform: rotate(2deg); }
@@ -288,8 +288,8 @@
     <div class="trial-strip" role="note" data-logged-out-only>
       <div class="wrap trial-strip-in">
         <span class="mono">Launch offer</span>
-        <span>Pro is <strong>free for your first 3 days</strong> — full audits, thread drafts, the lot. No card needed.</span>
-        <a href="#/pricing" data-page-link="pricing">Claim the 3 days →</a>
+        <span>Pro is <strong>free for your first <span data-trial-days>3 days</span></strong> — full audits, thread drafts, the lot. No card needed.</span>
+        <a href="#/pricing" data-page-link="pricing">Claim the <span data-trial-days>3 days</span> →</a>
       </div>
     </div>
 
@@ -305,26 +305,16 @@
               <h1>Your X account, <span class="hl">X-rayed.</span> Then fixed.</h1>
               <p class="hero-sub">XRayKit scans your profile the way a new investor or community member sees it — bio, pinned post, cadence, content mix — scores it, shows exactly what's costing you reach, and drafts the thread that fixes it. Tuned for token launches, fundraises, and community growth, not generic creator advice.</p>
               <div class="hero-ctas">
-                <a class="btn btn-lime" href="#/pricing" data-page-link="pricing" data-logged-out-only>Start 3 days of Pro — free</a>
+                <a class="btn btn-lime" href="#/pricing" data-page-link="pricing" data-logged-out-only>Start <span data-trial-days>3 days</span> of Pro — free</a>
                 <a class="btn" href="#/about" data-page-link="about">About us</a>
                 <a class="btn" href="#scan" data-home-anchor="scan">See what it scans</a>
               </div>
-              <form class="demo-form" id="demoForm" novalidate>
-                <input id="demoHandle" type="text" placeholder="@yourhandle — try a sample score" autocomplete="off" maxlength="16" />
-                <button class="btn btn-lime" type="submit">See sample score &rarr;</button>
-              </form>
-              <p class="demo-msg" id="demoMsg">No signup — this is a sample scorecard. Your real audit reads your actual bio and posts.</p>
-              <p class="hero-note">FREE PLAN — <b>1 audit / month</b> · PRO — <b>$7/mo</b> if you keep it after the trial</p>
+              <p class="hero-note">FREE PLAN — <b><span data-free-limit>1 audit</span> / month</b> · PRO — <b><span data-pro-price>$7</span>/mo</b> if you keep it after the trial</p>
             </div>
-            <div class="scan-card" aria-label="Illustration of an XRayKit scan report card">
-              <div class="scan-head"><div class="who-wrap"><img class="demo-avatar" id="demoAvatar" alt="" hidden /><div class="who" id="demoWho">@founder<span>Crypto founder · pre-launch</span></div></div><div class="stamp" id="demoStamp">Scan report<br />Profile X-ray</div></div>
-              <div class="scan-row"><span class="lbl">Bio</span><span class="bar"><i style="width:38%"></i></span><span class="chip chip-bad">Unclear</span></div>
-              <div class="scan-row"><span class="lbl">Pinned post</span><span class="bar"><i style="width:22%"></i></span><span class="chip chip-bad">No hook</span></div>
-              <div class="scan-row"><span class="lbl">Cadence</span><span class="bar"><i style="width:55%"></i></span><span class="chip chip-warn">Sporadic</span></div>
-              <div class="scan-row"><span class="lbl">Content mix</span><span class="bar"><i style="width:64%"></i></span><span class="chip chip-warn">All promo</span></div>
-              <div class="scan-row"><span class="lbl">Proof</span><span class="bar"><i style="width:81%"></i></span><span class="chip chip-ok">Strong</span></div>
-              <p class="scan-foot">Every weak spot comes with a <b>specific fix</b> — and Pro rewrites it for you, thread included.</p>
-              <div class="demo-cta" id="demoCta" hidden><p>This is a <b>sample</b> scorecard — your real score comes from a full audit of your bio, pinned post and recent posts.</p><a class="btn btn-lime" href="audit.html">Run your real audit &rarr;</a></div>
+            <div class="scan-card" aria-label="What an XRayKit audit reads">
+              <div class="scan-head"><div class="who-wrap"><div class="who">Your X account<span>Real AI audit &middot; your actual posts</span></div></div><div class="stamp">Scan report<br />Profile X-ray</div></div>
+              <p class="scan-foot">One free audit a month. The AI reads your bio, pinned post and recent posts, scores what is costing you reach, and drafts the thread that fixes it.</p>
+              <div class="demo-cta"><a class="btn btn-lime" href="audit.html">Run your free audit &rarr;</a></div>
             </div>
           </div>
         </section>
@@ -373,7 +363,7 @@
             <div class="section-head"><span class="mono">Explore XRayKit</span><h2>Every page, one click away</h2><p>About, pricing, answers and contact each live on their own page — not buried further down this one.</p></div>
             <div class="explore">
               <article class="explore-card"><h3>About Us</h3><p>Who built XRayKit, why it's crypto-only, and who it's for.</p><a class="btn btn-small" href="#/about" data-page-link="about">Open About Us →</a></article>
-              <article class="explore-card"><h3>Pricing</h3><p>Free: 1 audit a month. Pro: $7/month with a 3-day free trial.</p><a class="btn btn-small" href="#/pricing" data-page-link="pricing">Open Pricing →</a></article>
+              <article class="explore-card"><h3>Pricing</h3><p>Free: <span data-free-limit>1 audit</span> a month. Pro: <span data-pro-price>$7</span>/month with a <span data-trial-days>3 days</span> free trial.</p><a class="btn btn-small" href="#/pricing" data-page-link="pricing">Open Pricing →</a></article>
               <article class="explore-card"><h3>FAQ</h3><p>What the free audit includes, how the trial works, and more.</p><a class="btn btn-small" href="#/faq" data-page-link="faq">Open FAQ →</a></article>
               <article class="explore-card"><h3>Contact</h3><p>Email, X and LinkedIn — the fastest ways to reach us.</p><a class="btn btn-small" href="#/contact" data-page-link="contact">Open Contact →</a></article>
             </div>
@@ -395,7 +385,7 @@
                 <p>It was built by <strong>Md. Mostafijur Rahman</strong>, a digital marketer and social media manager whose work is mostly in the crypto and NFT sector — managing X accounts, growing communities, and seeing first-hand how a weak bio or a hookless pinned post quietly costs a project reach right before a launch.</p>
                 <p>So XRayKit gives you the diagnosis <strong>and</strong> the fix: a 0–100 score, the problems ranked by impact, and — on Pro — the thread draft and 7-day plan that fix them.</p>
                 <div class="page-ctas">
-                  <a class="btn btn-lime" href="#/pricing" data-page-link="pricing">See Pricing — Pro $7/mo</a>
+                  <a class="btn btn-lime" href="#/pricing" data-page-link="pricing">See Pricing — Pro <span data-pro-price>$7</span>/mo</a>
                   <a class="btn" href="#/contact" data-page-link="contact">Contact us</a>
                   <a class="btn" href="https://x.com/mdmostafizur000" target="_blank" rel="noopener">Follow on X ↗</a>
                 </div>
@@ -407,7 +397,7 @@
                   <li><span class="k">Built for</span><span class="v">Crypto &amp; NFT founders</span></li>
                   <li><span class="k">What it does</span><span class="v">X audit + thread drafts</span></li>
                   <li><span class="k">Free plan</span><span class="v">1 audit / month</span></li>
-                  <li><span class="k">Pro</span><span class="v">$7 / month · 3 days free</span></li>
+                  <li><span class="k">Pro</span><span class="v" id="faqProLine">$7 / month · 3 days free</span></li>
                   <li><span class="k">Location</span><span class="v">Dhaka, Bangladesh</span></li>
                   <li><span class="k">Office hours</span><span class="v">Sat–Thu · 9:00 AM – 6:00 PM</span></li>
                   <li><span class="k">Friday</span><span class="v">Closed</span></li>
@@ -423,28 +413,37 @@
       <div class="page" data-page="pricing">
         <section class="section pricing-page">
           <div class="wrap">
-            <div class="section-head"><span class="mono">Pricing</span><h2>One audit is free. Pro is $7.</h2><p>Comparable tools charge $24–49 a month for a general audience. XRayKit is built only for crypto founders — and priced like it wants you to actually use it.</p></div>
+            <div class="section-head"><span class="mono">Pricing</span><h2>One audit is free. Pro is <span data-pro-price>$7</span>.</h2><p>Comparable tools charge $24–49 a month for a general audience. XRayKit is built only for crypto founders — and priced like it wants you to actually use it.</p></div>
             <div class="plans">
               <article class="plan plan-free">
                 <span class="pname">Free</span>
                 <div class="price"><span class="amt">$0</span><span class="per">forever</span></div>
                 <p class="pdesc">See where your account stands before you spend anything.</p>
-                <ul><li>1 full audit per month</li><li>0–100 profile score</li><li>Top problems, ranked by impact</li><li class="off">Fixes written out for every problem</li><li class="off">Thread generator &amp; drafts</li><li class="off">7-day posting plan</li></ul>
+                <ul><li><span data-free-limit-num>1</span> full audit per month</li><li>0–100 profile score</li><li>Top problems, ranked by impact</li><li class="off">Fixes written out for every problem</li><li class="off">Thread generator &amp; drafts</li><li class="off">7-day posting plan</li></ul>
                 <a class="btn" href="audit.html">Run my free audit</a>
               </article>
               <article class="plan plan-pro">
                 <span class="plan-badge">3 DAYS FREE</span>
                 <span class="pname">Pro</span>
-                <div class="price"><span class="amt">$7</span><span class="per">/ month</span></div>
-                <p class="pdesc">Free for your first 3 days — no card up front. Keep it afterwards for $7/month.</p>
-                <ul><li>30 audits per month</li><li>Every problem with its written fix</li><li>Thread generator — full drafts, not outlines</li><li>Thread ideas matched to your launch stage</li><li>7-day posting plan</li><li>Re-scan after fixes to watch the score move</li></ul>
+                <div class="price"><span class="amt"><span data-pro-price>$7</span></span><span class="per">/ month</span></div>
+                <p class="pdesc">Free for your first <span data-trial-days>3 days</span> — no card up front. Keep it afterwards for <span data-pro-price>$7</span>/month.</p>
+                <ul><li><span data-pro-limit-num>30</span> audits per month</li><li>Every problem with its written fix</li><li>Thread generator — full drafts, not outlines</li><li>Thread ideas matched to your launch stage</li><li>7-day posting plan</li><li>Re-scan after fixes to watch the score move</li></ul>
                 <a class="btn btn-lime trial-btn" id="trialBtn" href="#/pricing" data-page-link="pricing" data-logged-out-only>Start 3 free days of Pro</a>
                 <p class="trial-msg" id="trialMsg" aria-live="polite"></p>
-                <a class="btn" id="buyProBtn" href="#/pricing" data-page-link="pricing">Add a card — keep Pro at $7/mo</a>
+                <a class="btn" id="buyProBtn" href="#/pricing" data-page-link="pricing">Add a card — keep Pro at <span data-pro-price>$7</span>/mo</a>
                 <p class="trial-msg" id="buyProMsg" aria-live="polite"></p>
               </article>
+              <article class="plan plan-custom" id="customPlanCard">
+                <span class="plan-badge">TAILORED</span>
+                <span class="pname">Custom</span>
+                <div class="price"><span class="amt" style="font-size:34px">Let&rsquo;s talk</span></div>
+                <p class="pdesc">Need a different audit limit, a team deal, or a one-off price? Message us and we&rsquo;ll set up a custom package on your account.</p>
+                <ul><li>Your audit limit, set by us</li><li>Written fixes, threads &amp; 7-day plan &mdash; as you need them</li><li>One price, agreed up front</li><li>Pro starts only after payment</li></ul>
+                <a class="btn btn-lime" href="https://wa.me/8801613572749?text=Hi%20%E2%80%94%20I%20want%20a%20custom%20XRayKit%20package." target="_blank" rel="noopener">WhatsApp us</a>
+                <a class="btn" href="mailto:gmmostafijur001@gmail.com?subject=XRayKit%20custom%20package" style="margin-top:10px">Email us</a>
+              </article>
             </div>
-            <p class="pricing-note">TRIAL TERMS — 3 days of full Pro, no card up front and nothing to cancel. When the trial ends, Pro simply pauses; add a card only if you want to keep it at $7/month.</p>
+            <p class="pricing-note">TRIAL TERMS — <span data-trial-days>3 days</span> of full Pro, no card up front and nothing to cancel. When the trial ends, Pro simply pauses; add a card only if you want to keep it at $7/month.</p>
             <div class="page-ctas">
               <a class="btn" href="#/faq" data-page-link="faq">Questions? Read the FAQ →</a>
               <a class="btn" href="#/about" data-page-link="about">Who built XRayKit? About us →</a>
@@ -487,7 +486,7 @@
 
               <h3>2. Plans — Free and Pro</h3>
               <ul>
-                <li><strong>Free plan:</strong> 1 full audit per month, including your 0–100 profile score and top problems ranked by impact.</li>
+                <li><strong>Free plan:</strong> <span data-free-limit-num>1</span> full audit per month, including your 0–100 profile score and top problems ranked by impact.</li>
                 <li><strong>Pro:</strong> $7 per month. Pro includes the full feature set described on the Pricing page, including written fixes, thread drafts, the 7-day content calendar, AI Create, and hashtag research.</li>
                 <li><strong>3-day free Pro trial:</strong> No card is required to start the trial. The trial ends on its own after 3 days. Pro continues at $7/month <strong>only if</strong> you add a card — if you do not add a card, you are not charged and you return to the Free plan.</li>
               </ul>
@@ -544,7 +543,7 @@
               <div class="legal-callout"><p><strong>We do not sell your personal data.</strong> We do not sell your email, handle, or the content you paste for audits to third parties.</p></div>
 
               <h3>3. AI processing and API keys</h3>
-              <p>To generate audits and drafts, the content you submit is processed using AI services, including the Claude API. <strong>Our Claude API key is server-side only and is never exposed</strong> in the website, in your browser, or to users. You never need to provide your own API key to use XRayKit.</p>
+              <p>To generate audits and drafts, the content you submit is processed using AI services, including the Gemini API (via Coarena). <strong>Our Gemini API key is server-side only and is never exposed</strong> in the website, in your browser, or to users. You never need to provide your own API key to use XRayKit.</p>
 
               <h3>4. Sharing</h3>
               <p>We only share data where needed to run the service — for example, with the payment provider for Pro subscriptions and with infrastructure providers that host the service — or where required by law. Payment card details for Pro are handled by our payment provider; see the <a href="#/refund" data-page-link="refund">Refund Policy</a> for how payments work.</p>
@@ -720,6 +719,7 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="site-settings.js"></script>
     <script>
       (function () {
         "use strict";
@@ -742,7 +742,9 @@
           var s = await sb.auth.getSession();
           var user = s.data && s.data.session && s.data.session.user;
           if (!user) {
-            btn.textContent = "Start 3 free days of Pro";
+            var td = 3;
+            try { if (window.XRayKitSettings) { var st = await window.XRayKitSettings.load(); td = Number(st.trial_days) || 3; } } catch (e) {}
+            btn.textContent = "Start " + td + " free days of Pro";
             btn.removeAttribute("aria-disabled");
             return;
           }
@@ -755,7 +757,9 @@
             btn.textContent = "Pro active";
             btn.setAttribute("aria-disabled", "true");
           } else {
-            btn.textContent = "Start 3 free days of Pro";
+            var td = 3;
+            try { if (window.XRayKitSettings) { var st = await window.XRayKitSettings.load(); td = Number(st.trial_days) || 3; } } catch (e) {}
+            btn.textContent = "Start " + td + " free days of Pro";
             btn.removeAttribute("aria-disabled");
           }
         }
@@ -885,38 +889,32 @@
         });
       })();
     </script>
+    <script src="nav-auth.js"></script>
     <script>
-      /* Landing demo: type a handle, see your photo + a sample scorecard. */
+      /* Apply admin settings (price / trial / limits) to the public page. */
       (function () {
-        "use strict";
-        var form = document.getElementById("demoForm");
-        if (!form) return;
-        var input = document.getElementById("demoHandle");
-        var msg = document.getElementById("demoMsg");
-        var who = document.getElementById("demoWho");
-        var stamp = document.getElementById("demoStamp");
-        var avatar = document.getElementById("demoAvatar");
-        var cta = document.getElementById("demoCta");
-        var token = 0;
-        function say(text, err) { msg.textContent = text; msg.className = "demo-msg" + (err ? " err" : ""); }
-        form.addEventListener("submit", function (e) {
-          e.preventDefault();
-          var h = input.value.trim().replace(/^@/, "");
-          if (!/^[A-Za-z0-9_]{1,15}$/.test(h)) { say("Enter a valid X handle — letters, numbers and _ only.", true); return; }
-          who.innerHTML = "@" + h + "<span>Sample preview</span>";
-          stamp.innerHTML = "Sample<br />Scorecard";
-          cta.hidden = false;
-          say("Sample scorecard for @" + h + " — your real audit reads your actual posts.", false);
-          var t = ++token;
-          avatar.hidden = true;
-          var img = new Image();
-          img.onload = function () { if (t !== token) return; avatar.src = img.src; avatar.hidden = false; };
-          img.onerror = function () { if (t !== token) return; avatar.hidden = true; };
-          img.src = "https://unavatar.io/twitter/" + h;
+        if (!window.XRayKitSettings) return;
+        window.XRayKitSettings.load().then(function (s) {
+          var price = Number(s.pro_price_usd) || 7;
+          var trial = Number(s.trial_days) || 3;
+          var freeLim = Number(s.free_audit_limit) || 1;
+          var proLim = Number(s.pro_audit_limit) || 30;
+          var trialTxt = trial + (trial === 1 ? " day" : " days");
+          document.querySelectorAll("[data-pro-price]").forEach(function (el) { el.textContent = "$" + price; });
+          document.querySelectorAll("[data-trial-days]").forEach(function (el) { el.textContent = trialTxt; });
+          document.querySelectorAll("[data-free-limit]").forEach(function (el) { el.textContent = freeLim + (freeLim === 1 ? " audit" : " audits"); });
+          document.querySelectorAll("[data-free-limit-num]").forEach(function (el) { el.textContent = String(freeLim); });
+          document.querySelectorAll("[data-pro-limit-num]").forEach(function (el) { el.textContent = String(proLim); });
+          var faq = document.getElementById("faqProLine");
+          if (faq) faq.textContent = "$" + price + " / month · " + trialTxt + " free";
+          if (s.features && s.features.custom_packages === false) {
+            var cc = document.getElementById("customPlanCard");
+            if (cc) cc.style.display = "none";
+          }
         });
       })();
     </script>
-    <script src="nav-auth.js"></script>
+    <script src="chat-widget.js"></script>
     <script>
       /* mobile menu toggle */
       (function () {

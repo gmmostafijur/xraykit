@@ -100,14 +100,14 @@
         <nav class="topnav" aria-label="Main menu">
           <a href="index.html">Home</a>
           <a href="audit.html">Run a scan</a>
-          <a href="report.html">Sample report</a>
           <a href="tracker.html">Growth tracker</a>
           <a href="auth.html" id="navLogin">Log in</a><a href="account.html" id="navAccount" style="display:none">My account</a>
         </nav>
       </div>
     </header>
 
-    <main class="wrap">
+    <div id="featureOff" class="wrap" style="display:none;padding:40px 0"><p style="font-size:16px">This feature is paused by the admin right now — check back soon.</p><p><a href="index.html">&larr; Back to home</a></p></div>
+    <main class="wrap" data-feature-body>
       <section class="hero">
         <span class="mono">Audit history</span>
         <h1>Every audit, <span style="color:var(--scan)">compared</span>.</h1>
@@ -148,6 +148,9 @@
     <div class="toast" id="toast" role="status"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="site-settings.js"></script>
+    <script>if (window.XRayKitSettings) window.XRayKitSettings.guard("history");</script>
+    <script src="chat-widget.js"></script>
     <script src="nav-auth.js"></script>
     <script>
       (function () {

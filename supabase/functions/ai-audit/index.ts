@@ -1,7 +1,7 @@
 // XRayKit — real AI audit (Supabase Edge Function).
 // AI provider: Coarena Model API (Anthropic-compatible).
 //   Base URL: https://coarena.ai/api  (SDK adds /v1/messages)
-//   Model:    claude-sonnet-5-5
+//   Model:    gemini-3-8-flash (Gemini, via Coarena)
 //   Key:      set as the ANTHROPIC_AUTH_TOKEN secret in the Supabase
 //             dashboard (Edge Functions -> Manage secrets). NEVER put the
 //             key in this file, in chat, or in any frontend page.
@@ -151,8 +151,12 @@ Deno.serve(async (req) => {
     // Authoritative effective plan (handles expired trials) + usage.
     const planRes = await userClient.rpc("my_plan");
     const planRow = planRes.data || {};
-    const plan = planRow.plan === "pro" ? "pro" : "free";
-    const limit = plan === "pro" ? PRO_LIMIT : FREE_LIMIT;
+    const plan = planRow.plan === "pro" ? "pro" : planRow.plan === "custom" ? "custom" : "free";
+    const limit = Number(planRow.audit_limit) || (plan === "free" ? FREE_LIMIT : PRO_LIMIT);
+    // Feature toggles for custom plans (free/pro always get everything).
+    const features = planRow.features && typeof planRow.features === "object"
+      ? planRow.features
+      : { fixes: true, threads: true, plan7day: true };
 
     // Usage is counted from the audits table itself (own rows, RLS-allowed),
     // so the limit check needs no server key at all.
@@ -237,7 +241,15 @@ Deno.serve(async (req) => {
       project: payload.project,
       category: payload.category,
       goal: payload.goal,
+      features: features,
     };
+    // Custom plans only get the features the admin included. Free/pro
+    // keep the full report exactly as before.
+    if (plan === "custom") {
+      if (!features.fixes) report.problems.forEach(function (p) { delete p.fix; });
+      if (!features.threads) { delete report.threads; delete report.fullThread; }
+      if (!features.plan7day) report.plan7day = [];
+    }
     if (report.dimensions && typeof report.dimensions === "object") {
       Object.keys(report.dimensions).forEach(function (k) {
         const v = Number(report.dimensions[k]);
@@ -265,6 +277,23 @@ Deno.serve(async (req) => {
       .from("profiles")
       .update({ audits_used: auditsUsed + 1 })
       .eq("id", user.id);
+
+    // Track real Gemini usage: token counts from the provider response.
+    // Cost in $ is computed in the admin dashboard from the prices the
+    // admin sets in Settings (site_settings), so no price is hardcoded here.
+    const usage = aiData && aiData.usage ? aiData.usage : {};
+    const inTok = Number(usage.input_tokens) || 0;
+    const outTok = Number(usage.output_tokens) || 0;
+    if (inTok > 0 || outTok > 0) {
+      await admin.from("audit_costs").insert({
+        audit_id: ins.data.id,
+        user_id: user.id,
+        handle: handle,
+        model: MODEL,
+        input_tokens: inTok,
+        output_tokens: outTok,
+      });
+    }
 
     return json({
       audit_id: ins.data.id,
