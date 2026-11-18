@@ -112,6 +112,13 @@
       .mini-bar .bar i { display: block; height: 100%; background: var(--scan); border-radius: 99px; }
       .mini-bar .n { font-family: "IBM Plex Mono", monospace; font-weight: 600; width: 30px; text-align: right; flex: none; }
       .sheet-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; padding-top: 20px; border-top: 1.5px dashed var(--line); }
+      @page { margin: 14mm; }
+      @media print {
+        .topbar, .foot, .sheet-actions, .share-box, .next-grid, .toast, .page-ctas, .hero-ctas { display: none !important; }
+        body { background: #fff !important; color: #0c1210 !important; }
+        .sheet, .card, .panel, .verdict, .frame, .plan-day { background: #fff !important; color: #0c1210 !important; box-shadow: none !important; }
+        a { color: #0c1210 !important; text-decoration: none !important; }
+      }
       .sheet-note { margin: 14px 2px 0; font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-faint); letter-spacing: 0.02em; }
       .share-box { margin-top: 22px; padding: 20px; border: 1.5px dashed var(--line); border-radius: var(--radius); background: var(--bg-raise); }
       .share-box h3 { margin: 0 0 6px; font-size: 18px; }
@@ -396,6 +403,7 @@
 
             <div class="sheet-actions">
               <button class="btn btn-lime" type="button" id="downloadBtn">Download this report (.txt)</button>
+              <button class="btn" type="button" id="pdfBtn">Download PDF</button>
               <a class="btn" href="#frames" data-anchor="frames">Frame-by-frame breakdown ↓</a>
               <a class="btn btn-ghost" href="audit.html">Run your own free scan</a>
             </div>
@@ -598,7 +606,7 @@ Here's what testnet users get on day one:
 · Your feedback, shipped — check the changelog
 
 Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type="button" data-copy>Copy draft</button></article>
-              <article class="day"><div class="d-top"><span class="d-no">DAY 8+</span><span class="chip chip-ok">Re-scan</span></div><h3>Re-scan and watch it move</h3><p>After the week ships, run the audit again. The frames you fixed re-score immediately — that's the loop Pro is built around.</p><div class="draft">Projected score after this plan: 78 / 100 (estimate — see below). Re-scan to replace the estimate with the real number.</div><a class="btn copy-btn" href="#/pricing" data-page-link="pricing" style="text-decoration:none;">See Pro — re-scans included →</a></article>
+              <article class="day"><div class="d-top"><span class="d-no">DAY 8+</span><span class="chip chip-ok">Re-scan</span></div><h3>Re-scan and watch it move</h3><p>After the week ships, run the audit again. The frames you fixed re-score immediately — that's the loop Pro is built around.</p><div class="draft">Run the audit again after the week ships — the re-scan shows the real new score. No estimate, no guesswork.</div><a class="btn copy-btn" href="#/pricing" data-page-link="pricing" style="text-decoration:none;">See Pro — re-scans included →</a></article>
             </div>
             <p class="plan-note">POSTING IS MANUAL AT LAUNCH — COPY A DRAFT, POST IT ON X OR USE X'S OWN FREE SCHEDULER. NO X API CREDITS NEEDED; AUTO-POSTING ARRIVES LATER AS A HIGHER TIER.</p>
             <div style="margin-top:16px;"><a class="btn btn-lime sched-link" href="scheduler.html">Open this plan in the Scheduler &rarr;</a></div>
@@ -611,12 +619,12 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
             <div class="section-head">
               <span class="mono">The projection</span>
               <h2>What these fixes are worth</h2>
-              <p>An estimate, clearly labelled: if every fix in this report ships, the same scan re-run on the same account projects to land here. Pro replaces the estimate with a real re-scan.</p>
+              <p>No estimate, no guesswork: run the 7-day plan, then re-scan. The new score is the real one — and Pro re-scans are included.</p>
             </div>
             <div class="proj">
               <div class="proj-card"><span class="k">Today</span><div class="score">34 <span>/ 100</span></div><div class="bar"><i style="width:34%"></i></div><p>Live testnet and a closed seed round, presented like a placeholder account.</p></div>
               <div class="proj-arrow" aria-hidden="true">→</div>
-              <div class="proj-card after"><span class="k">After the 7-day plan · estimate</span><div class="score">78 <span>/ 100</span></div><div class="bar"><i style="width:78%"></i></div><p>Bio and pinned fixed, mix rebalanced, promises kept, launch runway running.</p></div>
+              <div class="proj-card after"><span class="k">After the 7-day plan</span><div class="score">—</div><div class="bar"><i style="width:0%"></i></div><p>Re-scan after the 7-day plan to see the new score.</p></div>
             </div>
           </div>
         </section>
@@ -1050,7 +1058,7 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
           "Day 6 — Deliver the teased partnership announcement.",
           "Day 7 — Start the launch runway: date reveal + countdown.",
           "",
-          "PROJECTION: 34 -> 78 / 100 if every fix ships (estimate; re-scan replaces it with the real number).",
+          "AFTER THE 7-DAY PLAN: re-scan to see the new score.",
           "",
           "Generated by XRayKit — X audit & thread generator for crypto founders. Free: 1 audit/month. Pro: $7/month, 3 days free."
         ].join("\n");
@@ -1068,6 +1076,9 @@ Try the testnet this weekend. It counts.</div><button class="btn copy-btn" type=
           setTimeout(function () { URL.revokeObjectURL(url); }, 800);
           showToast("Report downloaded — " + REPORT_NAME);
         });
+
+        var pdfBtn = document.getElementById("pdfBtn");
+        if (pdfBtn) pdfBtn.addEventListener("click", function () { window.print(); });
 
         route();
       })();
